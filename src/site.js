@@ -1629,7 +1629,7 @@ function displayDetails(features) {
             detail_text += '<span class="text-capitalize">' + primaryFeature.properties[config.statusDisplayField] + '</span><br/>';
         }
     } else {  // only put project-wide status in detail view
-        if (config.color_association.field === 'status') {
+        if (config.color_association.field.toLowerCase() === 'status') {
             detail_text += '<span class="fw-bold text-capitalize">Status</span>: ' +
                 '<span class="legend-dot" style="background-color:' + config.color_association.values[primaryFeature.properties[config.statusDisplayField]] + '"></span>' +
                 '<span class="text-lowercase">' + primaryFeature.properties[config.statusDisplayField] + '</span><br/>';

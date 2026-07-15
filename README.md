@@ -22,6 +22,18 @@ Each map loads its data at runtime from the `geojson:` URL at the top of
 push. The data file must expose the property names the config references
 (see the existing files on the CDN for the schema).
 
+**The GOIT map updates itself.** Its config points at the raw URL of the
+single-commit `map-data` branch of
+[goit-ggit-data-ops](https://github.com/GlobalEnergyMonitor/goit-ggit-data-ops),
+which that repo's `build map data` workflow rebuilds and force-pushes whenever
+[goit-ggit-pipeline-routes](https://github.com/GlobalEnergyMonitor/goit-ggit-pipeline-routes)
+updates its `normalized` branch (plus a daily cron for sheet-only edits). The
+file uses the data-team handoff schema (`PipelineName`, `Status`, `Wiki`,
+`CapacityBOEd`, …) with null-geometry rows dropped; no commit here is needed
+for data refreshes (raw.githubusercontent.com caches for ≤5 min and sends
+CORS headers). The GGIT map is still pointed at a manually uploaded snapshot
+on DO Spaces.
+
 Data files larger than 100 MB cannot be committed to this repo (GitHub limit) —
 host those on DigitalOcean Spaces (needs CORS open, as `publicgemdata` already
 is). Smaller subset files can be committed and referenced by relative path.
