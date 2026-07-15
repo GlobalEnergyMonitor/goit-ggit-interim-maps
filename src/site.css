@@ -1,0 +1,582 @@
+body {
+    margin: 0;
+    padding: 0;
+}
+
+#map {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+}
+
+#table-container, .page-link {
+    font-family: Arial;
+    color: rgb(33,37,41);
+    font-size: 12px;
+}
+#table-container {
+    display: none;
+    padding: 50px;
+}
+#table {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    padding-bottom: 150px;
+}
+tr {
+    vertical-align: bottom;
+}
+
+table.dataTable>tbody>tr.odd {
+   background-color: rgba(0,0,0,0.05);
+}
+table.dataTable>tbody>tr {
+   border-top: 1pt solid rgb(33,37,41);
+}
+table.dataTable>tbody>tr:hover {
+   background-color: #e9e9e9;
+}
+table.dataTable td {
+   padding-right: 10px;
+}
+
+.map-overlay {
+    font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    position: absolute;
+    width: 250px;
+    top: 0;
+    left: 0;
+    padding: 10px;
+    font-weight: bold;
+}
+
+.map-overlay .map-overlay-inner {
+    background-color: #fff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.map-overlay h2 {
+    line-height: 24px;
+    display: block;
+    margin: 0 0 10px;
+}
+
+.map-overlay .legend .bar {
+    height: 10px;
+    width: 100%;
+    background: linear-gradient(to right, #fca107, #7f3121);
+}
+
+.map-overlay .map-overlay-inner {
+    min-width: 300px;
+}
+
+.map-overlay input {
+    background-color: transparent;
+    display: inline-block;
+    width: 100%;
+    position: relative;
+    margin: 0;
+    cursor: ew-resize;
+}
+
+.map-overlay input[type='checkbox'] {
+    display: none;
+}
+
+.map-overlay input[type='checkbox']+label {
+    background-color: #3386c0;
+    display: block;
+    cursor: pointer;
+    font-weight: bold;
+    color: #ffffff;
+    position: center;
+    padding: 10px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+}
+
+.map-overlay input[type='checkbox']+label {
+    background-color: #3386c0;
+    text-transform: capitalize;
+}
+
+.map-overlay input[type='checkbox']+label:hover,
+.map-overlay input[type='checkbox']:checked+label {
+    background-color: #4ea0da;
+}
+
+.map-overlay input[type='checkbox']:checked+label:before {
+    content: '✔';
+    margin-right: 5px;
+}
+/* .map-border {
+    overflow-y: scroll;
+    overflow-x: scroll;
+} */
+
+.sidebar {
+    /* padding: 10px; */
+    position: fixed;
+    bottom: 100px; /* trying 75*/
+    left: 0px;
+    z-index: 2;
+    overflow-y:scroll; 
+    overflow-x:scroll !important;
+    max-height: 80%;
+    max-width: 35%;
+    white-space: nowrap;
+}
+#collapse-sidebar, #expand-sidebar {
+    cursor: pointer;
+    width: 8px;
+    position: absolute;
+    right: 2px;
+    top: 2px;
+}
+#expand-sidebar {
+    display: none;
+}
+#card-body {
+    min-width: 400px;
+    width: fit-content;
+    max-width: 90vw;
+}
+#summary, #capacity_summary_max, #capacity_summary_min {
+    font-size: 9px;
+}
+
+.mapboxgl-ctrl-bottom-right {
+    top: 0;
+    right: 10px;
+    bottom: auto;
+    z-index: -1;
+    opacity: 1 !important;
+}
+
+.mapboxgl-ctrl-bottom-left {
+    top: 0;
+    right: 10px;
+    bottom: auto;
+    z-index: -1;
+    opacity: 1 !important;
+}
+
+@media screen and (max-width: 1170) {
+    .navbar{
+        #basemap-toggle {
+            display: none;
+        }
+        #projection-toggle {
+            display: none;
+        }
+    }
+}
+
+
+@media screen and (max-width: 900px) {
+    .sidebar {
+        bottom: 25px;
+    }
+    #expand-sidebar {
+        display: block;
+    }
+    #collapse-sidebar, #filter-form, #all-select #all-select-section-level{
+        display: none;
+    }
+    .navbar {
+        visibility: hidden;
+    }
+
+    .mapboxgl-ctrl-bottom-left{
+        bottom: auto;
+        opacity: 0 !important;
+    }
+
+    .mapboxgl-ctrl-bottom-right {
+        bottom: auto;
+        opacity: 0 !important;
+
+    }
+}
+
+#filter-form {
+    text-transform: capitalize;
+    cursor: pointer;
+}
+
+#search-text {
+    width: 200px;
+}
+
+/* HACK */
+#search-form {
+    position: relative;
+    top: 3px;
+    max-height: 74px;
+}
+#search-type {
+    position: relative;
+    top: 3px;
+    font-family: 'Familjen Grotesk';
+}
+
+
+.asset-select-option {
+    cursor: pointer;
+}
+
+/* Nested Drop Down */
+/* ============ desktop view ============ */
+@media all and (min-width: 992px) {
+	.dropdown-menu li{ position: relative;  text-transform: uppercase;	}
+	.nav-item .submenu{ 
+		display: none;
+		position: absolute;
+		left:100%; top:-300px;
+	}
+	.nav-item .submenu-left{ 
+		right:100%; left:auto;
+	}
+	.dropdown-menu > li:hover{ background-color: #f1f1f1 }
+	.dropdown-menu > li:hover > .submenu{ display: block; }
+}	
+/* ============ desktop view .end// ============ */
+
+/* ============ small devices ============ */
+@media (max-width: 991px) {
+  .dropdown-menu .dropdown-menu{
+      margin-left:0.7rem; margin-right:0.7rem; margin-bottom: .5rem;
+  }
+
+}	
+/* ============ small devices .end// ============ */
+
+.dropdown-menu.submenu {
+     max-height: 400px;
+     overflow-y: auto;
+     overflow-x: auto;
+}
+
+.navbar {
+    opacity: 0.90; 
+    filter:(opacity=90);
+    padding: 2px;
+    overflow: visible;
+    z-index: 2;
+}
+
+#country {
+    min-width:318px;
+    font-family: 'Familjen Grotesk';
+}
+
+.shadow-sm{box-shadow:0 .125rem .25rem rgba(0,0,0,.35)!important}
+
+.rounded-top-left-1 {
+    border-top-left-radius: 1rem;
+}
+.rounded-top-right-1 {
+    border-top-right-radius: 1rem;
+}
+.rounded-bottom-left-1 {
+    border-bottom-left-radius: 1rem;
+}
+.rounded-bottom-right-1 {
+    border-bottom-right-radius: 1rem;
+}
+
+/* Checkbox by Chinnaking from <a href="https://thenounproject.com/browse/icons/term/checkbox/" target="_blank" title="Checkbox Icons">Noun Project</a> (CC BY 3.0) */
+.checkmark {
+    background: url(./img/check.svg);
+    background-repeat: no-repeat;
+    background-position: right;
+    position: relative;
+    top: 0px;
+}
+.uncheckmark {
+    background: url(./img/uncheck.svg);
+    background-repeat: no-repeat;
+    background-position: right;
+    position: relative;
+    top: 0px;
+}
+/* layer by Fahrur Razi Siddiq from <a href="https://thenounproject.com/browse/icons/term/layer/" target="_blank" title="layer Icons">Noun Project</a> (CC BY 3.0) */
+.layer {
+    background: url(./img/layer.svg);
+    background-repeat: no-repeat; 
+}
+
+.legend-dot {
+    height: 10px;
+    width: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: .5rem;
+}
+
+.modal-content {
+    border-width: 0px;
+}
+.modal-body {
+    padding: 0px;
+    min-height: 150px;
+    color: #000000;
+}
+.modal-body ul {
+    list-style: none;
+}
+.modal-dialog {
+    max-width:750px;
+}
+#modal-back {
+    cursor: pointer;
+    width: 20px;
+    position: relative;
+    top: 5px;
+    left: -5px;
+}
+#detail-satellite {
+    background-size: cover;
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    padding-right: 0px;
+    position: relative;
+    font-family: 'Familjen Grotesk';
+    min-height: 250px;
+}
+#detail-location-pin {
+    float: right;
+}
+
+.detail-location {
+    float: right;
+    background-color: rgba(151, 151, 151, 0.628);
+    position: relative;
+    top: 4px;
+    padding: 5px;
+}
+#detail-more-info {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background-color: white;
+}
+#detail-more-info a {
+    text-decoration: none;
+}
+#detail-all-phases {
+    position: absolute;
+    bottom: 10px;
+    right: 80px;
+    background-color: white;
+}
+#detail-all-phases a {
+    text-decoration: none;
+    color: black;
+    cursor: pointer;
+}
+#detail-total-units {
+    border-bottom: 1px solid #000; 
+    line-height: 0.1em;
+}
+#total_in_view, #max_capacity {
+    font-size: small;
+}
+
+#table_info, #table_paginate {
+    position: relative;
+    top: -50px;
+}
+
+#table_length {
+    display: none;
+}
+
+
+#country {
+    position: relative;
+    top: 3px;
+    bottom: 3px;
+    
+}
+
+#table-toggle {
+    position: relative; 
+    top: 0.5px;
+    height: 74px;
+}
+
+#basemap-toggle {
+    position: relative;
+    top: 0.5px;
+    height: 74px;
+}
+
+#projection-toggle {
+    position: relative;
+    top: 0.5px;
+    height: 74px;
+}
+
+/* #table-toggle-label {
+    position: absolue;
+    top: 3px;
+}
+
+#basemap-toggle-label {
+    position: absolute;
+    top: 3px;
+
+} */
+
+/* #projection-toggle-label {
+    position: relative;
+} */
+
+#spinner-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
+    z-index: 9999;
+    visibility: visible; 
+}
+
+.spinner-grow {
+
+    --bs-spinner-animation-speed: 1.5s !important ;
+
+}
+
+/* rotation */
+
+#btn-spin {
+    font:
+        bold 12px/20px 'Helvetica Neue',
+        Arial,
+        Helvetica,
+        sans-serif;
+    background-color: #3386c0;
+    color: #fff;
+    position: relative;
+    /* visibility: visible; */
+    /* top: 50%; */
+    left: 80%;
+    z-index: 1; 
+    right: 0px;
+    border: none;
+    width: 200px;
+    margin-top: 10%;
+    margin-right: 30%;
+    /* margin-left: auto; */
+    display: block;
+    cursor: pointer;
+    padding: 10px 20px;
+    border-radius: 3px;
+}
+
+#btn-spin-toggle {
+    position: relative;  /* keep this */ 
+    top: 10px; /* keep this */ 
+    left: 10px;
+    font:
+        bold 12px/20px 'Helvetica Neue',
+        Arial,
+        Helvetica,
+        sans-serif;
+    background-color: #3386c0;
+    color: #fff;
+    /* right: 30%; */
+    display: block; 
+    cursor: pointer; 
+    border: none;  /* keep this */ 
+    width: 200px;
+    padding: 10px 20px;  /* keep this */ 
+    border-radius: 3px;  /* keep this */ 
+}
+
+
+#btn-spin-toggle:hover {
+    background-color: #4ea0da;
+}
+
+
+#reset-all-button {
+    width: 2em;
+    height: 5em;
+    padding-left: 1em;
+    padding-right: .25em;
+    color: #000;
+    opacity: .5;
+}
+
+.infobox {
+    position: relative;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid rgb(2, 2, 174);
+    border-radius: 50%;
+    width: 1em;
+    height: 1em;
+    cursor: pointer;
+    font-family: bootstrap-icons !important;
+    text-transform: lowercase;
+    line-height: 1;
+    font-size: 12px;
+    color: rgb(2, 2, 174);
+    left: 3px;
+    top: -3px;
+}
+
+.tooltip {
+    position: absolute;
+    bottom: 80%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #6d6a6a;
+    color: #fff;
+    padding: 10px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    max-height: 400px; /* Set a maximum height for the tooltip */
+    min-width: 200px;
+    max-width: 400px; /* Set a maximum height for the tooltip */
+    overflow-y: auto; /* Enable vertical scrolling */
+    overflow-x: auto; /* Enable horizonal scrolling */
+    white-space: normal;
+    /* z-index: 9999; */
+}
+
+.tooltip::after {
+    content: '';
+    position: absolute;
+    /* top: 100%; */
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 5px;
+    border-style: solid;
+    opacity:1;
+    border-color: #656161 transparent transparent transparent;
+}
+
+#all-select-section-level{
+    /* lower opacity and smaller size */
+    opacity:.7;
+    font-size: 11px;
+    text-transform: lowercase;
+    /*add some more padding around the text */
+    padding: 8px 8px;
+}
