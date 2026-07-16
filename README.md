@@ -1,4 +1,4 @@
-# goit-ggit-cycle-maps
+# goit-ggit-interim-maps
 
 Test maps for the GOIT/GGIT annual update cycles, so researchers can view
 in-progress pipeline data on a map without waiting for the data team's annual
@@ -12,8 +12,8 @@ Snapshot of the map app shell from
 
 Deployed to GitHub Pages on every push to `main`:
 
-- https://globalenergymonitor.github.io/goit-ggit-cycle-maps/trackers/goit/
-- https://globalenergymonitor.github.io/goit-ggit-cycle-maps/trackers/ggit/
+- https://globalenergymonitor.github.io/goit-ggit-interim-maps/trackers/goit/
+- https://globalenergymonitor.github.io/goit-ggit-interim-maps/trackers/ggit/
 
 ## Updating the data a map shows
 
