@@ -69,15 +69,16 @@ var site_config = {
     /* Defined by pixels and be 1- infinity, 0 is invisible */
     minRadius: 1,
     maxRadius: 10,
-    minLineWidth: 0.5,
-    maxLineWidth: 7,
-    
+    /* min == max makes all lines the same thickness (no capacity scaling) */
+    minLineWidth: 2,
+    maxLineWidth: 2,
+
     /* radius to increase min/max to under high zoom */
     /* In  mapbox there are 22 zoom levels, higher zoom usually meaning samller area "closer in"*/
     highZoomMinRadius: 4,
     highZoomMaxRadius: 32,
-    highZoomMinLineWidth: 0.5,
-    highZoomMaxLineWidth: 7,
+    highZoomMinLineWidth: 3,
+    highZoomMaxLineWidth: 3,
     
     /* define column names to pull data from */
     nameField: 'name',
