@@ -41,12 +41,14 @@ var config = {
         'Owner': {'label': 'Owner'},
         'Parent': {'label': 'Parent'},
         'StartYear1': {'label': 'Start Year'},
+        'ProjectID': {'display': 'join', 'label': ['Project ID', 'Project IDs']},
     },
 
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */
 
     /* field mappings for the handoff-schema geojson */
     nameField: 'PipelineName',
+    projectIdField: 'ProjectID',  // shown in the hover popup (segment-level id)
     urlField: 'Wiki',
     statusField: 'Status',
     statusDisplayField: 'Status',

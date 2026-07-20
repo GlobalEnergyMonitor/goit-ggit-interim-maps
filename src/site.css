@@ -10,6 +10,33 @@ body {
     width: 100%;
 }
 
+#interim-banner {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 3;
+    background-color: #fff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+    padding: 6px 12px;
+    font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    pointer-events: none;
+}
+#interim-banner-title {
+    font-weight: bold;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+#interim-banner-updated {
+    font-size: 11px;
+    color: #555;
+}
+.hover-popup-id {
+    font-size: 11px;
+    color: #555;
+}
+
 #table-container, .page-link {
     font-family: Arial;
     color: rgb(33,37,41);

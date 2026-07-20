@@ -68,6 +68,30 @@ map.on('moveend', () => {
     spinGlobe();
 });
 
+showDataTimestamp();
+
+/* Fill in the interim-map banner with the build time of the data file - Single-use function.
+   raw.githubusercontent.com sends no Last-Modified header, so ask the GitHub API for the
+   last commit touching the file (unauthenticated: 60 requests/hour per IP). On any failure
+   the banner just shows no timestamp. */
+async function showDataTimestamp() {
+    const match = (config.geojson ?? '').match(/^https:\/\/raw\.githubusercontent\.com\/([^/]+)\/([^/]+)\/([^/]+)\/(.+)$/);
+    if (!match) return;
+    const [, owner, repo, branch, path] = match;
+    try {
+        const response = await fetch('https://api.github.com/repos/' + owner + '/' + repo + '/commits?sha=' + encodeURIComponent(branch) + '&path=' + encodeURIComponent(path) + '&per_page=1');
+        if (!response.ok) return;
+        const commits = await response.json();
+        const date = new Date(commits[0]?.commit?.committer?.date);
+        if (isNaN(date)) return;
+        $('#interim-banner-updated').text('data last updated ' + date.toLocaleString(undefined, {
+            year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
+        }));
+    } catch (e) {
+        // leave the banner without a timestamp
+    }
+}
+
 
 /*
   Load data in from various formats, and prepare for use in application
@@ -273,7 +297,8 @@ function linkAssets() {
         config.nameField,
         config.linkField,
         config.color_association.field,
-        config.capacityScaledField
+        config.capacityScaledField,
+        config.projectIdField  // shown in the hover popup
     ].filter((field) => field != null);
 
     Object.keys(grouped_assets).forEach((key) => {
@@ -814,7 +839,11 @@ function addEvents() {
             map.getCanvas().style.cursor = 'pointer';
             const feature = e.features && e.features[0];
             if (!feature) return;
-            const description = feature.properties?.[config.nameField] ?? "";
+            const props = feature.properties ?? {};
+            let description = props[config.nameField] ?? "";
+            if (config.projectIdField && props[config.projectIdField]) {
+                description += '<br/><span class="hover-popup-id">Project ID: ' + props[config.projectIdField] + '</span>';
+            }
             popup.setLngLat(e.lngLat).setHTML(description).addTo(map);
         });
 
@@ -1392,7 +1421,7 @@ function displayDetails(features) {
                 }
             } else if (config.detailView[detail]['display'] === 'join') {  // used by GIPT to show all technologies/fuels
                 let join_array = features.map((feature) => feature.properties[detail]);
-                join_array = join_array.filter((value, index, array) => array.indexOf(value) === index);
+                join_array = join_array.filter((value, index, array) => value !== '' && value != null && array.indexOf(value) === index);
                 if (join_array.length > 1) {
                     if (Object.keys(config.detailView[detail]).includes('label')) {
                         detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'][1] + '</span>: ';
