@@ -842,7 +842,7 @@ function addEvents() {
             const props = feature.properties ?? {};
             let description = props[config.nameField] ?? "";
             if (config.projectIdField && props[config.projectIdField]) {
-                description += '<br/><span class="hover-popup-id">Project ID: ' + props[config.projectIdField] + '</span>';
+                description += '<br/><span class="hover-popup-id">ProjectID: ' + props[config.projectIdField] + '</span>';
             }
             popup.setLngLat(e.lngLat).setHTML(description).addTo(map);
         });

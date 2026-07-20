@@ -42,7 +42,7 @@ var config = {
         'Owner': {'label': 'Owner'},
         'Parent': {'label': 'Parent'},
         'StartYear1': {'label': 'Start Year'},
-        'ProjectID': {'display': 'join', 'label': ['Project ID', 'Project IDs']},
+        'ProjectID': {'display': 'join', 'label': ['ProjectID', 'ProjectIDs']},
     },
 
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */
