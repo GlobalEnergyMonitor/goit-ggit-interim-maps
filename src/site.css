@@ -27,10 +27,11 @@ body {
     font-size: 14px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    color: #c74a48;  /* site_colors 'red' (operating) */
 }
 #interim-banner-updated {
     font-size: 11px;
-    color: #555;
+    color: #c74a48;  /* site_colors 'red' (operating) */
 }
 .hover-popup-id {
     font-size: 11px;
