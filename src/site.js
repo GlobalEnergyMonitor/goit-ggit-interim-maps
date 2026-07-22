@@ -193,6 +193,16 @@ function addGeoJSON(jsonData) {
         });
     }
 
+    // Blank linkField values (e.g. tracker rows with no Wiki page yet) must not share a
+    // group key, or every unlinked feature merges into one card titled after whichever
+    // feature comes first; fall back to the feature's own project id.
+    config.geojson.features.forEach((feature, index) => {
+        if (!feature.properties[config.linkField]) {
+            feature.properties[config.linkField] =
+                feature.properties[config.projectIdField] || 'unlinked-' + index;
+        }
+    });
+
     // part to optimize csv/geojson maps
     if (!config.tiles) {
         map.addSource('assets-source', {
