@@ -71,6 +71,10 @@ map.on('moveend', () => {
 showDataTimestamp();
 setupRouteDownload();
 
+// build time of the data file, set by showDataTimestamp(); also used to stamp the
+// routes-download filename. Stays null if the lookup fails.
+let dataTimestamp = null;
+
 /* Fill in the interim-map banner with the build time of the data file - Single-use function.
    raw.githubusercontent.com sends no Last-Modified header, so ask the GitHub API for the
    last commit touching the file (unauthenticated: 60 requests/hour per IP). On any failure
@@ -85,6 +89,7 @@ async function showDataTimestamp() {
         const commits = await response.json();
         const date = new Date(commits[0]?.commit?.committer?.date);
         if (isNaN(date)) return;
+        dataTimestamp = date;
         $('#interim-banner-updated').text('data last updated ' + date.toLocaleString(undefined, {
             year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
         }));
@@ -105,7 +110,6 @@ function setupRouteDownload() {
 
     const button = document.getElementById('download-routes');
     const label = button.textContent;
-    const filename = url.split('?')[0].split('/').pop() || 'routes.geojson';
     button.hidden = false;
 
     button.addEventListener('click', async () => {
@@ -117,7 +121,7 @@ function setupRouteDownload() {
             const objectUrl = URL.createObjectURL(await response.blob());
             const link = document.createElement('a');
             link.href = objectUrl;
-            link.download = filename;
+            link.download = stampedFilename(url);
             document.body.appendChild(link);
             link.click();
             link.remove();
@@ -131,6 +135,24 @@ function setupRouteDownload() {
             button.disabled = false;
         }
     });
+}
+
+/* Source filename with the banner's "data last updated" time appended, e.g.
+   goit_map_latest_2026-07-15_1544.geojson (local time, matching the banner).
+   Falls back to the bare filename if the timestamp lookup hasn't landed. */
+function stampedFilename(url) {
+    const base = url.split('?')[0].split('/').pop() || 'routes.geojson';
+    if (!dataTimestamp) return base;
+
+    const pad = (n) => String(n).padStart(2, '0');
+    const stamp = [
+        dataTimestamp.getFullYear(),
+        pad(dataTimestamp.getMonth() + 1),
+        pad(dataTimestamp.getDate()),
+    ].join('-') + '_' + pad(dataTimestamp.getHours()) + pad(dataTimestamp.getMinutes());
+
+    const dot = base.lastIndexOf('.');
+    return dot > 0 ? base.slice(0, dot) + '_' + stamp + base.slice(dot) : base + '_' + stamp;
 }
 
 
