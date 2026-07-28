@@ -33,6 +33,30 @@ body {
     font-size: 11px;
     color: #c74a48;  /* site_colors 'red' (operating) */
 }
+/* matches #interim-banner-title's type; the banner itself is click-through, so
+   re-enable pointer events here */
+#download-routes {
+    display: block;
+    margin: 4px 0 0;
+    padding: 0;
+    border: none;
+    background: none;
+    font-family: inherit;
+    font-weight: bold;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: left;
+    text-decoration: underline;
+    color: #444;
+    cursor: pointer;
+    pointer-events: auto;
+}
+#download-routes:disabled {
+    text-decoration: none;
+    color: #888;
+    cursor: default;
+}
 .hover-popup-id {
     font-size: 11px;
     color: #555;

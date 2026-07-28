@@ -69,6 +69,7 @@ map.on('moveend', () => {
 });
 
 showDataTimestamp();
+setupRouteDownload();
 
 /* Fill in the interim-map banner with the build time of the data file - Single-use function.
    raw.githubusercontent.com sends no Last-Modified header, so ask the GitHub API for the
@@ -90,6 +91,46 @@ async function showDataTimestamp() {
     } catch (e) {
         // leave the banner without a timestamp
     }
+}
+
+/* Let researchers download the exact geojson the map is drawing - Single-use function.
+   The file is cross-origin and served as text/plain, so a plain link (or the `download`
+   attribute, which cross-origin hrefs ignore) would just dump it into a browser tab;
+   fetch it as a blob instead and hand the browser an object URL. The map already pulled
+   the same URL, so this usually comes straight from the HTTP cache (max-age 300).
+   Stays hidden for maps that aren't geojson-backed. */
+function setupRouteDownload() {
+    const url = config.geojson;
+    if (!url) return;
+
+    const button = document.getElementById('download-routes');
+    const label = button.textContent;
+    const filename = url.split('?')[0].split('/').pop() || 'routes.geojson';
+    button.hidden = false;
+
+    button.addEventListener('click', async () => {
+        button.disabled = true;
+        button.textContent = 'Preparing download…';
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('geojson fetch failed: ' + response.status);
+            const objectUrl = URL.createObjectURL(await response.blob());
+            const link = document.createElement('a');
+            link.href = objectUrl;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            // give the browser time to start the save before dropping the blob
+            setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
+            button.textContent = label;
+        } catch (e) {
+            console.error(e);
+            button.textContent = 'Download failed — retry';
+        } finally {
+            button.disabled = false;
+        }
+    });
 }
 
 
