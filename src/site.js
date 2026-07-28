@@ -48,7 +48,8 @@ const map = new mapboxgl.Map({
 map.addControl(new mapboxgl.NavigationControl({ showCompass: false }));
 const popup = new mapboxgl.Popup({
     closeButton: false,
-    closeOnClick: false
+    closeOnClick: false,
+    className: 'hover-popup'  // click-through, so it can't steal the mousemove that keeps it open
 });
 
 map.on('load', async () => {
@@ -901,29 +902,48 @@ function addEvents() {
         config.modal.show();
     });
 
-    const hoverLayers = [
-        'assets-points',
-        'assets-lines',
-        'assets-polygons',
-        'assets-symbol'
-    ];
-    hoverLayers.forEach(layerID => {
-        map.on('mouseenter', layerID, (e) => {
-            map.getCanvas().style.cursor = 'pointer';
-            const feature = e.features && e.features[0];
-            if (!feature) return;
-            const props = feature.properties ?? {};
-            let description = props[config.nameField] ?? "";
-            if (config.projectIdField && props[config.projectIdField]) {
-                description += '<br/><span class="hover-popup-id">ProjectID: ' + props[config.projectIdField] + '</span>';
-            }
-            popup.setLngLat(e.lngLat).setHTML(description).addTo(map);
-        });
+    /* Hover popup. Mapbox's layer-scoped mouseenter/mouseleave query a single pixel, which
+       almost never lands on a 2-3px pipeline line, so the popup used to flicker and the
+       cursor rarely changed. Drive it off mousemove with the same hit area as the click
+       handler instead, and query config.layers so only layers this tracker actually added
+       are asked for features. */
+    const hoverPopupLimit = 4;  // several segments can sit under one cursor; list a few
+    let hoverPopupHTML = null;
+    map.on('mousemove', (e) => {
+        const bbox = [ [e.point.x - config.hitArea, e.point.y - config.hitArea], [e.point.x + config.hitArea, e.point.y + config.hitArea] ];
+        const features = getUniqueFeatures(map.queryRenderedFeatures(bbox, {layers: config.layers}), config.linkField);
 
-        map.on('mouseleave', layerID, () => {
+        if (features.length === 0) {
             map.getCanvas().style.cursor = '';
+            hoverPopupHTML = null;
             popup.remove();
-        }); 
+            return;
+        }
+
+        map.getCanvas().style.cursor = 'pointer';
+        let description = features.slice(0, hoverPopupLimit).map((feature) => {
+            const props = feature.properties ?? {};
+            let entry = props[config.nameField] ?? "";
+            if (config.projectIdField && props[config.projectIdField]) {
+                entry += '<br/><span class="hover-popup-id">ProjectID: ' + props[config.projectIdField] + '</span>';
+            }
+            return entry;
+        }).join('<hr class="hover-popup-divider"/>');
+        if (features.length > hoverPopupLimit) {
+            description += '<div class="hover-popup-id">+ ' + (features.length - hoverPopupLimit) + ' more nearby</div>';
+        }
+
+        if (description !== hoverPopupHTML) {  // avoid re-rendering the same popup every pixel
+            hoverPopupHTML = description;
+            popup.setHTML(description);
+        }
+        popup.setLngLat(e.lngLat).addTo(map);
+    });
+
+    map.on('mouseout', () => {
+        map.getCanvas().style.cursor = '';
+        hoverPopupHTML = null;
+        popup.remove();
     });
 
     $('#basemap-toggle').on('click', function() {
