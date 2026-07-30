@@ -77,6 +77,19 @@ body {
     margin: 4px 0;
     opacity: 0.25;
 }
+/* segment names under the pipeline name in the hover popup and click modal;
+   dark gray so they read as secondary to the black pipeline name */
+.segment-name {
+    color: #444;
+}
+.hover-popup .segment-name {
+    font-size: 12px;
+}
+.modal-body .segment-name {
+    font-size: 0.9rem;
+    margin-top: -6px;
+    margin-bottom: 8px;
+}
 /* red flag for AI-created routes (config.aiRouteNote), shown in the hover popup and click modal */
 .ai-route-note {
     color: #c00000;

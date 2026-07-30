@@ -37,6 +37,7 @@ var config = {
     */
     detailView: {
         'PipelineName': {'display': 'heading'},
+        'SegmentName': {'display': 'subheading'},  // gray segment names under the pipeline name
         'StartLocation': {'display': 'location'},
         'EndLocation': {'display': 'location'},
 
@@ -54,6 +55,7 @@ var config = {
     /* field mappings for the handoff-schema geojson */
     nameField: 'PipelineName',
     projectIdField: 'ProjectID',  // shown in the hover popup (segment-level id)
+    segmentNameField: 'SegmentName',  // gray segment name in the hover popup
     urlField: 'Wiki',
     statusField: 'Status',
     statusDisplayField: 'Status',

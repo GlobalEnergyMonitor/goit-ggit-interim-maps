@@ -373,6 +373,7 @@ function linkAssets() {
         config.color_association.field,
         config.capacityScaledField,
         config.projectIdField,  // shown in the hover popup
+        config.segmentNameField,  // shown in the hover popup
         config.aiRouteNote ? config.aiRouteNote.field : null  // AI-route flag shown in the hover popup
     ].filter((field) => field != null);
 
@@ -912,7 +913,16 @@ function addEvents() {
     let hoverPopupHTML = null;
     map.on('mousemove', (e) => {
         const bbox = [ [e.point.x - config.hitArea, e.point.y - config.hitArea], [e.point.x + config.hitArea, e.point.y + config.hitArea] ];
-        const features = getUniqueFeatures(map.queryRenderedFeatures(bbox, {layers: config.layers}), config.linkField);
+        // dedup per segment, not per pipeline (unlike the click handler): overlapping
+        // segments of one pipeline should each get their own hover entry
+        const seen = new Set();
+        const features = map.queryRenderedFeatures(bbox, {layers: config.layers}).filter((feature) => {
+            const props = feature.properties ?? {};
+            const key = (config.projectIdField && props[config.projectIdField]) || props[config.linkField];
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+        });
 
         if (features.length === 0) {
             map.getCanvas().style.cursor = '';
@@ -925,6 +935,9 @@ function addEvents() {
         let description = features.slice(0, hoverPopupLimit).map((feature) => {
             const props = feature.properties ?? {};
             let entry = props[config.nameField] ?? "";
+            if (config.segmentNameField && props[config.segmentNameField]) {
+                entry += '<br/><span class="segment-name">' + props[config.segmentNameField] + '</span>';
+            }
             if (config.projectIdField && props[config.projectIdField]) {
                 entry += '<br/><span class="hover-popup-id">ProjectID: ' + props[config.projectIdField] + '</span>';
             }
@@ -1515,8 +1528,8 @@ function displayDetails(features) {
         const value = primaryFeature.properties[detail];
         const invalidValues = ['', '--', 'unknown', 'unknown [unknown %]', 'undefined', 'nan', null, 0, [], undefined];
         const isInvalid = (v) => invalidValues.includes(v) || Number.isNaN(v);
-        // join rows draw from every feature, so treat them as empty only when no feature has a value
-        const noValue = config.detailView[detail]['display'] === 'join'
+        // join/subheading rows draw from every feature, so treat them as empty only when no feature has a value
+        const noValue = ['join', 'subheading'].includes(config.detailView[detail]['display'])
             ? !features.some((feature) => !isInvalid(feature.properties[detail]))
             : isInvalid(value);
         if (noValue) {
@@ -1529,6 +1542,11 @@ function displayDetails(features) {
             // TODO remove unused options from this if-statement
             if (config.detailView[detail]['display'] === 'heading') {
                 detail_text += '<h4>' + primaryFeature.properties[detail] + '</h4>';
+            } else if (config.detailView[detail]['display'] === 'subheading') {  // e.g. segment names in gray under the pipeline name
+                const uniqueValues = features
+                    .map((feature) => feature.properties[detail])
+                    .filter((v, index, array) => !isInvalid(v) && array.indexOf(v) === index);
+                detail_text += '<div class="segment-name">' + uniqueValues.join('; ') + '</div>';
             } else if (config.detailView[detail]['display'] === 'simple_markup') {
                 let value = primaryFeature.properties[detail];
                 if (value && value !== '') {
