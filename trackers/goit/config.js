@@ -22,6 +22,7 @@ var config = {
        each label has a value with the list of fields to search. Multiple fields might be searched */
     searchFields: {
         'Pipeline name': ['PipelineName'],
+        'Project ID': ['ProjectID'],
         'Companies': ['Owner', 'Parent'],
         'Start Year': ['StartYear1'],
     },

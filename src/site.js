@@ -92,7 +92,7 @@ async function showDataTimestamp() {
         if (isNaN(date)) return;
         dataTimestamp = date;
         $('#interim-banner-updated').text('data last updated ' + date.toLocaleString(undefined, {
-            year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
+            year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short'
         }));
     } catch (e) {
         // leave the banner without a timestamp
@@ -1233,7 +1233,7 @@ function filterTiles() {
     });
 
     config.filterExpression = [];
-    if (config.searchText.length >= 3) {
+    if (searchActive()) {
         // run the search in JS against the full CSV-side data, then filter the tiles by
         // the matching link ids; this keeps the search columns (owner, parent, *-search)
         // out of the tiles entirely, which is what keeps the tiles small
@@ -1293,16 +1293,25 @@ function filterTiles() {
     }
 }
 
-/* Shared by filterGeoJSON (table/summary) and filterTiles (map) so both apply the same search */
+/* Search is active once there are committed term chips or enough typed text */
+function searchActive() {
+    return config.searchTerms.length > 0 || config.searchText.length >= 3;
+}
+
+/* Shared by filterGeoJSON (table/summary) and filterTiles (map) so both apply the same search.
+   A feature matches if ANY term matches: every committed chip counts, plus the
+   still-being-typed text once it reaches 3 characters. */
 function featureMatchesSearch(feature) {
-    return config.selectedSearchFields.split(',').filter((field) => {
-        // remove diacritics from mapValue
-        if (feature.properties[field] != null) {
-            let mapValue = removeDiacritics(feature.properties[field]).toLowerCase();
-            let searchValue = removeDiacritics(config.searchText).toLowerCase();
-            return mapValue.includes(searchValue);
-        }
-    }).length > 0;
+    let terms = config.searchText.length >= 3
+        ? config.searchTerms.concat(config.searchText)
+        : config.searchTerms;
+    return terms.some((term) => {
+        let searchValue = removeDiacritics(term).toLowerCase();
+        return config.selectedSearchFields.split(',').some((field) => {
+            if (feature.properties[field] == null) return false;
+            return removeDiacritics(feature.properties[field]).toLowerCase().includes(searchValue);
+        });
+    });
 }
 
 function filterGeoJSON() {
@@ -1328,7 +1337,7 @@ function filterGeoJSON() {
             if (!filterStatus[field].includes(makeDomSafe(feature.properties[field]))) include = false;
         }
         // filter by text search bar
-        if (config.searchText.length >= 3) {
+        if (searchActive()) {
             if (!featureMatchesSearch(feature)) include = false;
         }
         // filter by country select, gets hit when just filtering by legend too
@@ -1940,12 +1949,63 @@ function removeDiacritics(value) {
 }
 
 function enableSearch() {
+    config.searchText = '';
+    config.searchTerms = [];
+
     $('#search-text').on('keyup paste', debounce(function() {
         config.searchText = $('#search-text').val().toLowerCase();
 
         filterData();
     }, 500));
+
+    // Enter commits the typed text as a removable term chip; backspace in an
+    // empty box removes the newest chip
+    $('#search-text').on('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            addSearchTerms($(this).val());
+        } else if (e.key === 'Backspace' && $(this).val() === '' && config.searchTerms.length > 0) {
+            removeSearchTerm(config.searchTerms.length - 1);
+        }
+    });
+
+    // a pasted list (comma/semicolon/newline separated) becomes chips directly,
+    // so a column of project IDs can be pasted straight from a spreadsheet
+    $('#search-text').on('paste', function(e) {
+        const text = (e.originalEvent.clipboardData || window.clipboardData).getData('text');
+        if (/[,;\n]/.test(text)) {
+            e.preventDefault();
+            addSearchTerms(text);
+        }
+    });
+}
+
+function addSearchTerms(text) {
+    text.split(/[,;\n]+/)
+        .map((term) => term.trim().toLowerCase())
+        .filter((term) => term.length > 0 && !config.searchTerms.includes(term))
+        .forEach((term) => config.searchTerms.push(term));
+    $('#search-text').val('');
     config.searchText = '';
+    renderSearchTerms();
+    filterData();
+}
+
+function removeSearchTerm(index) {
+    config.searchTerms.splice(index, 1);
+    renderSearchTerms();
+    filterData();
+}
+
+function renderSearchTerms() {
+    const container = $('#search-terms');
+    container.empty();
+    config.searchTerms.forEach((term, i) => {
+        const chip = $('<span class="search-term-chip"></span>').text(term);
+        const remove = $('<button type="button" class="search-term-remove" aria-label="Remove search term">&times;</button>');
+        remove.on('click', () => removeSearchTerm(i));
+        container.append(chip.append(remove));
+    });
 }
 
 function enableSearchSelect() {
@@ -1977,8 +2037,10 @@ function enableResetAll() {
     config.selectedCountries = [];
     
     // // clear search text by making search text ''
-    config.searchText = ''; 
+    config.searchText = '';
     $('#search-text').val('');
+    config.searchTerms = [];
+    renderSearchTerms();
 
     // put search field category back to all
     let allSearchFields = [];

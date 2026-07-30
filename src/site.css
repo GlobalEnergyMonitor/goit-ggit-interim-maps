@@ -288,6 +288,42 @@ table.dataTable td {
     top: 3px;
     max-height: 74px;
 }
+
+/* committed search terms, shown as removable cards stacked above the search box */
+#search-terms {
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 0;
+    display: flex;
+    flex-wrap: wrap-reverse;
+    gap: 4px;
+    width: max-content;
+    max-width: 300px;
+}
+.search-term-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+    padding: 2px 4px 2px 8px;
+    font-size: 0.85rem;
+    line-height: 1.2;
+}
+.search-term-remove {
+    border: none;
+    background: none;
+    padding: 0 4px;
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    color: #666;
+}
+.search-term-remove:hover {
+    color: #000;
+}
 #search-type {
     position: relative;
     top: 3px;
