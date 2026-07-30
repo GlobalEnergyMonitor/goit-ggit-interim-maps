@@ -1509,7 +1509,7 @@ function displayDetails(features) {
 
     Object.keys(config.detailView).forEach((detail) => {
         const value = primaryFeature.properties[detail];
-        const invalidValues = ['', 'unknown', 'unknown [unknown %]', 'undefined', 'nan', null, 0, [], undefined];
+        const invalidValues = ['', '--', 'unknown', 'unknown [unknown %]', 'undefined', 'nan', null, 0, [], undefined];
         if (invalidValues.includes(value) || Number.isNaN(value)) {
             detail_text += ''
         } else if (Object.keys(config.detailView[detail]).includes('display')) {
@@ -1522,18 +1522,32 @@ function displayDetails(features) {
                     detail_text += '<br/><div>' + value + '</div><br/>';
                 }
             } else if (config.detailView[detail]['display'] === 'join') {  // used by GIPT to show all technologies/fuels
-                let join_array = features.map((feature) => feature.properties[detail]);
-                join_array = join_array.filter((value, index, array) => value !== '' && value != null && array.indexOf(value) === index);
+                let join_array = features.map((feature) => {
+                    let value = feature.properties[detail];
+                    // 'trailing-field' appends each feature's own unit (e.g. DiameterUnits),
+                    // so segments with different units stay unambiguous
+                    if (Object.keys(config.detailView[detail]).includes('trailing-field') && value != null && value !== '' && value !== '--') {
+                        const unit = feature.properties[config.detailView[detail]['trailing-field']];
+                        // the join span is text-capitalize, which would turn 'mm' into 'Mm' — exempt the unit
+                        if (unit) value += ' <span style="text-transform:none">' + String(unit).trim() + '</span>';
+                    }
+                    return value;
+                });
+                join_array = join_array.filter((value, index, array) => value !== '' && value != null && value !== '--' && array.indexOf(value) === index);
+                // 'trailing-label' is a fixed unit for all values (e.g. km), appended once
+                const joinTrailing = Object.keys(config.detailView[detail]).includes('trailing-label')
+                    ? ' ' + config.detailView[detail]['trailing-label']
+                    : '';
                 if (join_array.length > 1) {
                     if (Object.keys(config.detailView[detail]).includes('label')) {
                         detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'][1] + '</span>: ';
                     }
-                    detail_text += '<span class="text-capitalize">' + join_array.join('; ').replaceAll('_', ' ') + '</span><br/>';
+                    detail_text += '<span class="text-capitalize">' + join_array.join('; ').replaceAll('_', ' ') + '</span>' + joinTrailing + '<br/>';
                 } else {
                     if (Object.keys(config.detailView[detail]).includes('label')) {
                         detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'][0] + '</span>: ';
                     }
-                    detail_text += '<span class="text-capitalize">' + join_array[0].replaceAll('_', ' ') + '</span><br/>';
+                    detail_text += '<span class="text-capitalize">' + join_array[0].replaceAll('_', ' ') + '</span>' + joinTrailing + '<br/>';
                 }
             } else if (config.detailView[detail]['display'] === 'range') {  // used by GIPT to show range of start dates
                 let greatest = features.reduce((accumulator, feature) => {
