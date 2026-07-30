@@ -2,7 +2,8 @@ var config = {
     /* name of the data file; use key `csv` if data file is CSV format, use key `geojson` if data file is geoJSON format.
        Built and published automatically by goit-ggit-data-ops (.github/workflows/build-map-data.yml)
        whenever goit-ggit-pipeline-routes' normalized branch updates: handoff schema
-       (same columns as the data-team release), null-geometry rows dropped. */
+       (same columns as the data-team release, plus map-only columns like RouteCreator
+       when the sheet has them), null-geometry rows dropped. */
     geojson: 'https://raw.githubusercontent.com/GlobalEnergyMonitor/goit-ggit-data-ops/map-data/goit_map_latest.geojson',
 
     /* Labels for describing the assets */
