@@ -84,7 +84,7 @@ body {
 }
 .hover-popup .segment-name {
     font-size: 12px;
-    color: #777;  /* lighter than the modal's #444 */
+    color: #999;  /* lighter than the modal's #444 */
 }
 .modal-body .segment-name {
     font-size: 0.9rem;
