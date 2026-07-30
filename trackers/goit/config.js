@@ -42,9 +42,9 @@ var config = {
         'Owner': {'label': 'Owner'},
         'Parent': {'label': 'Parent'},
         'StartYear1': {'label': 'Start Year'},
-        'Diameter': {'display': 'join', 'label': ['Diameter', 'Diameters'], 'trailing-field': 'DiameterUnits'},
-        'LengthKnownKm': {'display': 'join', 'label': ['Known length', 'Known lengths'], 'trailing-label': 'km'},
-        'LengthEstimateKm': {'display': 'join', 'label': ['Estimated length', 'Estimated lengths'], 'trailing-label': 'km'},
+        'Diameter': {'always-show': true, 'display': 'join', 'label': ['Diameter', 'Diameters'], 'trailing-field': 'DiameterUnits'},
+        'LengthKnownKm': {'always-show': true, 'display': 'join', 'label': ['Known length', 'Known lengths'], 'trailing-label': 'km'},
+        'LengthEstimateKm': {'always-show': true, 'display': 'join', 'label': ['Estimated length', 'Estimated lengths'], 'trailing-label': 'km'},
         'ProjectID': {'display': 'join', 'label': ['ProjectID', 'ProjectIDs']},
     },
 

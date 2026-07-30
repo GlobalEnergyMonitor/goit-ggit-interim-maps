@@ -1510,8 +1510,17 @@ function displayDetails(features) {
     Object.keys(config.detailView).forEach((detail) => {
         const value = primaryFeature.properties[detail];
         const invalidValues = ['', '--', 'unknown', 'unknown [unknown %]', 'undefined', 'nan', null, 0, [], undefined];
-        if (invalidValues.includes(value) || Number.isNaN(value)) {
-            detail_text += ''
+        const isInvalid = (v) => invalidValues.includes(v) || Number.isNaN(v);
+        // join rows draw from every feature, so treat them as empty only when no feature has a value
+        const noValue = config.detailView[detail]['display'] === 'join'
+            ? !features.some((feature) => !isInvalid(feature.properties[detail]))
+            : isInvalid(value);
+        if (noValue) {
+            // 'always-show' rows keep their label visible, with a blank value
+            if (config.detailView[detail]['always-show']) {
+                const label = config.detailView[detail]['label'];
+                detail_text += '<span class="fw-bold">' + (Array.isArray(label) ? label[0] : label) + '</span>: <br/>';
+            }
         } else if (Object.keys(config.detailView[detail]).includes('display')) {
             // TODO remove unused options from this if-statement
             if (config.detailView[detail]['display'] === 'heading') {
