@@ -372,7 +372,8 @@ function linkAssets() {
         config.linkField,
         config.color_association.field,
         config.capacityScaledField,
-        config.projectIdField  // shown in the hover popup
+        config.projectIdField,  // shown in the hover popup
+        config.aiRouteNote ? config.aiRouteNote.field : null  // AI-route flag shown in the hover popup
     ].filter((field) => field != null);
 
     Object.keys(grouped_assets).forEach((key) => {
@@ -926,6 +927,9 @@ function addEvents() {
             let entry = props[config.nameField] ?? "";
             if (config.projectIdField && props[config.projectIdField]) {
                 entry += '<br/><span class="hover-popup-id">ProjectID: ' + props[config.projectIdField] + '</span>';
+            }
+            if (config.aiRouteNote && String(props[config.aiRouteNote.field] ?? '').trim() === config.aiRouteNote.value) {
+                entry += '<br/><span class="ai-route-note">' + config.aiRouteNote.text + '</span>';
             }
             return entry;
         }).join('<hr class="hover-popup-divider"/>');
@@ -1674,6 +1678,12 @@ function displayDetails(features) {
             detail_text += '<br/>';
         }
     });
+
+    // flag AI-created routes (config.aiRouteNote) — any segment marked counts
+    if (config.aiRouteNote && features.some((feature) =>
+            String(feature.properties[config.aiRouteNote.field] ?? '').trim() === config.aiRouteNote.value)) {
+        detail_text += '<span class="ai-route-note">' + config.aiRouteNote.text + '</span><br/>';
+    }
 
     // get the asset and capacity label
     // if a dict and not a string (eg in multi-tracker maps), get the specific labels for each tracker within

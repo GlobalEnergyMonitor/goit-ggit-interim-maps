@@ -77,6 +77,12 @@ body {
     margin: 4px 0;
     opacity: 0.25;
 }
+/* red flag for AI-created routes (config.aiRouteNote), shown in the hover popup and click modal */
+.ai-route-note {
+    color: #c00000;
+    font-weight: 600;
+    font-size: 11px;
+}
 
 #table-container, .page-link {
     font-family: Arial;
