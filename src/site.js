@@ -1924,7 +1924,7 @@ function enableModal() {
     // so the zoom controls and panning don't dismiss it either
     document.addEventListener('click', (event) => {
         if (config.modalDragging) return;  // the click that ends a modal drag shouldn't dismiss
-        if (event.target.closest('#modal .modal-dialog, #map')) return;
+        if (event.target.closest('#modal, #map')) return;
         config.modal.hide();
     });
     enableModalDrag();

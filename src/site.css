@@ -444,12 +444,12 @@ table.dataTable td {
     margin-right: .5rem;
 }
 
-/* the click modal has no backdrop; let map clicks pass through everywhere except the dialog */
+/* the click modal has no backdrop; the full-viewport #modal container passes clicks through.
+   don't re-enable pointer events on .modal-dialog: it's an invisible column spanning the
+   viewport height, and bootstrap already keeps it pass-through with .modal-content
+   (the visible card) interactive */
 #modal {
     pointer-events: none;
-}
-#modal .modal-dialog {
-    pointer-events: auto;
 }
 /* the whole modal is grabbable (enableModalDrag); links and buttons keep their clicks */
 #modal .modal-content {
