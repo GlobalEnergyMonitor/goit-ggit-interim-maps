@@ -876,7 +876,11 @@ function addEvents() {
         const clickedFeatures = map.queryRenderedFeatures(bbox, {layers: config.layers});
         const selectedFeatures = getUniqueFeatures(clickedFeatures, config.linkField).sort((a, b) => a.properties[config.nameField].localeCompare(b.properties[config.nameField]));
 
-        if (selectedFeatures.length === 0) return;
+        if (selectedFeatures.length === 0) {
+            // no backdrop anymore, so an empty-map click stands in for the old outside-click dismissal
+            if (config.modal) config.modal.hide();
+            return;
+        }
 
         const links = selectedFeatures.map(
             (feature) => feature.properties[config.linkField]
@@ -1524,11 +1528,25 @@ function setHighlightFilter(links) {
     });
 }
 
-/* Creates the modal that pops up after clicking an asset */
+/* Creates the modal that pops up after clicking an asset. Shows only the clicked
+   segments by default; showAllSegments()/showClickedSegments() re-render the other view. */
 function displayDetails(features) {
     if (typeof features == 'string') {
         features = JSON.parse(features);
     }
+    config.detailFeatures = features;  // the clicked segments, kept so the segment toggle can flip back
+    renderDetails(features, false);
+}
+
+function showAllSegments() {
+    renderDetails(config.linked_assets[config.detailLink], true);
+}
+
+function showClickedSegments() {
+    renderDetails(config.detailFeatures, false);
+}
+
+function renderDetails(features, showingAll) {
     var detail_text = '';
     var location_text = '';
 
@@ -1539,6 +1557,24 @@ function displayDetails(features) {
         ? features.find(f => !isPolygon(f))
         : features[0];
 
+    // get the asset label
+    // if a dict and not a string (eg in multi-tracker maps), get the specific labels for each tracker within
+    let assetLabel = typeof config.assetLabel === 'string'
+        ? config.assetLabel
+        : config.assetLabel.values[primaryFeature.properties[config.assetLabel.field]];
+
+    // toggle between the clicked segments (the default view) and the pipeline's full network;
+    // placed under the segment-name subheading when there is one, otherwise after the details
+    config.detailLink = primaryFeature.properties[config.linkField];
+    const allLinkedCount = (config.linked_assets[config.detailLink] ?? features).length;
+    let segmentToggle = '';
+    if (!showingAll && features.length < allLinkedCount) {
+        segmentToggle = '<div class="segment-toggle" onClick="showAllSegments()">show all ' + allLinkedCount + ' ' + assetLabel + '</div>';
+    } else if (showingAll && config.detailFeatures.length < features.length) {
+        segmentToggle = '<div class="segment-toggle" onClick="showClickedSegments()">show clicked ' +
+            (config.detailFeatures.length === 1 ? assetLabel.replace(/s$/, '') : assetLabel) + ' only</div>';
+    }
+    let segmentTogglePlaced = false;
 
     Object.keys(config.detailView).forEach((detail) => {
         const value = primaryFeature.properties[detail];
@@ -1563,6 +1599,10 @@ function displayDetails(features) {
                     .map((feature) => feature.properties[detail])
                     .filter((v, index, array) => !isInvalid(v) && array.indexOf(v) === index);
                 detail_text += '<div class="segment-name">' + uniqueValues.join('; ') + '</div>';
+                if (segmentToggle) {
+                    detail_text += segmentToggle;
+                    segmentTogglePlaced = true;
+                }
             } else if (config.detailView[detail]['display'] === 'simple_markup') {
                 let value = primaryFeature.properties[detail];
                 if (value && value !== '') {
@@ -1719,11 +1759,9 @@ function displayDetails(features) {
         detail_text += '<span class="ai-route-note">' + config.aiRouteNote.text + '</span><br/>';
     }
 
-    // get the asset and capacity label
-    // if a dict and not a string (eg in multi-tracker maps), get the specific labels for each tracker within
-    let assetLabel = typeof config.assetLabel === 'string'
-        ? config.assetLabel
-        : config.assetLabel.values[primaryFeature.properties[config.assetLabel.field]];
+    if (segmentToggle && !segmentTogglePlaced) {  // no segment-name subheading to sit under
+        detail_text += segmentToggle;
+    }
 
     // consistent with how linkAssets() handles totalCount and summary_count.
     const countableFeatures = config.polygonsAreIndependent
@@ -1853,10 +1891,50 @@ function displayDetails(features) {
 }
 
 function enableModal() {
-    config.modal = new bootstrap.Modal($('#modal'));
+    // no backdrop: the map stays visible behind the modal, and #modal is pointer-events:none
+    // in css so the map also stays interactive around the dialog. focus:false keeps bootstrap's
+    // focus trap from fighting map interaction, so escape is handled here instead.
+    config.modal = new bootstrap.Modal($('#modal'), {backdrop: false, focus: false});
     $('#modal').on('hidden.bs.modal', function (event) {
         setHighlightFilter('');
-    })
+    });
+    $(document).on('keydown', (event) => {
+        if (event.key === 'Escape') config.modal.hide();
+    });
+    enableModalDrag();
+}
+
+/* Drag the detail modal around by its handle bar, to uncover the highlighted routes behind it */
+function enableModalDrag() {
+    const dialog = document.querySelector('#modal .modal-dialog');
+    const handle = document.getElementById('modal-drag-handle');
+    let baseX = 0;
+    let baseY = 0;
+    handle.addEventListener('pointerdown', (event) => {
+        if (event.target.closest('.btn-close')) return;  // keep the close button a plain click
+        event.preventDefault();
+        handle.setPointerCapture(event.pointerId);
+        const startX = event.clientX;
+        const startY = event.clientY;
+        const onMove = (moveEvent) => {
+            dialog.style.transform = 'translate(' + (baseX + moveEvent.clientX - startX) + 'px, ' + (baseY + moveEvent.clientY - startY) + 'px)';
+        };
+        const onEnd = (endEvent) => {
+            baseX += endEvent.clientX - startX;
+            baseY += endEvent.clientY - startY;
+            handle.removeEventListener('pointermove', onMove);
+            handle.removeEventListener('pointerup', onEnd);
+            handle.removeEventListener('pointercancel', onEnd);
+        };
+        handle.addEventListener('pointermove', onMove);
+        handle.addEventListener('pointerup', onEnd);
+        handle.addEventListener('pointercancel', onEnd);
+    });
+    $('#modal').on('hidden.bs.modal', () => {  // reopen centered next time
+        baseX = 0;
+        baseY = 0;
+        dialog.style.transform = '';
+    });
 }
 
 function buildSatImage(features) {

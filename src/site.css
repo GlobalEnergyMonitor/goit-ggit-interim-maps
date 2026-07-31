@@ -444,6 +444,61 @@ table.dataTable td {
     margin-right: .5rem;
 }
 
+/* the click modal has no backdrop; let map clicks pass through everywhere except the dialog */
+#modal {
+    pointer-events: none;
+}
+#modal .modal-dialog {
+    pointer-events: auto;
+}
+/* slim bar for dragging the modal aside (grip pill in the middle, close button at right) */
+#modal-drag-handle {
+    position: relative;
+    height: 20px;
+    background-color: #f2f2f2;
+    cursor: grab;
+    user-select: none;
+    touch-action: none;  /* pointer-event dragging needs default touch gestures off */
+    border-top-left-radius: inherit;
+    border-top-right-radius: inherit;
+}
+#modal-drag-handle:active {
+    cursor: grabbing;
+}
+#modal-drag-handle::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 8px;
+    width: 40px;
+    height: 4px;
+    margin-left: -20px;
+    border-radius: 2px;
+    background-color: #c2c2c2;
+}
+#modal-drag-handle .btn-close {
+    position: absolute;
+    right: 8px;
+    top: 4px;
+    padding: 0;
+    font-size: 0.6rem;
+}
+/* small button that flips the click modal between clicked segments and the whole network */
+.segment-toggle {
+    display: inline-block;
+    margin: 2px 0 8px;
+    padding: 1px 8px;
+    font-size: 0.7rem;
+    color: #444444;
+    background-color: #fafafa;
+    border: 1px solid #cccccc;
+    border-radius: 3px;
+    cursor: pointer;
+    user-select: none;
+}
+.segment-toggle:hover {
+    background-color: #eeeeee;
+}
 .modal-content {
     border-width: 0px;
 }
