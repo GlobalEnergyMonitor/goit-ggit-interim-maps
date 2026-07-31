@@ -96,5 +96,5 @@ var config = {
 
     /* red note in the hover popup and click modal when a segment's route was AI-created
        (RouteCreator is a map-only column appended by pipeline_exports.py in goit-ggit-data-ops) */
-    aiRouteNote: {field: 'RouteCreator', value: 'CB', text: 'NOTE: route created by AI'},
+    aiRouteNote: {field: 'RouteCreator', value: 'CB', text: 'NOTE: route added by AI'},
 }

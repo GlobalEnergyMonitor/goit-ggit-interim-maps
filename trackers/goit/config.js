@@ -104,5 +104,5 @@ var config = {
     /* red note in the hover popup and click modal when a segment's route was AI-created.
        The Oil/NGL sheet has no RouteCreator column yet, so this is inert on GOIT until it does
        (RouteCreator is a map-only column appended by pipeline_exports.py in goit-ggit-data-ops) */
-    aiRouteNote: {field: 'RouteCreator', value: 'CB', text: 'NOTE: route created by AI'},
+    aiRouteNote: {field: 'RouteCreator', value: 'CB', text: 'NOTE: route added by AI'},
 }
