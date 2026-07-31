@@ -136,6 +136,64 @@ function setupRouteDownload() {
             button.disabled = false;
         }
     });
+
+    setupFilteredRouteDownload(url);
+}
+
+/* Secondary download button: hidden until the user filters the data or modifier-clicks
+   routes on the map, then offers just that subset. Unlike the full download (the exact
+   source file), this serializes the in-memory features. updateFilteredDownloadButton()
+   keeps its visibility and label current. */
+function setupFilteredRouteDownload(url) {
+    config.filteredDownloadURL = url;  // doubles as the flag that the map is geojson-backed
+    const button = document.getElementById('download-filtered-routes');
+
+    button.addEventListener('click', () => {
+        const selection = selectedRouteFeatures();
+        const features = selection.length > 0 ? selection : config.geojson_filtered.features;
+        const suffix = selection.length > 0 ? 'selected' : 'filtered';
+        const geojson = {'type': 'FeatureCollection', 'features': features};
+        const objectUrl = URL.createObjectURL(new Blob([JSON.stringify(geojson)], {type: 'application/geo+json'}));
+        const link = document.createElement('a');
+        link.href = objectUrl;
+        link.download = suffixedFilename(stampedFilename(url), suffix);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        // give the browser time to start the save before dropping the blob
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
+    });
+}
+
+/* All features of the modifier-click-selected pipelines, from the full dataset: an
+   explicitly selected route downloads whole even if the legend filters would hide parts of it */
+function selectedRouteFeatures() {
+    if (!config.selectedRoutes || config.selectedRoutes.size === 0) return [];
+    return config.geojson.features.filter(
+        (feature) => config.selectedRoutes.has(feature.properties[config.linkField]));
+}
+
+function suffixedFilename(name, suffix) {
+    const dot = name.lastIndexOf('.');
+    return dot > 0 ? name.slice(0, dot) + '_' + suffix + name.slice(dot) : name + '_' + suffix;
+}
+
+/* Show/hide + label the secondary download button for the current filter/selection state */
+function updateFilteredDownloadButton() {
+    if (!config.filteredDownloadURL) return;  // map isn't geojson-backed
+    const button = document.getElementById('download-filtered-routes');
+    const selectedCount = config.selectedRoutes ? config.selectedRoutes.size : 0;
+    const filtered = config.geojson_filtered && config.geojson.features
+        && config.geojson_filtered.features.length < config.geojson.features.length;
+    if (selectedCount > 0) {
+        button.textContent = 'Download ' + selectedCount + ' selected route' + (selectedCount === 1 ? '' : 's');
+        button.hidden = false;
+    } else if (filtered) {
+        button.textContent = 'Download filtered routes';
+        button.hidden = false;
+    } else {
+        button.hidden = true;
+    }
 }
 
 /* Source filename with the banner's "data last updated" time appended, e.g.
@@ -869,6 +927,8 @@ function enableUX() {
 
 /* Adds events and sets some event handling - Single-use function */
 function addEvents() {
+    config.selectedRoutes = new Set();  // pipelines (linkField values) picked by modifier-click
+
     map.on('click', (e) => {
         userInteracting = true;
         spinGlobe();
@@ -876,9 +936,34 @@ function addEvents() {
         const clickedFeatures = map.queryRenderedFeatures(bbox, {layers: config.layers});
         const selectedFeatures = getUniqueFeatures(clickedFeatures, config.linkField).sort((a, b) => a.properties[config.nameField].localeCompare(b.properties[config.nameField]));
 
+        // ctrl/cmd/shift-click toggles routes in a persistent selection for the
+        // selected-routes download, instead of opening the details modal
+        if (e.originalEvent.ctrlKey || e.originalEvent.metaKey || e.originalEvent.shiftKey) {
+            if (selectedFeatures.length === 0) return;
+            selectedFeatures.forEach((feature) => {
+                const link = feature.properties[config.linkField];
+                if (config.selectedRoutes.has(link)) {
+                    config.selectedRoutes.delete(link);
+                } else {
+                    config.selectedRoutes.add(link);
+                }
+            });
+            if (config.modal) config.modal.hide();
+            setHighlightFilter(config.selectedRoutes.size > 0 ? [...config.selectedRoutes] : '');
+            updateFilteredDownloadButton();
+            return;
+        }
+
+        // a plain click replaces any modifier-click selection
+        if (config.selectedRoutes.size > 0) {
+            config.selectedRoutes.clear();
+            updateFilteredDownloadButton();
+        }
+
         if (selectedFeatures.length === 0) {
             // no backdrop anymore, so an empty-map click stands in for the old outside-click dismissal
             if (config.modal) config.modal.hide();
+            setHighlightFilter('');  // a selection highlight can exist with no modal to dismiss
             return;
         }
 
@@ -1424,6 +1509,8 @@ function updateSummary() {
         $('#min_capacity').text(Math.round(config.minFilteredCapacity).toLocaleString());
         $('#capacity_summary_min').html('Minimum ' + config.minMaxCapacityFilterLabel);
     }
+
+    updateFilteredDownloadButton();  // runs after every filter change, so the button tracks filter state
 }
 
 
@@ -1914,7 +2001,8 @@ function enableModal() {
     // focus trap from fighting map interaction, so escape is handled here instead.
     config.modal = new bootstrap.Modal($('#modal'), {backdrop: false, focus: false});
     $('#modal').on('hidden.bs.modal', function (event) {
-        setHighlightFilter('');
+        // keep any modifier-click selection highlighted; clear otherwise
+        setHighlightFilter(config.selectedRoutes && config.selectedRoutes.size > 0 ? [...config.selectedRoutes] : '');
     });
     $(document).on('keydown', (event) => {
         if (event.key === 'Escape') config.modal.hide();
