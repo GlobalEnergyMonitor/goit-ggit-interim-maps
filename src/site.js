@@ -873,7 +873,8 @@ function addEvents() {
         userInteracting = true;
         spinGlobe();
         const bbox = [ [e.point.x - config.hitArea, e.point.y - config.hitArea], [e.point.x + config.hitArea, e.point.y + config.hitArea] ];
-        const selectedFeatures = getUniqueFeatures(map.queryRenderedFeatures(bbox, {layers: config.layers}), config.linkField).sort((a, b) => a.properties[config.nameField].localeCompare(b.properties[config.nameField]));
+        const clickedFeatures = map.queryRenderedFeatures(bbox, {layers: config.layers});
+        const selectedFeatures = getUniqueFeatures(clickedFeatures, config.linkField).sort((a, b) => a.properties[config.nameField].localeCompare(b.properties[config.nameField]));
 
         if (selectedFeatures.length === 0) return;
 
@@ -883,16 +884,31 @@ function addEvents() {
 
         setHighlightFilter(links);
 
+        // The modal should describe only the segments under the click, not every segment
+        // in the network sharing the linkField. Match by projectIdField (segment-level id);
+        // fall back to the whole group when segments can't be identified.
+        const featuresForLink = (link) => {
+            const allLinked = config.linked_assets[link];
+            if (!config.projectIdField) return allLinked;
+            const clickedIds = new Set(clickedFeatures
+                .filter((feature) => feature.properties[config.linkField] === link)
+                .map((feature) => feature.properties[config.projectIdField])
+                .filter((id) => id != null && id !== ''));
+            if (clickedIds.size === 0) return allLinked;
+            const clicked = allLinked.filter((feature) => clickedIds.has(feature.properties[config.projectIdField]));
+            return clicked.length > 0 ? clicked : allLinked;
+        };
+
         if (selectedFeatures.length === 1) {
             config.selectModal = '';
-            displayDetails(config.linked_assets[selectedFeatures[0].properties[config.linkField]]);
+            displayDetails(featuresForLink(selectedFeatures[0].properties[config.linkField]));
         } else {
             var modalText = '<h6 class="p-3">There are multiple ' + config.assetFullLabel + ' near this location. Select one for more details</h6>';
 
             let ul = $('<ul>');
             selectedFeatures.forEach((feature) => {
                 var link = $('<li class="asset-select-option">' + feature.properties[config.nameField] + '</li>');
-                link.attr('data-feature', JSON.stringify(config.linked_assets[feature.properties[config.linkField]]));
+                link.attr('data-feature', JSON.stringify(featuresForLink(feature.properties[config.linkField])));
                 link.attr('onClick', 'displayDetails(this.dataset.feature)');
                 ul.append(link);
             });
