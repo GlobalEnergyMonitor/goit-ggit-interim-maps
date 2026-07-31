@@ -469,10 +469,12 @@ table.dataTable td {
     padding: 4px;
     opacity: 0.7;
 }
-/* small button that flips the click modal between clicked segments and the whole network */
+/* small button that flips the click modal between clicked segments and the whole network;
+   block + fit-content keeps it on its own line at button width */
 .segment-toggle {
-    display: inline-block;
-    margin: 2px 0 8px;
+    display: block;
+    width: fit-content;
+    margin: 4px 0 8px;
     padding: 1px 8px;
     font-size: 0.7rem;
     color: #444444;

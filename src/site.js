@@ -1922,11 +1922,14 @@ function enableModal() {
     // any click outside the dialog dismisses the modal. clicks inside #map are left to the
     // map's own click handler (swap to the clicked pipeline, or hide when nothing is there),
     // so the zoom controls and panning don't dismiss it either
+    // capture phase: the check must run before a clicked control (segment toggle, select-list
+    // item) re-renders the modal body — by the bubble phase the clicked element is detached,
+    // closest('#modal') no longer matches, and the modal would wrongly dismiss
     document.addEventListener('click', (event) => {
         if (config.modalDragging) return;  // the click that ends a modal drag shouldn't dismiss
         if (event.target.closest('#modal, #map')) return;
         config.modal.hide();
-    });
+    }, true);
     enableModalDrag();
 }
 
