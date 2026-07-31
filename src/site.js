@@ -1280,6 +1280,20 @@ function buildLegendFilters() {
             filterData();
         });
     });
+
+    lockLegendWidth();
+    // the theme's web font usually lands after the first measurement; re-measure once loaded
+    document.fonts.ready.then(lockLegendWidth);
+}
+
+/* Freeze the legend at the widest width it has rendered at (full-data counts): filtered
+   counts only ever get shorter, and letting the fit-content card reflow around them
+   shifts every row. Min-width (not width) so the collapsed sidebar still shrinks. */
+function lockLegendWidth() {
+    const form = document.getElementById('filter-form');
+    if (!form) return;
+    const frozen = parseFloat(form.style.minWidth) || 0;
+    if (form.offsetWidth > frozen) form.style.minWidth = form.offsetWidth + 'px';
 }
 
 function toggleFilter(id) {
@@ -1524,6 +1538,7 @@ function updateSummary() {
     }
 
     updateFilteredDownloadButton();  // runs after every filter change, so the button tracks filter state
+    lockLegendWidth();  // ratchet, in case the legend rendered narrow before fonts loaded
 }
 
 

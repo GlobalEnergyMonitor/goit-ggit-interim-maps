@@ -298,6 +298,25 @@ table.dataTable td {
     text-transform: capitalize;
     cursor: pointer;
 }
+/* Legend rows: the bootstrap col-1/col-8/col-3 percentage grid breaks when filtering —
+   shorter counts shrink the fit-content card, the nowrap labels then overflow their 66%
+   column, and the count wraps onto its own line. Lay the row out as plain flex instead:
+   fixed checkmark, natural-width label, count growing to keep right-aligned. */
+#filter-form .filter-row {
+    flex-wrap: nowrap;
+}
+#filter-form .filter-row > .col-1 {
+    flex: 0 0 auto;
+    width: 24px;
+}
+#filter-form .filter-row > .col-8 {
+    flex: 0 0 auto;
+    width: auto;
+}
+#filter-form .filter-row > .col-3 {
+    flex: 1 0 auto;
+    width: auto;
+}
 
 /* small gray x, top-right of the region/country/area box, to clear an active filter */
 #country {
