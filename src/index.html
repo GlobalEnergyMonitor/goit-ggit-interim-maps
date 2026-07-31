@@ -55,6 +55,7 @@
         <div class="container-fluid">
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav mb-2 mx-2 shadow-sm" id="country">
+                    <button type="button" id="country-clear" aria-label="Clear region/country/area filter" hidden>&times;</button>
                     <li class="nav-item dropup">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <span class="small">Select region/country/area</span><br/><span class="h3" id="selectedCountryLabel">All</span>
@@ -98,6 +99,7 @@
         </div>
         <button type="button" id="download-routes" hidden>Download routes</button>
         <button type="button" id="download-filtered-routes" hidden>Download filtered routes</button>
+        <button type="button" id="download-selected-routes" hidden>Download selected routes</button>
     </div>
 
     <div id="map"></div>

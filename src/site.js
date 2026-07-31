@@ -141,18 +141,14 @@ function setupRouteDownload() {
     setupFilteredRouteDownload(url);
 }
 
-/* Secondary download button: hidden until the user filters the data or modifier-clicks
-   routes on the map, then offers just that subset. Unlike the full download (the exact
-   source file), this serializes the in-memory features. updateFilteredDownloadButton()
-   keeps its visibility and label current. */
+/* Secondary download buttons: hidden until the user filters the data and/or
+   modifier-clicks routes on the map, then each offers its own subset (both can show at
+   once). Unlike the full download (the exact source file), these serialize the
+   in-memory features. updateFilteredDownloadButton() keeps their visibility current. */
 function setupFilteredRouteDownload(url) {
     config.filteredDownloadURL = url;  // doubles as the flag that the map is geojson-backed
-    const button = document.getElementById('download-filtered-routes');
 
-    button.addEventListener('click', () => {
-        const selection = selectedRouteFeatures();
-        const features = selection.length > 0 ? selection : config.geojson_filtered.features;
-        const suffix = selection.length > 0 ? 'selected' : 'filtered';
+    const downloadFeatures = (features, suffix) => {
         const geojson = {'type': 'FeatureCollection', 'features': features};
         const objectUrl = URL.createObjectURL(new Blob([JSON.stringify(geojson)], {type: 'application/geo+json'}));
         const link = document.createElement('a');
@@ -163,6 +159,13 @@ function setupFilteredRouteDownload(url) {
         link.remove();
         // give the browser time to start the save before dropping the blob
         setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
+    };
+
+    document.getElementById('download-filtered-routes').addEventListener('click', () => {
+        downloadFeatures(config.geojson_filtered.features, 'filtered');
+    });
+    document.getElementById('download-selected-routes').addEventListener('click', () => {
+        downloadFeatures(selectedRouteFeatures(), 'selected');
     });
 }
 
@@ -195,22 +198,15 @@ function toggleRouteSelection(selectedFeatures) {
     updateFilteredDownloadButton();
 }
 
-/* Show/hide + label the secondary download button for the current filter/selection state */
+/* Show/hide the secondary download buttons for the current filter/selection state;
+   the two are independent, so filtering and selecting at once shows both */
 function updateFilteredDownloadButton() {
     if (!config.filteredDownloadURL) return;  // map isn't geojson-backed
-    const button = document.getElementById('download-filtered-routes');
-    const selectedCount = config.selectedRoutes ? config.selectedRoutes.size : 0;
     const filtered = config.geojson_filtered && config.geojson.features
         && config.geojson_filtered.features.length < config.geojson.features.length;
-    if (selectedCount > 0) {
-        button.textContent = 'Download selected routes';
-        button.hidden = false;
-    } else if (filtered) {
-        button.textContent = 'Download filtered routes';
-        button.hidden = false;
-    } else {
-        button.hidden = true;
-    }
+    const selected = config.selectedRoutes && config.selectedRoutes.size > 0;
+    document.getElementById('download-filtered-routes').hidden = !filtered;
+    document.getElementById('download-selected-routes').hidden = !selected;
 }
 
 /* Source filename with the banner's "data last updated" time appended, e.g.
@@ -2193,9 +2189,15 @@ function buildCountrySelect() {
             config.selectedCountryText = this.dataset.countrytext;
             config.selectedCountries = (this.dataset.countries.length > 0 ? this.dataset.countries.split(';') : []);
             $('#selectedCountryLabel').text(config.selectedCountryText || 'all');
+            updateCountryClear();
 
             filterData();
         });
+    });
+
+    document.getElementById('country-clear').addEventListener('click', (e) => {
+        e.stopPropagation();  // don't toggle the dropdown open
+        clearCountryFilter();
     });
 
     // Hover logic for continent: show submenu, keep open when moving to submenu
@@ -2231,6 +2233,20 @@ function buildCountrySelect() {
 
     config.selectedCountries = [];
     config.selectedCountryText = '';
+}
+
+/* Show the region/country/area clear button only while that filter is active */
+function updateCountryClear() {
+    const button = document.getElementById('country-clear');
+    if (button) button.hidden = !config.selectedCountryText;
+}
+
+function clearCountryFilter() {
+    config.selectedCountryText = '';
+    config.selectedCountries = [];
+    $('#selectedCountryLabel').text('all');
+    updateCountryClear();
+    filterData();
 }
 
 // this removes diacritics in the data so that when you search you get all the possible options ignored special diacritics
@@ -2330,6 +2346,7 @@ function enableResetAll() {
     $('#selectedCountryLabel').text('all');
     config.selectedCountryText = '';
     config.selectedCountries = [];
+    updateCountryClear();
     
     // // clear search text by making search text ''
     config.searchText = '';
