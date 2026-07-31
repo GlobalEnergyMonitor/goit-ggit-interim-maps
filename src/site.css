@@ -477,15 +477,15 @@ table.dataTable td {
     margin: 4px 0 8px;
     padding: 1px 8px;
     font-size: 0.7rem;
-    color: #444444;
-    background-color: #fafafa;
-    border: 1px solid #cccccc;
+    color: #2f5e41;  /* forest green text on a pale green pill */
+    background-color: #e6f0e8;
+    border: 1px solid #8fb59b;
     border-radius: 3px;
     cursor: pointer;
     user-select: none;
 }
 .segment-toggle:hover {
-    background-color: #eeeeee;
+    background-color: #d5e6d9;
 }
 .modal-content {
     border-width: 0px;
