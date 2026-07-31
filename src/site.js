@@ -886,7 +886,7 @@ function addEvents() {
             (feature) => feature.properties[config.linkField]
         );
 
-        setHighlightFilter(links);
+        setHighlightFilter(links, segmentHighlightIds(clickedFeatures));
 
         // The modal should describe only the segments under the click, not every segment
         // in the network sharing the linkField. Match by projectIdField (segment-level id);
@@ -1506,7 +1506,8 @@ function geoJSON2Table() {
 /*
   Modals
 */
-function setHighlightFilter(links) {
+/* segmentIds (optional) narrows the highlight to specific segments of the linked networks */
+function setHighlightFilter(links, segmentIds) {
     if (! Array.isArray(links)) links = [links];
     let filter;
     let highlightExpression = [
@@ -1520,12 +1521,28 @@ function setHighlightFilter(links) {
     } else {
         filter = ['all', highlightExpression];
     }
+    if (segmentIds) {
+        filter.push(['in', ['get', config.projectIdField], ['literal', segmentIds]]);
+    }
     config.layers.forEach(layer => {
         filter.push(['==', ['geometry-type'],
             map.getLayer(layer).type === 'line' ? 'LineString' : 'Point'
         ]);
         map.setFilter(layer + '-highlighted', filter);
     });
+}
+
+/* Segment ids for scoping the highlight to the given features;
+   null means "can't identify every segment, highlight the whole network instead" */
+function segmentHighlightIds(features) {
+    if (!config.projectIdField) return null;
+    const ids = features
+        .map((feature) => feature.properties[config.projectIdField])
+        .filter((id, index, array) => id != null && id !== '' && array.indexOf(id) === index);
+    return features.every((feature) => {
+        const id = feature.properties[config.projectIdField];
+        return id != null && id !== '';
+    }) ? ids : null;
 }
 
 /* Creates the modal that pops up after clicking an asset. Shows only the clicked
@@ -1887,7 +1904,8 @@ function renderDetails(features, showingAll) {
         '</div>'
     );
 
-    setHighlightFilter(primaryFeature.properties[config.linkField]);
+    // highlight exactly what the modal shows: the clicked segments, or the whole network on "show all"
+    setHighlightFilter(config.detailLink, showingAll ? null : segmentHighlightIds(features));
 }
 
 function enableModal() {
@@ -1901,34 +1919,58 @@ function enableModal() {
     $(document).on('keydown', (event) => {
         if (event.key === 'Escape') config.modal.hide();
     });
+    // any click outside the dialog dismisses the modal. clicks inside #map are left to the
+    // map's own click handler (swap to the clicked pipeline, or hide when nothing is there),
+    // so the zoom controls and panning don't dismiss it either
+    document.addEventListener('click', (event) => {
+        if (config.modalDragging) return;  // the click that ends a modal drag shouldn't dismiss
+        if (event.target.closest('#modal .modal-dialog, #map')) return;
+        config.modal.hide();
+    });
     enableModalDrag();
 }
 
-/* Drag the detail modal around by its handle bar, to uncover the highlighted routes behind it */
+/* Drag the detail modal by grabbing anywhere on it that isn't a link or button,
+   to uncover the highlighted routes behind it */
 function enableModalDrag() {
     const dialog = document.querySelector('#modal .modal-dialog');
-    const handle = document.getElementById('modal-drag-handle');
+    const content = document.querySelector('#modal .modal-content');
     let baseX = 0;
     let baseY = 0;
-    handle.addEventListener('pointerdown', (event) => {
-        if (event.target.closest('.btn-close')) return;  // keep the close button a plain click
-        event.preventDefault();
-        handle.setPointerCapture(event.pointerId);
+    content.addEventListener('pointerdown', (event) => {
+        // interactive elements keep their clicks; everywhere else starts a (potential) drag
+        if (event.target.closest('a, button, input, select, textarea, li, [onclick]')) return;
+        event.preventDefault();  // no text selection or image ghost-drag while moving the modal
         const startX = event.clientX;
         const startY = event.clientY;
+        let dragging = false;
         const onMove = (moveEvent) => {
-            dialog.style.transform = 'translate(' + (baseX + moveEvent.clientX - startX) + 'px, ' + (baseY + moveEvent.clientY - startY) + 'px)';
+            const dx = moveEvent.clientX - startX;
+            const dy = moveEvent.clientY - startY;
+            if (!dragging) {
+                if (Math.abs(dx) < 4 && Math.abs(dy) < 4) return;  // ignore jitter within a click
+                dragging = true;
+                config.modalDragging = true;
+                content.setPointerCapture(event.pointerId);
+                content.classList.add('modal-dragging');
+            }
+            dialog.style.transform = 'translate(' + (baseX + dx) + 'px, ' + (baseY + dy) + 'px)';
         };
         const onEnd = (endEvent) => {
-            baseX += endEvent.clientX - startX;
-            baseY += endEvent.clientY - startY;
-            handle.removeEventListener('pointermove', onMove);
-            handle.removeEventListener('pointerup', onEnd);
-            handle.removeEventListener('pointercancel', onEnd);
+            if (dragging) {
+                baseX += endEvent.clientX - startX;
+                baseY += endEvent.clientY - startY;
+                content.classList.remove('modal-dragging');
+                // the browser fires a click right after pointerup; keep it from dismissing the modal
+                setTimeout(() => { config.modalDragging = false; }, 0);
+            }
+            content.removeEventListener('pointermove', onMove);
+            content.removeEventListener('pointerup', onEnd);
+            content.removeEventListener('pointercancel', onEnd);
         };
-        handle.addEventListener('pointermove', onMove);
-        handle.addEventListener('pointerup', onEnd);
-        handle.addEventListener('pointercancel', onEnd);
+        content.addEventListener('pointermove', onMove);
+        content.addEventListener('pointerup', onEnd);
+        content.addEventListener('pointercancel', onEnd);
     });
     $('#modal').on('hidden.bs.modal', () => {  // reopen centered next time
         baseX = 0;
