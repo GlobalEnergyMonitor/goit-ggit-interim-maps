@@ -18,7 +18,7 @@ body {
     z-index: 3;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;  /* every card the same width, so a popping-in button never resizes the stack */
     gap: 8px;
     font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif;
     pointer-events: none;
@@ -57,6 +57,7 @@ body {
     color: #c74a48;  /* site_colors 'red' (operating) */
     cursor: pointer;
     pointer-events: auto;
+    white-space: nowrap;
 }
 #download-routes:hover:enabled, #download-filtered-routes:hover:enabled {
     background-color: #f5f5f5;

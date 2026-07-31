@@ -46,6 +46,7 @@ const map = new mapboxgl.Map({
 });
 
 map.addControl(new mapboxgl.NavigationControl({ showCompass: false }));
+map.boxZoom.disable();  // shift+click toggles route selection; boxZoom would swallow it
 const popup = new mapboxgl.Popup({
     closeButton: false,
     closeOnClick: false,
@@ -178,6 +179,22 @@ function suffixedFilename(name, suffix) {
     return dot > 0 ? name.slice(0, dot) + '_' + suffix + name.slice(dot) : name + '_' + suffix;
 }
 
+/* Toggle the clicked pipelines in/out of the persistent modifier-click selection */
+function toggleRouteSelection(selectedFeatures) {
+    if (selectedFeatures.length === 0) return;
+    selectedFeatures.forEach((feature) => {
+        const link = feature.properties[config.linkField];
+        if (config.selectedRoutes.has(link)) {
+            config.selectedRoutes.delete(link);
+        } else {
+            config.selectedRoutes.add(link);
+        }
+    });
+    if (config.modal) config.modal.hide();
+    setHighlightFilter(config.selectedRoutes.size > 0 ? [...config.selectedRoutes] : '');
+    updateFilteredDownloadButton();
+}
+
 /* Show/hide + label the secondary download button for the current filter/selection state */
 function updateFilteredDownloadButton() {
     if (!config.filteredDownloadURL) return;  // map isn't geojson-backed
@@ -186,7 +203,7 @@ function updateFilteredDownloadButton() {
     const filtered = config.geojson_filtered && config.geojson.features
         && config.geojson_filtered.features.length < config.geojson.features.length;
     if (selectedCount > 0) {
-        button.textContent = 'Download ' + selectedCount + ' selected route' + (selectedCount === 1 ? '' : 's');
+        button.textContent = 'Download selected routes';
         button.hidden = false;
     } else if (filtered) {
         button.textContent = 'Download filtered routes';
@@ -939,18 +956,7 @@ function addEvents() {
         // ctrl/cmd/shift-click toggles routes in a persistent selection for the
         // selected-routes download, instead of opening the details modal
         if (e.originalEvent.ctrlKey || e.originalEvent.metaKey || e.originalEvent.shiftKey) {
-            if (selectedFeatures.length === 0) return;
-            selectedFeatures.forEach((feature) => {
-                const link = feature.properties[config.linkField];
-                if (config.selectedRoutes.has(link)) {
-                    config.selectedRoutes.delete(link);
-                } else {
-                    config.selectedRoutes.add(link);
-                }
-            });
-            if (config.modal) config.modal.hide();
-            setHighlightFilter(config.selectedRoutes.size > 0 ? [...config.selectedRoutes] : '');
-            updateFilteredDownloadButton();
+            toggleRouteSelection(selectedFeatures);
             return;
         }
 
@@ -1007,6 +1013,17 @@ function addEvents() {
         }
 
         config.modal.show();
+    });
+
+    // macOS delivers ctrl+click as a contextmenu event (never as click), and mapbox's
+    // drag-rotate also claims ctrl+left-drag, so ctrl-based selection needs this path;
+    // a plain right-click still gets the browser menu
+    map.on('contextmenu', (e) => {
+        if (!e.originalEvent.ctrlKey) return;
+        e.originalEvent.preventDefault();
+        const bbox = [ [e.point.x - config.hitArea, e.point.y - config.hitArea], [e.point.x + config.hitArea, e.point.y + config.hitArea] ];
+        const clickedFeatures = map.queryRenderedFeatures(bbox, {layers: config.layers});
+        toggleRouteSelection(getUniqueFeatures(clickedFeatures, config.linkField));
     });
 
     /* Hover popup. Mapbox's layer-scoped mouseenter/mouseleave query a single pixel, which
