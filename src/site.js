@@ -141,10 +141,11 @@ function setupRouteDownload() {
     setupFilteredRouteDownload(url);
 }
 
-/* Secondary download buttons: hidden until the user filters the data and/or
-   modifier-clicks routes on the map, then each offers its own subset (both can show at
-   once). Unlike the full download (the exact source file), these serialize the
-   in-memory features. updateFilteredDownloadButton() keeps their visibility current. */
+/* Secondary download buttons: hidden until the user filters the data and/or selects
+   routes on the map (a plain click selects what it highlights; ctrl/cmd/shift-click
+   builds a multi-selection), then each offers its own subset (both can show at once).
+   Unlike the full download (the exact source file), these serialize the in-memory
+   features. updateFilteredDownloadButton() keeps their visibility current. */
 function setupFilteredRouteDownload(url) {
     config.filteredDownloadURL = url;  // doubles as the flag that the map is geojson-backed
 
@@ -169,8 +170,8 @@ function setupFilteredRouteDownload(url) {
     });
 }
 
-/* All features of the modifier-click-selected pipelines, from the full dataset: an
-   explicitly selected route downloads whole even if the legend filters would hide parts of it */
+/* All features of the selected (clicked or modifier-clicked) pipelines, from the full
+   dataset: a selected route downloads whole even if the legend filters would hide parts of it */
 function selectedRouteFeatures() {
     if (!config.selectedRoutes || config.selectedRoutes.size === 0) return [];
     return config.geojson.features.filter(
@@ -956,12 +957,8 @@ function addEvents() {
             return;
         }
 
-        // a plain click replaces any modifier-click selection
-        if (config.selectedRoutes.size > 0) {
-            config.selectedRoutes.clear();
-            updateFilteredDownloadButton();
-        }
-
+        // a plain click replaces any previous selection with what it highlights
+        // (setHighlightFilter keeps config.selectedRoutes in sync)
         if (selectedFeatures.length === 0) {
             // no backdrop anymore, so an empty-map click stands in for the old outside-click dismissal
             if (config.modal) config.modal.hide();
@@ -1624,6 +1621,12 @@ function geoJSON2Table() {
 /* segmentIds (optional) narrows the highlight to specific segments of the linked networks */
 function setHighlightFilter(links, segmentIds) {
     if (! Array.isArray(links)) links = [links];
+    // the highlighted routes ARE the selection: a plain click selects what it highlights,
+    // so the selected-routes download tracks every way a highlight can change
+    if (config.selectedRoutes) {
+        config.selectedRoutes = new Set(links.filter((link) => link != null && link !== ''));
+        updateFilteredDownloadButton();
+    }
     let filter;
     let highlightExpression = [
         'in',
@@ -2029,7 +2032,7 @@ function enableModal() {
     // focus trap from fighting map interaction, so escape is handled here instead.
     config.modal = new bootstrap.Modal($('#modal'), {backdrop: false, focus: false});
     $('#modal').on('hidden.bs.modal', function (event) {
-        // keep any modifier-click selection highlighted; clear otherwise
+        // keep the selected routes highlighted; an empty-map click is what clears them
         setHighlightFilter(config.selectedRoutes && config.selectedRoutes.size > 0 ? [...config.selectedRoutes] : '');
     });
     $(document).on('keydown', (event) => {
