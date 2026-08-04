@@ -67,13 +67,13 @@ var config = {
     color_association: {
         field: 'Status',
         values: {
-            'operating': 'red',
-            'construction': 'blue',
-            'proposed': 'blue',
-            'mothballed': 'green',
-            'cancelled': 'green',
+            'operating': 'dark grey',
+            'construction': 'red',
+            'proposed': 'orange',
+            'shelved': 'yellow',
+            'mothballed': 'grey',
+            'cancelled': 'grey',
             'retired': 'grey',
-            'shelved': 'grey',
             'idle': 'grey',
             //'': 'black',
         },
@@ -82,8 +82,8 @@ var config = {
     filters: [
         {
             field: 'Status',
-            values: ['operating', 'proposed', 'construction', 'mothballed', 'cancelled', 'retired', 'shelved', 'idle',], //''],
-            values_labels: ['Operating', 'Proposed', 'Construction', 'Mothballed', 'Cancelled', 'Retired', 'Shelved', 'Idle',], //'Unknown status'],
+            values: ['operating', 'construction', 'proposed', 'shelved', 'mothballed', 'cancelled', 'retired', 'idle',], //''],
+            values_labels: ['Operating', 'Construction', 'Proposed', 'Shelved', 'Mothballed', 'Cancelled', 'Retired', 'Idle',], //'Unknown status'],
         },
         {
             field: 'Fuel',

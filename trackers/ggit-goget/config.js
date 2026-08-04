@@ -83,35 +83,35 @@ var config = {
     capacityLabelField: 'CapacityUnits',
 
     /* union of the GGIT and GOGET status vocabularies; the color language matches
-       the two single-tracker maps (red operating, blue future, green stopped-by-
-       choice, grey inactive/other) */
+       the two single-tracker maps (dark grey operating, red construction, orange
+       proposed, yellow shelved, grey everything else) */
     color_association: {
         field: 'Status',
         values: {
-            'operating': 'red',
-            'construction': 'blue',
-            'proposed': 'blue',
-            'in-development': 'blue',
-            'discovered': 'blue',
-            'exploration': 'blue',
-            'mothballed': 'green',
-            'cancelled': 'green',
-            'decommissioning': 'green',
+            'operating': 'dark grey',
+            'construction': 'red',
+            'proposed': 'orange',
+            'shelved': 'yellow',
+            'in-development': 'grey',
+            'discovered': 'grey',
+            'exploration': 'grey',
+            'mothballed': 'grey',
+            'cancelled': 'grey',
+            'decommissioning': 'grey',
             'retired': 'grey',
-            'shelved': 'grey',
             'idle': 'grey',
             'mixed status': 'grey',
             'abandoned': 'grey',
             'underground gas storage': 'grey',
-            'not found': 'black',
+            'not found': 'grey',
         },
     },
 
     filters: [
         {
             field: 'Status',
-            values: ['operating', 'proposed', 'construction', 'in-development', 'discovered', 'exploration', 'mothballed', 'cancelled', 'decommissioning', 'retired', 'shelved', 'idle', 'mixed status', 'abandoned', 'underground gas storage', 'not found'],
-            values_labels: ['Operating', 'Proposed', 'Construction', 'In development', 'Discovered', 'Exploration', 'Mothballed', 'Cancelled', 'Decommissioning', 'Retired', 'Shelved', 'Idle', 'Mixed status', 'Abandoned', 'Underground gas storage', 'Not found'],
+            values: ['operating', 'construction', 'proposed', 'shelved', 'mothballed', 'cancelled', 'retired', 'idle', 'in-development', 'discovered', 'exploration', 'decommissioning', 'mixed status', 'abandoned', 'underground gas storage', 'not found'],
+            values_labels: ['Operating', 'Construction', 'Proposed', 'Shelved', 'Mothballed', 'Cancelled', 'Retired', 'Idle', 'In development', 'Discovered', 'Exploration', 'Decommissioning', 'Mixed status', 'Abandoned', 'Underground gas storage', 'Not found'],
         },
     ],
 

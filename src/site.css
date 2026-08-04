@@ -34,11 +34,11 @@ body {
     font-size: 14px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: #c74a48;  /* site_colors 'red' (operating) */
+    color: #c74a48;  /* site_colors 'red' (UI accent) */
 }
 #interim-banner-updated {
     font-size: 11px;
-    color: #c74a48;  /* site_colors 'red' (operating) */
+    color: #c74a48;  /* site_colors 'red' (UI accent) */
 }
 /* same card and type as the banner above it; the stack is click-through, so
    re-enable pointer events here */
@@ -54,7 +54,7 @@ body {
     text-transform: uppercase;
     letter-spacing: 0.5px;
     text-align: left;
-    color: #c74a48;  /* site_colors 'red' (operating) */
+    color: #c74a48;  /* site_colors 'red' (UI accent) */
     cursor: pointer;
     pointer-events: auto;
     white-space: nowrap;
@@ -453,11 +453,25 @@ table.dataTable td {
 }
 
 .navbar {
-    opacity: 0.90; 
+    opacity: 0.90;
     filter:(opacity=90);
     padding: 2px;
     overflow: visible;
     z-index: 2;
+}
+
+/* tighten the bottom bar: trim the vertical margin/padding around the controls
+   (Lux gives nav links 0.5rem padding-y and each control an mb-2 margin) */
+.navbar.fixed-bottom .navbar-nav,
+.navbar.fixed-bottom #search-form,
+.navbar.fixed-bottom .btn {
+    margin-top: 0 !important;
+    margin-bottom: 0.15rem !important;
+}
+.navbar.fixed-bottom .nav-link,
+.navbar.fixed-bottom .btn {
+    padding-top: 0.15rem;
+    padding-bottom: 0.15rem;
 }
 
 #country {
