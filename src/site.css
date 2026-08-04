@@ -371,7 +371,7 @@ table.dataTable td {
 #search-form {
     position: relative;
     top: 3px;
-    max-height: 74px;
+    height: 47px;  /* match the region/search-by dropups' rendered height */
 }
 
 /* committed search terms, shown as removable cards stacked above the search box */
@@ -472,6 +472,20 @@ table.dataTable td {
 .navbar.fixed-bottom .btn {
     padding-top: 0.15rem;
     padding-bottom: 0.15rem;
+}
+/* match the search box and toggle buttons to the dropups' tightened height:
+   Lux gives .form-control 0.75rem padding-y, and the toggles' icons carry
+   height="50" attributes that inflated the buttons */
+.navbar.fixed-bottom #search-text {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+}
+.navbar.fixed-bottom .btn {
+    display: inline-flex;
+    align-items: center;
+}
+.navbar.fixed-bottom .btn img {
+    height: 30px;
 }
 
 #country {
@@ -653,22 +667,12 @@ table.dataTable td {
     
 }
 
-#table-toggle {
-    position: relative; 
-    top: 0.5px;
-    height: 74px;
-}
-
-#basemap-toggle {
-    position: relative;
-    top: 0.5px;
-    height: 74px;
-}
-
+#table-toggle,
+#basemap-toggle,
 #projection-toggle {
     position: relative;
-    top: 0.5px;
-    height: 74px;
+    top: 3px;
+    height: 47px;  /* match the region/search-by dropups' rendered height */
 }
 
 /* #table-toggle-label {

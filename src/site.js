@@ -720,6 +720,18 @@ function addPolygonLayers() {
 function addLineLayers() {
     console.log('adding Line layers');  // TODO DELETE
     let paint = { ...config.linePaint };
+    let layout = { ...(config.lineLayout || {}) };
+
+    /* draw order within the line layer: config.lineSortOrder lists statuses
+       bottom to top; unlisted statuses render below all listed ones */
+    if ('lineSortOrder' in config && 'color_association' in config) {
+        layout['line-sort-key'] = [
+            'match',
+            ['get', config.color_association.field],
+            ...config.lineSortOrder.flatMap((status, i) => [status, i + 1]),
+            0
+        ];
+    }
 
     if ('color_association' in config) {
         paint['line-color'] = [
@@ -761,7 +773,7 @@ function addLineLayers() {
         'source': 'assets-source',
         'filter': ['in', ['geometry-type'], ['literal', ['LineString', 'MultiLineString']]],
         ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
-        'layout': config.lineLayout,
+        'layout': layout,
         'paint': paint
     });
     config.layers.push('assets-lines');
@@ -777,7 +789,7 @@ function addLineLayers() {
             ['in', ['get', config.linkField], '']
         ],
         ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
-        'layout': config.lineLayout,
+        'layout': layout,
         'paint': highlightPaint,
     });
 }

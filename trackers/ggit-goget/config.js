@@ -107,6 +107,10 @@ var config = {
         },
     },
 
+    /* draw order within the line layer, bottom to top; unlisted (grey) statuses
+       render below all of these */
+    lineSortOrder: ['operating', 'shelved', 'proposed', 'construction'],
+
     filters: [
         {
             field: 'Status',
