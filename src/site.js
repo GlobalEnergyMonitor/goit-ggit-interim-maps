@@ -82,22 +82,28 @@ let dataTimestamp = null;
    last commit touching the file (unauthenticated: 60 requests/hour per IP). On any failure
    the banner just shows no timestamp. */
 async function showDataTimestamp() {
-    const match = (config.geojson ?? '').match(/^https:\/\/raw\.githubusercontent\.com\/([^/]+)\/([^/]+)\/([^/]+)\/(.+)$/);
-    if (!match) return;
-    const [, owner, repo, branch, path] = match;
-    try {
-        const response = await fetch('https://api.github.com/repos/' + owner + '/' + repo + '/commits?sha=' + encodeURIComponent(branch) + '&path=' + encodeURIComponent(path) + '&per_page=1');
-        if (!response.ok) return;
-        const commits = await response.json();
-        const date = new Date(commits[0]?.commit?.committer?.date);
-        if (isNaN(date)) return;
-        dataTimestamp = date;
-        $('#interim-banner-updated').text('data last updated ' + date.toLocaleString(undefined, {
-            year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short'
-        }));
-    } catch (e) {
-        // leave the banner without a timestamp
-    }
+    // multi-source maps show the newest source's commit time
+    const urls = [].concat(config.geojson ?? []);
+    const dates = await Promise.all(urls.map(async (url) => {
+        const match = (url ?? '').match(/^https:\/\/raw\.githubusercontent\.com\/([^/]+)\/([^/]+)\/([^/]+)\/(.+)$/);
+        if (!match) return null;
+        const [, owner, repo, branch, path] = match;
+        try {
+            const response = await fetch('https://api.github.com/repos/' + owner + '/' + repo + '/commits?sha=' + encodeURIComponent(branch) + '&path=' + encodeURIComponent(path) + '&per_page=1');
+            if (!response.ok) return null;
+            const commits = await response.json();
+            const date = new Date(commits[0]?.commit?.committer?.date);
+            return isNaN(date) ? null : date;
+        } catch (e) {
+            return null;
+        }
+    }));
+    const newest = dates.filter(Boolean).sort((a, b) => b - a)[0];
+    if (!newest) return;  // leave the banner without a timestamp
+    dataTimestamp = newest;
+    $('#interim-banner-updated').text('data last updated ' + newest.toLocaleString(undefined, {
+        year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short'
+    }));
 }
 
 /* Let researchers download the exact geojson the map is drawing - Single-use function.
@@ -107,8 +113,12 @@ async function showDataTimestamp() {
    the same URL, so this usually comes straight from the HTTP cache (max-age 300).
    Stays hidden for maps that aren't geojson-backed. */
 function setupRouteDownload() {
-    const url = config.geojson;
-    if (!url) return;
+    const urls = [].concat(config.geojson ?? []);
+    if (urls.length === 0) return;
+    // multi-source maps name downloads after the tracker folder, not one source file
+    const nameUrl = urls.length === 1
+        ? urls[0]
+        : (location.pathname.split('/').filter(Boolean).pop() || 'combined') + '_map_latest.geojson';
 
     const button = document.getElementById('download-routes');
     const label = button.textContent;
@@ -118,12 +128,20 @@ function setupRouteDownload() {
         button.disabled = true;
         button.textContent = 'Preparing download…';
         try {
-            const response = await fetch(url);
-            if (!response.ok) throw new Error('geojson fetch failed: ' + response.status);
-            const objectUrl = URL.createObjectURL(await response.blob());
+            let blob;
+            if (urls.length === 1) {
+                const response = await fetch(urls[0]);
+                if (!response.ok) throw new Error('geojson fetch failed: ' + response.status);
+                blob = await response.blob();
+            } else {
+                // serialize the merged in-memory collection instead of re-fetching the sources
+                if (!config.geojson.features) throw new Error('data still loading');
+                blob = new Blob([JSON.stringify(config.geojson)], {type: 'application/geo+json'});
+            }
+            const objectUrl = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = objectUrl;
-            link.download = stampedFilename(url);
+            link.download = stampedFilename(nameUrl);
             document.body.appendChild(link);
             link.click();
             link.remove();
@@ -138,7 +156,7 @@ function setupRouteDownload() {
         }
     });
 
-    setupFilteredRouteDownload(url);
+    setupFilteredRouteDownload(nameUrl);
 }
 
 /* Secondary download buttons: hidden until the user filters the data and/or selects
@@ -244,13 +262,21 @@ async function loadData() {
         addGeoJSON(data);
 
     } else if ('geojson' in config) {
-        const response = await fetch(config.geojson);
-        if (!response.ok) {
-            throw new Error('Failed to load geojson');
-        }
-        console.log('awaiting data pull');  // TODO DELETE
-        data = await response.json();
+        // config.geojson may be one URL or an array of URLs (combined maps like
+        // ggit-goget); sources are fetched in parallel and merged into one collection
+        const urls = [].concat(config.geojson);
+        const collections = await Promise.all(urls.map(async (url) => {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error('Failed to load geojson: ' + url);
+            }
+            return response.json();
+        }));
         console.log('data pulled successfully');  // TODO DELETE
+        data = collections.length === 1 ? collections[0] : {
+            'type': 'FeatureCollection',
+            'features': collections.flatMap((collection) => collection.features)
+        };
         addGeoJSON(data);
 
     } else if ('json' in config) {

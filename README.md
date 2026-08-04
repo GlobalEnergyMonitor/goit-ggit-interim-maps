@@ -14,6 +14,7 @@ Deployed to GitHub Pages on every push to `main`:
 
 - https://globalenergymonitor.github.io/goit-ggit-interim-maps/trackers/goit/
 - https://globalenergymonitor.github.io/goit-ggit-interim-maps/trackers/ggit/
+- https://globalenergymonitor.github.io/goit-ggit-interim-maps/trackers/ggit-goget/
 
 ## Updating the data a map shows
 
@@ -34,6 +35,16 @@ files use the data-team handoff schema (`PipelineName`, `Status`, `Wiki`,
 for data refreshes (raw.githubusercontent.com caches for ≤5 min and sends
 CORS headers). The GGIT map shows gas pipelines only — LNG terminals will get
 their own map separately.
+
+**The ggit-goget map** overlays GOGET oil & gas extraction areas (points) on
+the GGIT pipelines. Its `geojson:` key is an *array* of URLs (the shared shell
+merges multiple sources): the same auto-updating GGIT file, plus
+`trackers/ggit-goget/goget_map_latest.geojson` — a committed snapshot of the
+data team's GOGET map export (from
+`publicgemdata…/interim_maps/goget_map_*.geojson`, built from the GEM project
+database) with properties renamed to the handoff schema. To refresh GOGET
+data: update `SOURCE_URL` in `scripts/build_goget_map_data.py` if the data
+team published a newer export, run it, and commit the regenerated file.
 
 Data files larger than 100 MB cannot be committed to this repo (GitHub limit) —
 host those on DigitalOcean Spaces (needs CORS open, as `publicgemdata` already
