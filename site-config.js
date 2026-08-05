@@ -30,6 +30,9 @@ var site_config = {
         'black': '#000000',
     },
 
+    /* color for clicked/selected routes; keep distinct from every status color above */
+    highlightColor: '#FF00FF',
+
     /* define the column and associated values for color application */
     color_association: {
         field: 'status',
