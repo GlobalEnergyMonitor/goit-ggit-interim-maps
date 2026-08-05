@@ -472,7 +472,8 @@ function linkAssets() {
         config.capacityScaledField,
         config.projectIdField,  // shown in the hover popup
         config.segmentNameField,  // shown in the hover popup
-        config.aiRouteNote ? config.aiRouteNote.field : null  // AI-route flag shown in the hover popup
+        config.aiRouteNote ? config.aiRouteNote.field : null,  // AI-route flag shown in the hover popup
+        ...(config.hoverFields ?? []).map((hoverField) => hoverField.field)  // extra labeled rows in the hover popup
     ].filter((field) => field != null);
 
     Object.keys(grouped_assets).forEach((key) => {
@@ -1094,6 +1095,13 @@ function addEvents() {
             if (config.projectIdField && props[config.projectIdField]) {
                 entry += '<br/><span class="hover-popup-id">ProjectID: ' + props[config.projectIdField] + '</span>';
             }
+            // extra per-segment rows (config.hoverFields), skipped when the segment has no value
+            (config.hoverFields ?? []).forEach((hoverField) => {
+                const value = String(props[hoverField.field] ?? '').trim();
+                if (value !== '' && value !== '--') {
+                    entry += '<br/><span class="hover-popup-id">' + hoverField.label + ': ' + value + '</span>';
+                }
+            });
             if (config.aiRouteNote && String(props[config.aiRouteNote.field] ?? '').trim() === config.aiRouteNote.value) {
                 entry += '<br/><span class="ai-route-note">' + config.aiRouteNote.text + '</span>';
             }

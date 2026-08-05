@@ -57,6 +57,8 @@ var config = {
         'LengthKnownKm': {'display': 'join', 'label': ['Known length', 'Known lengths'], 'trailing-label': 'km'},
         'LengthEstimateKm': {'display': 'join', 'label': ['Estimated length', 'Estimated lengths'], 'trailing-label': 'km'},
         'ProjectID': {'display': 'join', 'label': ['ProjectID', 'ProjectIDs']},
+        'RouteAccuracy': {'display': 'join', 'label': ['Route accuracy', 'Route accuracies']},
+        'RouteCreator': {'display': 'join', 'label': ['Route creator', 'Route creators']},
 
         /* extraction-area (GOGET) fields */
         'DiscoveryYear': {'label': 'Discovery Year'},
@@ -124,6 +126,13 @@ var config = {
 
     linkField: 'Wiki', // not ProjectID because pieces of one pipeline have different ids
     geometries: ['LineString', 'Point'],
+
+    /* extra rows under the ProjectID line in the hover popup, per segment; the GOGET
+       extraction points carry neither field, so they simply don't get these rows */
+    hoverFields: [
+        {field: 'RouteAccuracy', label: 'Route accuracy'},
+        {field: 'RouteCreator', label: 'Route creator'},
+    ],
 
     /* red note in the hover popup and click modal when a segment's route was AI-created
        (RouteCreator is a map-only column appended by pipeline_exports.py in goit-ggit-data-ops) */

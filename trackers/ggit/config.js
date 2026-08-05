@@ -49,6 +49,8 @@ var config = {
         'LengthKnownKm': {'always-show': true, 'display': 'join', 'label': ['Known length', 'Known lengths'], 'trailing-label': 'km'},
         'LengthEstimateKm': {'always-show': true, 'display': 'join', 'label': ['Estimated length', 'Estimated lengths'], 'trailing-label': 'km'},
         'ProjectID': {'display': 'join', 'label': ['ProjectID', 'ProjectIDs']},
+        'RouteAccuracy': {'display': 'join', 'label': ['Route accuracy', 'Route accuracies']},
+        'RouteCreator': {'display': 'join', 'label': ['Route creator', 'Route creators']},
     },
 
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */
@@ -97,6 +99,13 @@ var config = {
 
     linkField: 'Wiki', // not ProjectID because pieces of one pipeline have different ids
     geometries: ['LineString'],
+
+    /* extra rows under the ProjectID line in the hover popup, per segment;
+       a segment with no value for a field just doesn't get that row */
+    hoverFields: [
+        {field: 'RouteAccuracy', label: 'Route accuracy'},
+        {field: 'RouteCreator', label: 'Route creator'},
+    ],
 
     /* red note in the hover popup and click modal when a segment's route was AI-created
        (RouteCreator is a map-only column appended by pipeline_exports.py in goit-ggit-data-ops) */

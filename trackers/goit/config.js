@@ -48,6 +48,9 @@ var config = {
         'LengthKnownKm': {'always-show': true, 'display': 'join', 'label': ['Known length', 'Known lengths'], 'trailing-label': 'km'},
         'LengthEstimateKm': {'always-show': true, 'display': 'join', 'label': ['Estimated length', 'Estimated lengths'], 'trailing-label': 'km'},
         'ProjectID': {'display': 'join', 'label': ['ProjectID', 'ProjectIDs']},
+        'RouteAccuracy': {'display': 'join', 'label': ['Route accuracy', 'Route accuracies']},
+        /* the Oil/NGL sheet has no RouteCreator column yet, so this row stays hidden until it does */
+        'RouteCreator': {'display': 'join', 'label': ['Route creator', 'Route creators']},
     },
 
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */
@@ -104,6 +107,13 @@ var config = {
 
     linkField: 'Wiki', // not ProjectID because pieces of one pipeline have different ids
     geometries: ['LineString'],
+
+    /* extra rows under the ProjectID line in the hover popup, per segment; RouteCreator
+       isn't in the Oil/NGL data yet, so only the accuracy row shows for now */
+    hoverFields: [
+        {field: 'RouteAccuracy', label: 'Route accuracy'},
+        {field: 'RouteCreator', label: 'Route creator'},
+    ],
 
     /* red note in the hover popup and click modal when a segment's route was AI-created.
        The Oil/NGL sheet has no RouteCreator column yet, so this is inert on GOIT until it does
