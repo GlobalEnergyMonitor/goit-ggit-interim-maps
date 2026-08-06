@@ -1726,11 +1726,29 @@ function setHighlightFilter(links, segmentIds) {
     if (segmentIds) {
         filter.push(['in', ['get', config.projectIdField], ['literal', segmentIds]]);
     }
-    config.layers.forEach(layer => {
-        filter.push(['==', ['geometry-type'],
-            map.getLayer(layer).type === 'line' ? 'LineString' : 'Point'
-        ]);
-        map.setFilter(layer + '-highlighted', filter);
+    /* Each highlight layer may only match the geometries its base layer draws. Two
+       things were wrong here: the geometry test was pushed onto the shared `filter`
+       array inside the loop, so every layer after the first got the previous layers'
+       tests too and could never match anything (on the combined map that meant a
+       clicked pipeline stopped highlighting once polygons put a layer ahead of the
+       lines); and polygons fell through to the Point branch, so a field outline never
+       highlighted at all. */
+    const highlightGeometries = {
+        'assets-polygons': ['Polygon', 'MultiPolygon'],
+        'assets-polygons-outline': ['Polygon', 'MultiPolygon'],
+        'assets-lines': ['LineString', 'MultiLineString'],
+        'assets-points': ['Point', 'MultiPoint'],
+        'assets-symbol': ['Point', 'MultiPoint'],
+    };
+    const highlightLayers = new Set(config.layers);
+    // the polygon selection outline is drawn even when the base outlines are off, so it
+    // isn't in config.layers and still needs its filter kept in step
+    if (highlightLayers.has('assets-polygons')) highlightLayers.add('assets-polygons-outline');
+
+    highlightLayers.forEach(layer => {
+        const geometries = highlightGeometries[layer] ?? ['Point', 'MultiPoint'];
+        map.setFilter(layer + '-highlighted',
+            [...filter, ['in', ['geometry-type'], ['literal', geometries]]]);
     });
 }
 
