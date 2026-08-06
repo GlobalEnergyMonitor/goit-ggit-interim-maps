@@ -121,7 +121,8 @@ function setupRouteDownload() {
         : (location.pathname.split('/').filter(Boolean).pop() || 'combined') + '_map_latest.geojson';
 
     const button = document.getElementById('download-routes');
-    const label = button.textContent;
+    button.textContent = 'Download ' + config.downloadNoun;
+    const label = button.textContent;  // restored after the "Preparing download…" state
     button.hidden = false;
 
     button.addEventListener('click', async () => {
@@ -180,10 +181,14 @@ function setupFilteredRouteDownload(url) {
         setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
     };
 
-    document.getElementById('download-filtered-routes').addEventListener('click', () => {
+    const filteredButton = document.getElementById('download-filtered-routes');
+    filteredButton.textContent = 'Download filtered ' + config.downloadNoun;
+    filteredButton.addEventListener('click', () => {
         downloadFeatures(config.geojson_filtered.features, 'filtered');
     });
-    document.getElementById('download-selected-routes').addEventListener('click', () => {
+    const selectedButton = document.getElementById('download-selected-routes');
+    selectedButton.textContent = 'Download selected ' + config.downloadNoun;
+    selectedButton.addEventListener('click', () => {
         downloadFeatures(selectedRouteFeatures(), 'selected');
     });
 }

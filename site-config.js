@@ -134,5 +134,9 @@ var site_config = {
     useDefaultCapacityInDetailView: true, // for gas finance where we used the unit capacity status functionality but 'Capacity' is hardcoded in for single unit projects and the value is not capacity but finance info here. displayDetails() in stie.js is where this is going to be used.
     showToolTip: false,  // set true in Europe map
 
+    /* what the download buttons call the thing they download ('Download routes',
+       'Download filtered routes', …); maps that aren't only pipeline routes override it */
+    downloadNoun: 'routes',
+
     polygonsAreIndependent: true,  // TODO determine which default value
 };

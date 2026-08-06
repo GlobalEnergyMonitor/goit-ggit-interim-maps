@@ -232,12 +232,29 @@ table.dataTable td {
     display: none;
 }
 #card-body {
-    min-width: 400px;
+    /* just a floor for narrow legends; the card sizes to its widest row (a status label,
+       normally) rather than to a fixed width */
+    min-width: 240px;
     width: fit-content;
     max-width: 90vw;
 }
 #summary, #capacity_summary_max, #capacity_summary_min {
     font-size: 9px;
+}
+/* Summary and capacity rows get the same plain-flex treatment as the legend rows below:
+   their bootstrap col-9/col-3 percentage grid sized the label to 75% of the card, so the
+   card had to grow to ~1.33x the label's own width — and the nowrap label overflowed its
+   column anyway. Natural-width label, count growing to stay right-aligned. */
+#card-body > .row {
+    flex-wrap: nowrap;
+}
+#card-body > .row > .col-9 {
+    flex: 0 0 auto;
+    width: auto;
+}
+#card-body > .row > .col-3 {
+    flex: 1 0 auto;
+    width: auto;
 }
 
 .mapboxgl-ctrl-bottom-right {

@@ -11,9 +11,14 @@ var config = {
         'https://raw.githubusercontent.com/GlobalEnergyMonitor/goit-ggit-interim-maps/main/trackers/ggit-goget/goget_map_latest.geojson',
     ],
 
-    /* Labels for describing the assets */
-    assetFullLabel: 'Pipelines + Extraction Areas',
+    /* Labels for describing the assets. assetFullLabel is deliberately short: it sets the
+       legend's summary line ('Total assets selected'), which was the widest thing in the
+       card and stretched the whole legend. The two legend sections name the trackers. */
+    assetFullLabel: 'assets',
     assetLabel: 'assets',
+
+    /* this map isn't only pipeline routes, so the download buttons say 'data' */
+    downloadNoun: 'data',
 
     /* configure the table view, selecting which columns to show, how to label them,
        and designated which column has the link */
