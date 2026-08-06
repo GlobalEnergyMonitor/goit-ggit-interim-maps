@@ -168,6 +168,10 @@ var config = {
        ring array never matches, so an outline is always alone in its group. */
     polygonsAreIndependent: true,
 
+    /* fills only: at world zoom a 2px outline on every field swamped the fill it was
+       tracing, and the outlines of neighbouring fields ran together */
+    showPolygonOutlines: false,
+
     /* extra rows under the ProjectID line in the hover popup, per segment; the GOGET
        extraction points carry neither field, so they simply don't get these rows */
     hoverFields: [
