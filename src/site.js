@@ -75,6 +75,7 @@ map.on('moveend', () => {
 
 showDataTimestamp();
 setupRouteDownload();
+trackInterimStackHeight();
 
 // build time of the data file, set by showDataTimestamp(); also used to stamp the
 // routes-download filename. Stays null if the lookup fails.
@@ -107,6 +108,27 @@ async function showDataTimestamp() {
     $('#interim-banner-updated').text('data last updated ' + newest.toLocaleString(undefined, {
         year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short'
     }));
+}
+
+/* Keep the legend clear of the banner/download-button stack above it - Single-use function.
+   The stack's height isn't knowable from CSS: buttons appear and disappear with the
+   filter/selection state, the timestamp line wraps at some widths, and the whole thing
+   renders taller under browser zoom or a minimum-font-size setting (which is why the
+   deployed map can look bigger than localhost off byte-identical CSS). Publish the stack's
+   rendered bottom edge, plus a gap, and .sidebar's max-height subtracts it. */
+function trackInterimStackHeight() {
+    const stack = document.getElementById('interim-banner-stack');
+    if (!stack) return;
+    const publish = () => {
+        // the stack is absolutely positioned in a page that doesn't scroll, so its
+        // viewport-relative bottom is exactly the space it claims from the top
+        const claimed = Math.ceil(stack.getBoundingClientRect().bottom) + 12;  // + breathing gap
+        document.documentElement.style.setProperty('--interim-stack-space', claimed + 'px');
+    };
+    publish();
+    if (window.ResizeObserver) new ResizeObserver(publish).observe(stack);
+    window.addEventListener('resize', publish);
+    document.fonts.ready.then(publish);  // the web font usually lands after first paint
 }
 
 /* Let researchers download the exact geojson the map is drawing - Single-use function.

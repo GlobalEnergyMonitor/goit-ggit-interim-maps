@@ -211,13 +211,19 @@ table.dataTable td {
 
 .sidebar {
     /* padding: 10px; */
+    --sidebar-bottom: 100px; /* trying 75*/
     position: fixed;
-    bottom: 100px; /* trying 75*/
+    bottom: var(--sidebar-bottom);
     left: 0px;
     z-index: 2;
-    overflow-y:scroll; 
+    overflow-y:scroll;
     overflow-x:scroll !important;
-    max-height: 80%;
+    /* the legend must never reach up into the interim banner / download-button stack: that
+       stack grows as buttons appear and grows again if the browser renders type larger than
+       we assumed (zoom, minimum-font-size), so trackInterimStackHeight() publishes its
+       rendered bottom edge as --interim-stack-space and the legend scrolls inside whatever
+       is left. 2rem covers the card's m-3 top and bottom margins. */
+    max-height: calc(100% - var(--interim-stack-space, 130px) - var(--sidebar-bottom) - 2rem);
     max-width: 35%;
     white-space: nowrap;
 }
@@ -287,7 +293,7 @@ table.dataTable td {
 
 @media screen and (max-width: 900px) {
     .sidebar {
-        bottom: 25px;
+        --sidebar-bottom: 25px;  /* max-height follows via the calc() above */
     }
     #expand-sidebar {
         display: block;
@@ -777,11 +783,14 @@ table.dataTable td {
 }
 
 
+/* the × sits in a full-height box inside the flex form, so its centered background image
+   lines up with the input's vertically centered placeholder/text */
 #reset-all-button {
     width: 2em;
-    height: 5em;
-    padding-left: 1em;
-    padding-right: .25em;
+    height: auto;
+    align-self: stretch;
+    padding: 0 .25em 0 1em;
+    background-position: center;
     color: #000;
     opacity: .5;
 }
