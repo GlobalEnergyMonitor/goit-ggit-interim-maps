@@ -37,6 +37,9 @@ let spinEnabled = false;
     Set up mapboxgljs instance, and trigger data load
 */ 
 mapboxgl.accessToken = config.accessToken;
+/* the flat projection to return to when the globe toggle is switched back; the toggle
+   mutates config.projection, so the configured value has to be captured up front */
+const flatProjection = config.projection === 'globe' ? 'mercator' : config.projection;
 const map = new mapboxgl.Map({
     container: 'map',
     style: config.mapStyle,
@@ -697,17 +700,19 @@ function addPolygonLayers() {
     });
     config.layers.push('assets-polygons');
 
-    // Add polygon outline layer
-    map.addLayer({
-        'id': 'assets-polygons-outline',
-        'type': 'line',
-        'source': 'assets-source',
-        'filter': ['in', ['geometry-type'], ['literal', ['Polygon', 'MultiPolygon']]],
-        ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
-        'layout': { ...(config.lineLayout || {}) },
-        'paint': outlinePaint
-    });
-    config.layers.push('assets-polygons-outline');
+    // Add polygon outline layer, unless the tracker draws its polygons as fills only
+    if (config.showPolygonOutlines) {
+        map.addLayer({
+            'id': 'assets-polygons-outline',
+            'type': 'line',
+            'source': 'assets-source',
+            'filter': ['in', ['geometry-type'], ['literal', ['Polygon', 'MultiPolygon']]],
+            ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
+            'layout': { ...(config.lineLayout || {}) },
+            'paint': outlinePaint
+        });
+        config.layers.push('assets-polygons-outline');
+    }
 
     // Add 2 highlight layers
     map.addLayer({
@@ -722,6 +727,8 @@ function addPolygonLayers() {
         'layout': { ...(config.polygonLayout || {}) },
         'paint': { ...paint, 'fill-color': config.highlightColor },
     });
+    // the selection outline is added either way: with outlines off, a highlighted
+    // polygon would otherwise only be a partly transparent fill
     map.addLayer({
         'id': 'assets-polygons-outline-highlighted',
         'type': 'line',
@@ -1185,8 +1192,8 @@ function addEvents() {
 
     $('#projection-toggle').on('click', function() {
         if (config.projection === 'globe') {
-            config.projection = 'naturalEarth';
-            map.setProjection('naturalEarth');
+            config.projection = flatProjection;
+            map.setProjection(flatProjection);
             map.setCenter(config.center);
             map.setZoom(determineZoom());
         } else {

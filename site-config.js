@@ -5,7 +5,7 @@ var site_config = {
     /* Mapbox Base Map Style */
     mapStyle: 'mapbox://styles/gemteam1/cls98k6sf02li01p2fqtu67lc',
     center: [0, 0],
-    projection: 'naturalEarth',
+    projection: 'mercator',
     baseMap: 'Streets',
     icons: [],
 
@@ -66,6 +66,8 @@ var site_config = {
         'line-opacity': 0.85,
         'line-width': 2
     },
+    /* set false to draw polygons as fills only; the magenta selection outline stays either way */
+    showPolygonOutlines: true,
     polygonLayout: {},
 
     /* radius associated with minimum/maximum value on map */
