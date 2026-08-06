@@ -209,3 +209,4 @@ cython_debug/
 
 # codegraph local index
 .codegraph/
+_standalone/

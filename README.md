@@ -16,6 +16,26 @@ Deployed to GitHub Pages on every push to `main`:
 - https://globalenergymonitor.github.io/goit-ggit-interim-maps/trackers/ggit/
 - https://globalenergymonitor.github.io/goit-ggit-interim-maps/trackers/ggit-goget/
 
+### When Pages can't deploy
+
+Two independent things can block a deploy, so check which one it is:
+
+- **The Actions deploy fails** (`Invalid actions OIDC token`, as in the
+  2026-08-06 Actions/Pages outage). The workaround is to serve a branch instead
+  of the Actions artifact — `node scripts/build-pages.mjs`, push `_dist/` to
+  `gh-pages`, and set the repo's Pages source to that branch
+  (`gh api -X PUT repos/.../pages` with `build_type=legacy`). The public URL
+  doesn't change. **Switch it back to `build_type=workflow` afterwards**, or
+  pushes to `main` will stop republishing the site.
+- **Pages itself is down**, in which case neither path deploys. To get a map in
+  front of someone anyway, `node scripts/build-standalone.mjs` writes a single
+  self-contained HTML file per tracker into `_standalone/` (untracked). The
+  Mapbox token is URL-restricted to `globalenergymonitor.github.io` and
+  `localhost`, so those files must be *served*, not opened over `file://` —
+  `cd _standalone && python3 -m http.server 8000`. Opening one directly loads
+  the assets but no basemap (403 on tiles). The same restriction rules out
+  hosting the maps anywhere else without editing the token's allowed URLs.
+
 ## Updating the data a map shows
 
 Each map loads its data at runtime from the `geojson:` URL at the top of
