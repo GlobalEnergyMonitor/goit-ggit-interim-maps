@@ -44,7 +44,12 @@ data team's GOGET map export (from
 `publicgemdata…/interim_maps/goget_map_*.geojson`, built from the GEM project
 database) with properties renamed to the handoff schema. To refresh GOGET
 data: update `SOURCE_URL` in `scripts/build_goget_map_data.py` if the data
-team published a newer export, run it, and commit the regenerated file.
+team published a newer export, run it, and commit the regenerated file. Its
+legend has one section per tracker, which works via the shell's `derivedFields`
+config: `Status` is copied into `PipelineStatus` on the lines and
+`ExtractionStatus` on the points, and a filter section ignores features that
+don't carry its field, so each section filters only its own tracker while the
+map paint still colors off the single shared `Status`.
 
 Data files larger than 100 MB cannot be committed to this repo (GitHub limit) —
 host those on DigitalOcean Spaces (needs CORS open, as `publicgemdata` already

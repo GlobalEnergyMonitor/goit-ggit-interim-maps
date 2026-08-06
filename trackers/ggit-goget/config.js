@@ -84,9 +84,11 @@ var config = {
     capacityDisplayField: 'Capacity',
     capacityLabelField: 'CapacityUnits',
 
-    /* union of the GGIT and GOGET status vocabularies; the color language matches
-       the two single-tracker maps (dark grey operating, red construction, orange
-       proposed, yellow shelved, grey everything else) */
+    /* union of the GGIT and GOGET status vocabularies. The two vocabularies only share
+       statuses that are grey anyway, so one map covers both: dark grey operating, then
+       red / orange / yellow for the pre-operating and post-operating stages of each
+       tracker (pipelines: construction, proposed, shelved; extraction areas:
+       in-development, discovered + exploration, decommissioning), grey everything else. */
     color_association: {
         field: 'Status',
         values: {
@@ -94,12 +96,12 @@ var config = {
             'construction': 'red',
             'proposed': 'orange',
             'shelved': 'yellow',
-            'in-development': 'grey',
-            'discovered': 'grey',
-            'exploration': 'grey',
+            'in-development': 'red',
+            'discovered': 'orange',
+            'exploration': 'orange',
+            'decommissioning': 'yellow',
             'mothballed': 'grey',
             'cancelled': 'grey',
-            'decommissioning': 'grey',
             'retired': 'grey',
             'idle': 'grey',
             'mixed status': 'grey',
@@ -113,11 +115,31 @@ var config = {
        render below all of these */
     lineSortOrder: ['operating', 'shelved', 'proposed', 'construction'],
 
+    /* One legend section per tracker. Both sections filter on Status, but a single field
+       can't carry two legend sections (duplicate ids, one shared checkbox list), so Status
+       is copied into a per-geometry field: lines (GGIT pipelines) get PipelineStatus,
+       points (GOGET extraction areas) get ExtractionStatus. Features only carry their own
+       source's field, and site.js skips a section for features that lack its field, so
+       each section filters just its own tracker. */
+    derivedFields: [
+        {field: 'PipelineStatus', from: 'Status', geometries: ['LineString', 'MultiLineString']},
+        {field: 'ExtractionStatus', from: 'Status', geometries: ['Point', 'MultiPoint', 'Polygon', 'MultiPolygon']},
+    ],
+
     filters: [
         {
-            field: 'Status',
-            values: ['operating', 'construction', 'proposed', 'shelved', 'mothballed', 'cancelled', 'retired', 'idle', 'in-development', 'discovered', 'exploration', 'decommissioning', 'mixed status', 'abandoned', 'underground gas storage', 'not found'],
-            values_labels: ['Operating', 'Construction', 'Proposed', 'Shelved', 'Mothballed', 'Cancelled', 'Retired', 'Idle', 'In development', 'Discovered', 'Exploration', 'Decommissioning', 'Mixed status', 'Abandoned', 'Underground gas storage', 'Not found'],
+            field: 'PipelineStatus',
+            label: 'Gas pipelines',
+            showColorDots: true,
+            values: ['operating', 'construction', 'proposed', 'shelved', 'mothballed', 'cancelled', 'retired', 'idle', 'mixed status'],
+            values_labels: ['Operating', 'Construction', 'Proposed', 'Shelved', 'Mothballed', 'Cancelled', 'Retired', 'Idle', 'Mixed status'],
+        },
+        {
+            field: 'ExtractionStatus',
+            label: 'Oil &amp; gas extraction areas',
+            showColorDots: true,
+            values: ['operating', 'in-development', 'discovered', 'exploration', 'decommissioning', 'mothballed', 'abandoned', 'cancelled', 'underground gas storage', 'not found'],
+            values_labels: ['Operating', 'In development', 'Discovered', 'Exploration', 'Decommissioning', 'Mothballed', 'Abandoned', 'Cancelled', 'Underground gas storage', 'Not found'],
         },
     ],
 

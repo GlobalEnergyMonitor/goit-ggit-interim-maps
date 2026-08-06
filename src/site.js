@@ -365,6 +365,20 @@ function addGeoJSON(jsonData) {
         }
     });
 
+    /* Copy a shared field into a per-geometry field (config.derivedFields). Combined maps
+       (ggit-goget) use this to give each source its own legend section: the lines get
+       PipelineStatus, the points get ExtractionStatus, both copied from Status. A feature
+       only ever carries the field for its own source, and a filter section skips features
+       that don't carry its field (see filterGeoJSON), so the sections filter independently
+       while the map paint keeps reading the single shared Status field. */
+    (config.derivedFields ?? []).forEach((rule) => {
+        config.geojson.features.forEach((feature) => {
+            if (rule.geometries.includes(feature.geometry?.type)) {
+                feature.properties[rule.field] = feature.properties[rule.from];
+            }
+        });
+    });
+
     // part to optimize csv/geojson maps
     if (!config.tiles) {
         map.addSource('assets-source', {
@@ -1235,7 +1249,7 @@ function makeDomSafe(value) {
 
 function buildLegendFilters() {
     // config.filterCount is tallied by linkAssets(), which always runs before this
-    config.filters.forEach(filter => {
+    config.filters.forEach((filter, filterIndex) => {
         const title = filter.label || filter.field.replaceAll("_", " ");
         const hasTooltip = !!filter.field_hover_text;
         const isPrimaryWithTooltip = filter.primary && hasTooltip;
@@ -1247,7 +1261,9 @@ function buildLegendFilters() {
                </div>`
             : '';
 
-        const hrHtml = (config.showToolTip && !isPrimaryWithTooltip) || (!config.showToolTip && config.color_association.field !== filter.field)
+        // a titled first section sits directly under the summary line, so it needs no divider
+        const hrHtml = (config.showToolTip && !isPrimaryWithTooltip)
+            || (!config.showToolTip && config.color_association.field !== filter.field && filterIndex > 0)
             ? '<hr />'
             : '';
 
@@ -1277,7 +1293,9 @@ function buildLegendFilters() {
             let check = `<div class="row filter-row" data-checkid="${(check_id).replace('/','\\/')}">`;
             check += '<div class="col-1 checkmark" id="' + check_id + '-checkmark"></div>';
             check += `<div class="col-8"><input type="checkbox" checked class="form-check-input d-none" id="${check_id}">`;
-            check += (config.color_association.field === filter.field ? '<span class="legend-dot" style="background-color:' + config.color_association.values[ filter.values[i] ] + '"></span>' : "");
+            // `showColorDots` opts a section in when it filters on a field derived from the
+            // color field (combined maps), so its values still resolve in color_association
+            check += (config.color_association.field === filter.field || filter.showColorDots ? '<span class="legend-dot" style="background-color:' + config.color_association.values[ filter.values[i] ] + '"></span>' : "");
             check += `<span id='${check_id}-label'>` + ('values_labels' in filter ? filter.values_labels[i] : filter.values[i].replaceAll("_", " ")) + '</span></div>';
             check += '<div class="col-3 text-end" style="text-align: right;" id="' + check_id + '-count">' + config.filterCount[filter.field][makeDomSafe(filter.values[i])] + '</div></div>';
             $('#filter-form').append(check);
@@ -1455,7 +1473,11 @@ function filterTiles() {
     }
 
     for (let field in filterStatus) {
-        config.filterExpression.push(['in', ['get', field], ['literal', filterStatus[field]]]);
+        // features that don't carry the field are untouched by that section, matching filterGeoJSON
+        config.filterExpression.push(['any',
+            ['!', ['has', field]],
+            ['in', ['get', field], ['literal', filterStatus[field]]]
+        ]);
     }
     if (config.filterExpression.length === 0) {
         config.filterExpression = null;
@@ -1526,6 +1548,10 @@ function filterGeoJSON() {
     config.geojson.features.forEach(feature => {  // for each unit in the original geojson
         let include = true;
         for (let field in filterStatus) {  // for pre-defined filters (left side)
+            // a section only applies to features that carry its field: on combined maps the
+            // pipeline and extraction sections key on their own derived status field, and
+            // features from the other source must pass through untouched
+            if (!(field in feature.properties)) continue;
             if (!filterStatus[field].includes(makeDomSafe(feature.properties[field]))) include = false;
         }
         // filter by text search bar
