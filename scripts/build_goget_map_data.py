@@ -14,6 +14,9 @@ https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/interim_maps/
 
     python3 scripts/build_goget_map_data.py
 
+Run this AFTER build_goget_areas.py, whose outlines decide which centroids get
+dropped (see outlined_project_ids).
+
 Commit and push the regenerated goget_map_latest.geojson; the ggit-goget map
 loads it from this repo's raw.githubusercontent.com URL.
 """
@@ -24,6 +27,7 @@ from pathlib import Path
 
 SOURCE_URL = 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/interim_maps/goget_map_2026-03.geojson'
 OUT_PATH = Path(__file__).resolve().parent.parent / 'trackers' / 'ggit-goget' / 'goget_map_latest.geojson'
+AREAS_PATH = OUT_PATH.parent / 'goget_areas_latest.geojson'
 
 # million boe/y -> boe/d, so CapacityBOEd means the same thing it does on the
 # pipeline features (circle scaling only compares points to points, but keep
@@ -75,25 +79,51 @@ def transform(props):
     }
 
 
+def outlined_project_ids():
+    """ProjectIDs that already have a field outline on the map.
+
+    An extraction area should be one asset, so where build_goget_areas.py
+    produced an outline the centroid is dropped. Keeping both would count those
+    fields twice in the legend and the 'total assets' line: the shell groups
+    features by link field *plus* coordinates, and a polygon's coordinates are a
+    ring array, so an outline and its own centroid never collapse into one
+    asset. The outlines carry the centroid's production, capacity and parent, so
+    dropping the point loses nothing.
+    """
+    if not AREAS_PATH.exists():
+        print(f'{AREAS_PATH.name} not found — keeping every centroid')
+        return set()
+    data = json.loads(AREAS_PATH.read_text())
+    ids = {f['properties'].get('ProjectID') for f in data['features']}
+    return ids - {'', None}
+
+
 def main():
+    outlined = outlined_project_ids()
     print(f'downloading {SOURCE_URL}')
     with urllib.request.urlopen(SOURCE_URL) as response:
         data = json.load(response)
 
     features = []
+    dropped = 0
     for feature in data['features']:
         if not feature.get('geometry'):
+            continue
+        props = transform(feature['properties'])
+        if props['ProjectID'] in outlined:
+            dropped += 1
             continue
         features.append({
             'type': 'Feature',
             'geometry': feature['geometry'],
-            'properties': transform(feature['properties']),
+            'properties': props,
         })
 
     out = {'type': 'FeatureCollection', 'features': features}
     OUT_PATH.write_text(json.dumps(out, separators=(',', ':'), ensure_ascii=False))
     size_mb = OUT_PATH.stat().st_size / 1e6
     print(f'wrote {OUT_PATH.name}: {len(features)} features, {size_mb:.1f} MB')
+    print(f'dropped {dropped} centroids that have a field outline instead')
 
 
 if __name__ == '__main__':

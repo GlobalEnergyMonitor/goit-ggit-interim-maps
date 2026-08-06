@@ -1,13 +1,19 @@
 var config = {
-    /* Combined map: GGIT gas pipelines (lines) + GOGET oil & gas extraction areas (points).
-       Both sources use the handoff-schema property names, so one config drives both:
+    /* Combined map: GGIT gas pipelines (lines) + GOGET oil & gas extraction areas
+       (field-outline polygons, plus centroid points). All three sources use the
+       handoff-schema property names, so one config drives them together:
        - the GGIT file is the same auto-built one the ggit map uses (rebuilt by
          goit-ggit-data-ops whenever pipeline routes or the sheet change);
-       - the GOGET file is a snapshot of the data team's GOGET map export with
-         properties renamed to the handoff schema — rebuild it with
-         scripts/build_goget_map_data.py and push to refresh. */
+       - goget_map_latest.geojson is a snapshot of the data team's GOGET map export
+         with properties renamed to the handoff schema — rebuild it with
+         scripts/build_goget_map_data.py;
+       - goget_areas_latest.geojson is the field outlines, read straight from the
+         GEM project database (project_geospatial.wkt) by
+         scripts/build_goget_areas.py — fresher than the release sheet, and the
+         only source where outlines over 32k characters survive intact. */
     geojson: [
         'https://raw.githubusercontent.com/GlobalEnergyMonitor/goit-ggit-data-ops/map-data/ggit_map_latest.geojson',
+        'https://raw.githubusercontent.com/GlobalEnergyMonitor/goit-ggit-interim-maps/main/trackers/ggit-goget/goget_areas_latest.geojson',
         'https://raw.githubusercontent.com/GlobalEnergyMonitor/goit-ggit-interim-maps/main/trackers/ggit-goget/goget_map_latest.geojson',
     ],
 
@@ -152,7 +158,15 @@ var config = {
     includeCapacityByStatusInDetailView: false,
 
     linkField: 'Wiki', // not ProjectID because pieces of one pipeline have different ids
-    geometries: ['LineString', 'Point'],
+    geometries: ['Polygon', 'LineString', 'Point'],
+
+    /* Each extraction area appears exactly once — as an outline if the database has
+       one for it, otherwise as a centroid point (build_goget_map_data.py drops the
+       points that would duplicate an outline) — so outlines count as their own
+       assets. Leaving this false would instead drop every outline from the legend
+       tally: grouping keys off linkField + coordinates[0],[1], which a polygon's
+       ring array never matches, so an outline is always alone in its group. */
+    polygonsAreIndependent: true,
 
     /* extra rows under the ProjectID line in the hover popup, per segment; the GOGET
        extraction points carry neither field, so they simply don't get these rows */

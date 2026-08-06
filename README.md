@@ -36,20 +36,54 @@ for data refreshes (raw.githubusercontent.com caches for ≤5 min and sends
 CORS headers). The GGIT map shows gas pipelines only — LNG terminals will get
 their own map separately.
 
-**The ggit-goget map** overlays GOGET oil & gas extraction areas (points) on
-the GGIT pipelines. Its `geojson:` key is an *array* of URLs (the shared shell
-merges multiple sources): the same auto-updating GGIT file, plus
-`trackers/ggit-goget/goget_map_latest.geojson` — a committed snapshot of the
-data team's GOGET map export (from
-`publicgemdata…/interim_maps/goget_map_*.geojson`, built from the GEM project
-database) with properties renamed to the handoff schema. To refresh GOGET
-data: update `SOURCE_URL` in `scripts/build_goget_map_data.py` if the data
-team published a newer export, run it, and commit the regenerated file. Its
-legend has one section per tracker, which works via the shell's `derivedFields`
-config: `Status` is copied into `PipelineStatus` on the lines and
-`ExtractionStatus` on the points, and a filter section ignores features that
-don't carry its field, so each section filters only its own tracker while the
-map paint still colors off the single shared `Status`.
+**The ggit-goget map** overlays GOGET oil & gas extraction areas on the GGIT
+pipelines. Its `geojson:` key is an *array* of URLs (the shared shell merges
+multiple sources): the same auto-updating GGIT file, plus two committed GOGET
+files under `trackers/ggit-goget/`.
+
+- `goget_areas_latest.geojson` — field-outline polygons, read straight from the
+  GEM project database (`project_geospatial.wkt`) by
+  `scripts/build_goget_areas.py`. The database is the only acceptable source
+  for these: it's fresher than the release sheet, and outlines longer than
+  32,767 characters (Tupi, Cerro Dragon, most Dutch offshore fields) are
+  truncated to unparseable WKT by Google Sheets' per-cell limit. Status comes
+  from `status_timeline` (a timeline, not a scalar — `status_id` is null for
+  every GOGET project), taking the highest-`order` entry that isn't a
+  `planned` substatus.
+- `goget_map_latest.geojson` — centroid points for the fields that have no
+  outline, from the data team's export
+  (`publicgemdata…/interim_maps/goget_map_*.geojson`) with properties renamed
+  to the handoff schema, by `scripts/build_goget_map_data.py`.
+
+**Each field appears exactly once**, as an outline or a centroid, never both —
+the outline builder copies the export's production, capacity and parent values
+onto the matching outline, and the point builder then drops those fields'
+centroids. Keeping both would double-count them in the legend and the "total
+assets" line, because the shell groups features by link field *plus*
+coordinates and a polygon's coordinates never match its centroid's. So the
+two scripts must run **in that order**, and the outline builder reads the
+published export rather than the local points file (which no longer has those
+rows):
+
+```
+export GEM_READONLY_DB_URL=…      # read-only GEM project DB role
+python3 scripts/build_goget_areas.py
+python3 scripts/build_goget_map_data.py
+```
+
+Then commit and push both regenerated files. Update `SOURCE_URL` in
+`build_goget_map_data.py` first if the data team published a newer export.
+Production/capacity and Parent are deliberately *not* derived from the database
+— production lives in `reserves_production` in ~110 fuel-description × unit
+combinations (including mass and energy units needing density/heat-content
+assumptions), and Parent needs a real ownership-tree traversal; both are the
+data team's and the ownership repos' normalization to own.
+
+The legend has one section per tracker, which works via the shell's
+`derivedFields` config: `Status` is copied into `PipelineStatus` on the lines
+and `ExtractionStatus` on the outlines and points, and a filter section ignores
+features that don't carry its field, so each section filters only its own
+tracker while the map paint still colors off the single shared `Status`.
 
 Data files larger than 100 MB cannot be committed to this repo (GitHub limit) —
 host those on DigitalOcean Spaces (needs CORS open, as `publicgemdata` already
@@ -65,7 +99,11 @@ acceptable.
 python server.py
 # → http://localhost:8080/maps/trackers/goit/
 # → http://localhost:8080/maps/trackers/ggit/
+# → http://localhost:8080/maps/trackers/ggit-goget/
 ```
+
+Data loads from the committed `raw.githubusercontent.com` URLs even when running
+locally, so a regenerated geojson only shows up after it's pushed.
 
 ## Layout
 
