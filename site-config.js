@@ -82,8 +82,8 @@ var site_config = {
        by capacity: they come from trackers whose capacities aren't comparable to the
        circles' (nameplate MW vs boe/d), so a size comparison there would be meaningless.
        Same low-zoom/high-zoom pair as the radii above. */
-    shapeMarkerRadius: 4,
-    highZoomShapeMarkerRadius: 12,
+    shapeMarkerRadius: 2,
+    highZoomShapeMarkerRadius: 6,
 
     /* radius to increase min/max to under high zoom */
     /* In  mapbox there are 22 zoom levels, higher zoom usually meaning samller area "closer in"*/
