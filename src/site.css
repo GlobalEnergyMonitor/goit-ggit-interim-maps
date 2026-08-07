@@ -89,6 +89,13 @@ body {
     text-decoration: underline;
     cursor: pointer;
 }
+/* in the right-click menu the pair is the whole content, so the link sits under it
+   rather than stretching the popup sideways */
+.coordinates-popup .copy-button {
+    display: block;
+    margin-left: 0;
+    margin-top: 2px;
+}
 .hover-popup-id {
     font-size: 11px;
     color: #555;
