@@ -395,17 +395,24 @@ function addGeoJSON(jsonData) {
         }
     });
 
-    /* Copy a shared field into a per-geometry field (config.derivedFields). Combined maps
-       (ggit-goget) use this to give each source its own legend section: the lines get
-       PipelineStatus, the points get ExtractionStatus, both copied from Status. A feature
-       only ever carries the field for its own source, and a filter section skips features
-       that don't carry its field (see filterGeoJSON), so the sections filter independently
-       while the map paint keeps reading the single shared Status field. */
+    /* Copy a shared field into a per-source field (config.derivedFields). Combined maps
+       (ggit-goget, ggit-goget-gogpt) use this to give each source its own legend section:
+       the lines get PipelineStatus, the extraction areas get ExtractionStatus, the power
+       plants get PlantStatus, all copied from Status. A feature only ever carries the field
+       for its own source, and a filter section skips features that don't carry its field
+       (see filterGeoJSON), so the sections filter independently while the map paint keeps
+       reading the single shared Status field.
+
+       A rule selects which features it applies to with `geometries` (a list of geometry
+       types) and/or `where` ({field, value} matched against the feature's properties);
+       omit both and it applies to everything. `where` is what separates sources that share
+       a geometry — GOGET centroids and GOGPT plants are both points, and only the Tracker
+       property tells them apart. */
     (config.derivedFields ?? []).forEach((rule) => {
         config.geojson.features.forEach((feature) => {
-            if (rule.geometries.includes(feature.geometry?.type)) {
-                feature.properties[rule.field] = feature.properties[rule.from];
-            }
+            if (rule.geometries && !rule.geometries.includes(feature.geometry?.type)) return;
+            if (rule.where && feature.properties[rule.where.field] !== rule.where.value) return;
+            feature.properties[rule.field] = feature.properties[rule.from];
         });
     });
 

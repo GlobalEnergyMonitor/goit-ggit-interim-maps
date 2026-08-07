@@ -15,6 +15,7 @@ Deployed to GitHub Pages on every push to `main`:
 - https://globalenergymonitor.github.io/goit-ggit-interim-maps/trackers/goit/
 - https://globalenergymonitor.github.io/goit-ggit-interim-maps/trackers/ggit/
 - https://globalenergymonitor.github.io/goit-ggit-interim-maps/trackers/ggit-goget/
+- https://globalenergymonitor.github.io/goit-ggit-interim-maps/trackers/ggit-goget-gogpt/
 
 ### When Pages can't deploy
 
@@ -99,11 +100,41 @@ combinations (including mass and energy units needing density/heat-content
 assumptions), and Parent needs a real ownership-tree traversal; both are the
 data team's and the ownership repos' normalization to own.
 
+**The ggit-goget-gogpt map** is the ggit-goget map with GOGPT oil & gas power
+plants added as a third source. It reads the GGIT file and *the same two GOGET
+files from `trackers/ggit-goget/`* — they aren't copied, so regenerating them
+updates both maps — plus one committed file of its own:
+
+- `trackers/ggit-goget-gogpt/gogpt_map_latest.geojson` — plant points, one
+  feature per generating unit, from the data team's export
+  (`publicgemdata…/interim_maps/gogpt_map_*.geojson`) with properties renamed to
+  the handoff schema, by `scripts/build_gogpt_map_data.py`. Update `SOURCE_URL`
+  there when a newer export is published, rerun, then commit and push. Nothing
+  is de-duplicated against GOGET — plants and extraction areas are separate
+  assets — so this script has no required run order.
+
+Units aren't merged: the shell groups features sharing link field + coordinates,
+so a station's units render as one circle (a pie chart when their statuses
+differ) and the detail card lists them individually. The legend counts, like the
+pipeline sections' segment counts, are per unit.
+
 The legend has one section per tracker, which works via the shell's
-`derivedFields` config: `Status` is copied into `PipelineStatus` on the lines
-and `ExtractionStatus` on the outlines and points, and a filter section ignores
-features that don't carry its field, so each section filters only its own
-tracker while the map paint still colors off the single shared `Status`.
+`derivedFields` config: `Status` is copied into `PipelineStatus` on the lines,
+`ExtractionStatus` on the GOGET outlines and points, and (on the three-tracker
+map) `PlantStatus` on the GOGPT units, and a filter section ignores features
+that don't carry its field, so each section filters only its own tracker while
+the map paint still colors off the single shared `Status`. A `derivedFields`
+rule selects features by `geometries`, by `where: {field, value}`, or both —
+`where` is what separates the GOGET centroids from the GOGPT plants, since
+geometry alone can't (both are points).
+
+The three-tracker map uses the same mechanism for circle size. Radius comes from
+one field, but plant capacity is nameplate MW and pipeline/extraction capacity is
+boe/d, so raw MW would pin every plant at the minimum radius. The GOGPT builder
+writes `CapacityMapScale` (MW × 100, display-only, no efficiency or utilisation
+assumption implied) and `derivedFields` fills the same field from `CapacityBOEd`
+for the other two sources. Real figures stay in `Capacity`/`CapacityUnits`, which
+is what the detail card, the table and the downloads report.
 
 Data files larger than 100 MB cannot be committed to this repo (GitHub limit) —
 host those on DigitalOcean Spaces (needs CORS open, as `publicgemdata` already
@@ -120,6 +151,7 @@ python server.py
 # → http://localhost:8080/maps/trackers/goit/
 # → http://localhost:8080/maps/trackers/ggit/
 # → http://localhost:8080/maps/trackers/ggit-goget/
+# → http://localhost:8080/maps/trackers/ggit-goget-gogpt/
 ```
 
 Data loads from the committed `raw.githubusercontent.com` URLs even when running
