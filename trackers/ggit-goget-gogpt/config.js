@@ -1,26 +1,32 @@
 var config = {
     /* Combined map: GGIT gas pipelines (lines) + GOGET oil & gas extraction areas
        (field-outline polygons, plus centroid points) + GOGPT oil & gas power plants
-       (points, one feature per generating unit). All four sources use the handoff-schema
-       property names, so one config drives them together:
-       - the GGIT file is the same auto-built one the ggit map uses (rebuilt by
+       (points, one feature per generating unit) + GGIT LNG terminals (points, one feature
+       per terminal unit). All five files use the handoff-schema property names, so one
+       config drives them together:
+       - the GGIT pipelines file is the same auto-built one the ggit map uses (rebuilt by
          goit-ggit-data-ops whenever pipeline routes or the sheet change);
        - the two GOGET files are the ones the ggit-goget map already loads, read from
          that tracker's folder rather than copied here — see trackers/ggit-goget/config.js
          for how they're built and why each field appears exactly once;
        - gogpt_map_latest.geojson is a snapshot of the data team's GOGPT map export with
          properties renamed to the handoff schema — rebuild it with
-         scripts/build_gogpt_map_data.py. */
+         scripts/build_gogpt_map_data.py;
+       - lng_map_latest.geojson comes straight from the GEM project database (there is no
+         published LNG map export to rename) — rebuild it with
+         scripts/build_lng_map_data.py. The LNG terminals are deliberately only on this
+         map: the ggit map stays gas pipelines only. */
     geojson: [
         'https://raw.githubusercontent.com/GlobalEnergyMonitor/goit-ggit-data-ops/map-data/ggit_map_latest.geojson',
         'https://raw.githubusercontent.com/GlobalEnergyMonitor/goit-ggit-interim-maps/main/trackers/ggit-goget/goget_areas_latest.geojson',
         'https://raw.githubusercontent.com/GlobalEnergyMonitor/goit-ggit-interim-maps/main/trackers/ggit-goget/goget_map_latest.geojson',
         'https://raw.githubusercontent.com/GlobalEnergyMonitor/goit-ggit-interim-maps/main/trackers/ggit-goget-gogpt/gogpt_map_latest.geojson',
+        'https://raw.githubusercontent.com/GlobalEnergyMonitor/goit-ggit-interim-maps/main/trackers/ggit-goget-gogpt/lng_map_latest.geojson',
     ],
 
     /* Labels for describing the assets. assetFullLabel is deliberately short: it sets the
        legend's summary line ('Total assets selected'), which was the widest thing in the
-       card and stretched the whole legend. The three legend sections name the trackers. */
+       card and stretched the whole legend. The four legend sections name the trackers. */
     assetFullLabel: 'assets',
     assetLabel: 'assets',
 
@@ -87,10 +93,14 @@ var config = {
         'ProdGasYear': {'label': 'Production Year - Gas'},
         'LocationAccuracy': {'label': 'Location Accuracy'},
 
-        /* power-plant (GOGPT) fields; FuelType is also carried by the GOGET areas */
+        /* power-plant (GOGPT) fields; FuelType is also carried by the GOGET areas and the
+           LNG terminals, and UnitID by the terminals */
         'UnitID': {'display': 'join', 'label': ['Unit ID', 'Unit IDs']},
         'FuelType': {'label': 'Fuel'},
         'TechType': {'label': 'Technology'},
+
+        /* LNG terminal fields */
+        'FacilityType': {'label': 'Facility type'},
     },
 
     /* ---------------------------- FIELDS TO OVERWRITE FROM site-config.js ---------------------------- */
@@ -107,12 +117,14 @@ var config = {
     capacityDisplayField: 'Capacity',
     capacityLabelField: 'CapacityUnits',
 
-    /* union of the GGIT, GOGET and GOGPT status vocabularies. The vocabularies only share
-       statuses that mean the same thing in each tracker, so one map covers all three: dark
-       grey operating, then red / orange / light red / yellow for the pre-operating and
-       post-operating stages of each tracker (pipelines: construction, proposed, shelved;
-       extraction areas: in-development, discovered + exploration, decommissioning; power
-       plants: construction, pre-construction, announced, shelved), grey everything else. */
+    /* union of the GGIT pipeline, GOGET, GOGPT and LNG-terminal status vocabularies. The
+       vocabularies only share statuses that mean the same thing in each tracker, so one
+       map covers all four: dark grey operating, then red / orange / light red / yellow for
+       the pre-operating and post-operating stages of each tracker (pipelines:
+       construction, proposed, shelved; extraction areas: in-development, discovered +
+       exploration, decommissioning; power plants: construction, pre-construction,
+       announced, shelved; LNG terminals: construction, proposed, shelved), grey everything
+       else. 'idled' is the LNG tracker's spelling of the pipelines' 'idle'. */
     color_association: {
         field: 'Status',
         values: {
@@ -130,6 +142,7 @@ var config = {
             'cancelled': 'grey',
             'retired': 'grey',
             'idle': 'grey',
+            'idled': 'grey',
             'mixed status': 'grey',
             'abandoned': 'grey',
             'underground gas storage': 'grey',
@@ -147,23 +160,34 @@ var config = {
        or both — geometry alone can't separate the GOGET centroids from the GOGPT plants,
        since both are points.
 
-       Status → PipelineStatus / ExtractionStatus / PlantStatus: a single field can't carry
-       three legend sections (duplicate ids, one shared checkbox list), and site.js skips a
-       section for features that lack its field, so each section filters just its own
-       tracker while the map paint keeps reading the shared Status.
+       Status → PipelineStatus / ExtractionStatus / PlantStatus / TerminalStatus: a single
+       field can't carry four legend sections (duplicate ids, one shared checkbox list),
+       and site.js skips a section for features that lack its field, so each section
+       filters just its own tracker while the map paint keeps reading the shared Status.
 
-       CapacityBOEd → CapacityMapScale: circle radius comes from one field, and plant
+       CapacityBOEd → CapacityMapScale: marker size comes from one field, and plant
        capacity is nameplate MW while pipeline and extraction capacity is boe/d. The GOGPT
        file supplies its own CapacityMapScale (MW × 100, a display-only number — see
-       build_gogpt_map_data.py); the other two sources just reuse their boe/d value. The
-       real figures stay in Capacity/CapacityUnits, which is what the detail card, the
-       table and the downloads show. */
+       build_gogpt_map_data.py) and the LNG file supplies boe/d converted from whatever
+       unit each terminal recorded (build_lng_map_data.py); the other two sources just
+       reuse their boe/d value. The real figures stay in Capacity/CapacityUnits, which is
+       what the detail card, the table and the downloads show. */
     derivedFields: [
         {field: 'PipelineStatus', from: 'Status', geometries: ['LineString', 'MultiLineString']},
         {field: 'ExtractionStatus', from: 'Status', where: {field: 'Tracker', value: 'GOGET'}},
         {field: 'PlantStatus', from: 'Status', where: {field: 'Tracker', value: 'GOGPT'}},
+        {field: 'TerminalStatus', from: 'Status', where: {field: 'Tracker', value: 'GGIT-LNG'}},
         {field: 'CapacityMapScale', from: 'CapacityBOEd', geometries: ['LineString', 'MultiLineString']},
         {field: 'CapacityMapScale', from: 'CapacityBOEd', where: {field: 'Tracker', value: 'GOGET'}},
+    ],
+
+    /* Three kinds of point on one map, all sharing the status colors, so shape carries the
+       tracker: power plants are squares, LNG terminals triangles, and the GOGET extraction
+       centroids stay circles. Multi-status groups still get their pie split, just clipped
+       to the shape (see MARKER_CLIP_PATHS in site.js). */
+    markerShapes: [
+        {field: 'Tracker', value: 'GOGPT', shape: 'square'},
+        {field: 'Tracker', value: 'GGIT-LNG', shape: 'triangle'},
     ],
 
     filters: [
@@ -185,8 +209,17 @@ var config = {
             field: 'PlantStatus',
             label: 'Oil &amp; gas power plants',
             showColorDots: true,
+            dotShape: 'square',  // these draw as squares on the map
             values: ['operating', 'construction', 'pre-construction', 'announced', 'shelved', 'mothballed', 'retired', 'cancelled'],
             values_labels: ['Operating', 'Construction', 'Pre-construction', 'Announced', 'Shelved', 'Mothballed', 'Retired', 'Cancelled'],
+        },
+        {
+            field: 'TerminalStatus',
+            label: 'LNG terminals',
+            showColorDots: true,
+            dotShape: 'triangle',  // these draw as triangles on the map
+            values: ['operating', 'construction', 'proposed', 'shelved', 'mothballed', 'idled', 'retired', 'cancelled'],
+            values_labels: ['Operating', 'Construction', 'Proposed', 'Shelved', 'Mothballed', 'Idled', 'Retired', 'Cancelled'],
         },
     ],
 

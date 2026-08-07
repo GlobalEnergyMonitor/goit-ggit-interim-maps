@@ -55,6 +55,13 @@ const popup = new mapboxgl.Popup({
     closeOnClick: false,
     className: 'hover-popup'  // click-through, so it can't steal the mousemove that keeps it open
 });
+/* right-click menu offering the coordinates under the cursor; unlike the hover popup it
+   has to take clicks, so it gets its own popup instance */
+const coordinatesPopup = new mapboxgl.Popup({
+    closeButton: true,
+    closeOnClick: true,
+    className: 'coordinates-popup'
+});
 
 map.on('load', async () => {
     await loadData();
@@ -542,8 +549,11 @@ function linkAssets() {
             return previous + Number(current.properties[config.capacityScaledField]);
         }, 0);
 
-        // generate icon based on that label if more than one status
+        // generate icon based on that label if more than one status — or, whatever its
+        // statuses, if the group isn't drawn as a circle, since a generated image is the
+        // only way to draw a point as any other shape
         if (group_feature.geometry.type === 'Point') {
+            const shape = markerShape(features_in_current_group[0]);
             let icon = Object.assign(...Object.keys(config.color_association.values).map(k => ({ [config.color_association.values[k]]: 0 })));
             features_in_current_group.forEach((feature) => {
                 if (config.scaleCircleColorsProportionally) {
@@ -554,7 +564,15 @@ function linkAssets() {
                     icon[config.color_association.values[feature.properties[config.color_association.field]]] += 1;
                 }
             });
-            if (Object.values(icon).filter(v => v != 0).length > 1) {  // if the icon will contain more than one color
+            // A group whose features all report zero (or blank) capacity has nothing to
+            // divide proportionally, and an all-zero icon draws no slices at all; fall
+            // back to one slice per feature so it still appears.
+            if (config.scaleCircleColorsProportionally && Object.values(icon).every((value) => !value)) {
+                features_in_current_group.forEach((feature) => {
+                    icon[config.color_association.values[feature.properties[config.color_association.field]]] += 1;
+                });
+            }
+            if (shape || Object.values(icon).filter(v => v != 0).length > 1) {  // if the icon will contain more than one color
                 if (config.scaleCircleColorsProportionally) {
                     // Normalize to ~12 pieces using Math.ceil
                     let total = Object.values(icon).reduce((previous, current) => {
@@ -563,10 +581,13 @@ function linkAssets() {
                     icon = Object.assign(...Object.keys(icon).map(k => ({ [k]: Math.ceil(11 * (icon[k] / total)) })));
                 }
                 // When not proportional, raw counts are used directly (no normalization needed)
-                let icon_as_str = JSON.stringify(icon);
+                // The prefix keeps shapes with the same color mix as separate map images;
+                // the layers filter on icon-shape, so they don't have to parse the key.
+                let icon_as_str = (shape ? shape + ':' : '') + JSON.stringify(icon);
                 group_feature.properties['icon'] = icon_as_str;
+                if (shape) group_feature.properties['icon-shape'] = shape;
                 if (!config.icons.includes(icon_as_str)) {
-                    generateIcon(icon, icon_as_str);
+                    generateIcon(icon, icon_as_str, shape);
                 }
             }
         }
@@ -608,8 +629,94 @@ function linkAssets() {
     }
 }
 
+/* Non-circular point markers (config.markerShapes: [{field, value, shape}]).
+
+   Mapbox circle layers can only draw circles, so a point that should be another shape has
+   to go through the symbol/icon path instead — generateIcon() clips its pie to the shape,
+   and addPointLayers() gives those features their own symbol layer. Combined maps use this
+   to tell one tracker's points apart from another's at a glance: the ggit-goget-gogpt map
+   draws GOGPT power plants as squares and LNG terminals as triangles, leaving the GOGET
+   extraction points round. Supported shapes are the keys of MARKER_CLIP_PATHS. */
+const MARKER_CLIP_PATHS = {
+    square: (size) => [[0, 0], [size, 0], [size, size], [0, size]],
+    triangle: (size) => [[size / 2, 0], [size, size], [0, size]],
+    diamond: (size) => [[size / 2, 0], [size, size / 2], [size / 2, size], [0, size / 2]],
+};
+const HIGHLIGHT_ICON_PREFIX = 'highlight-';
+
+function markerShape(feature) {
+    const rule = (config.markerShapes ?? []).find(
+        (candidate) => feature.properties[candidate.field] === candidate.value);
+    return rule ? rule.shape : null;
+}
+
+/*
+  Copyable coordinates
+*/
+
+/* Coordinates in the order people paste them elsewhere (lat, lon), at 5 decimal places —
+   about a metre, and more than the trackers' own location accuracy */
+function formatCoordinates(lng, lat) {
+    // round before formatting, so a hair west of Greenwich doesn't come out as '-0.00000'
+    const fixed = (value) => (Math.round(Number(value) * 1e5) / 1e5 + 0).toFixed(5);
+    return fixed(lat) + ', ' + fixed(lng);
+}
+
+/* Copies text and confirms in the button that triggered it. Both callers (the detail
+   card's coordinates row and the right-click menu) are injected as HTML strings, so they
+   reach this through an inline onclick and it has to stay a global function. */
+function copyText(button, text) {
+    const original = button.textContent;
+    const confirm = () => {
+        button.textContent = 'copied';
+        setTimeout(() => { button.textContent = original; }, 1200);
+    };
+    // navigator.clipboard needs a secure context, which the standalone single-file
+    // builds don't always get; the textarea fallback works anywhere
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(confirm, () => copyViaTextarea(text, confirm));
+    } else {
+        copyViaTextarea(text, confirm);
+    }
+}
+
+function copyViaTextarea(text, confirm) {
+    const area = document.createElement('textarea');
+    area.value = text;
+    area.setAttribute('readonly', '');
+    area.style.position = 'fixed';
+    area.style.opacity = '0';
+    document.body.appendChild(area);
+    area.select();
+    try {
+        if (document.execCommand('copy')) confirm();
+    } finally {
+        area.remove();
+    }
+}
+
+/* The coordinates row for the detail card, for assets that are a single point in space
+   (power plants, LNG terminals, extraction-area centroids). Pipelines and field outlines
+   have no one coordinate to offer, so they get no row. */
+function coordinatesRowHtml(features) {
+    if (!features.length || !features.every((feature) => feature.geometry?.type === 'Point')) return '';
+    const [lng, lat] = features[0].geometry.coordinates;
+    if (lng == null || lat == null) return '';
+    const coordinates = formatCoordinates(lng, lat);
+    return '<span class="fw-bold text-capitalize">Coordinates</span>: ' +
+        '<span class="copyable-coords">' + coordinates + '</span>' +
+        '<button type="button" class="copy-button" onclick="copyText(this, \'' + coordinates + '\')">copy</button><br/>';
+}
+
+/* Class for a status swatch in the detail card, so the card's dot matches the shape the
+   asset has on the map */
+function statusDotClass(feature) {
+    const shape = markerShape(feature);
+    return shape ? 'legend-dot legend-' + shape : 'legend-dot';
+}
+
 /* Generates icon image circles for each unique asset combination - Frequent-use function: called once in linkAssets() in a forEach loop */
-function generateIcon(icon, icon_as_str) {
+function generateIcon(icon, icon_as_str, shape) {
     if (map.hasImage(icon_as_str)) return;  // if the map has already created an icon (image) with the given label, return
     // ideally, should return more often for the longer time the user spend filtering
     // on initial load, this function will run for every unique icon (image)
@@ -622,6 +729,13 @@ function generateIcon(icon, icon_as_str) {
 
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
+
+    // A shaped marker is the same pie clipped to that shape: a single-status group comes
+    // out a solid square/triangle, a mixed one keeps the same wedge proportions. The
+    // wedges have to reach the canvas corners (the half-diagonal), or clipping to a shape
+    // wider than the inscribed circle would leave gaps.
+    const radius = shape ? (canvas.width / 2) * Math.SQRT2 : canvas.width / 2;
+    if (shape) clipToShape(context, shape, canvas.width);
 
     let current = 0.75;  // start at vertical
 
@@ -638,7 +752,7 @@ function generateIcon(icon, icon_as_str) {
         context.arc(
             centerX,
             centerY,
-            canvas.width / 2,
+            radius,
             Math.PI * 2 * current,
             Math.PI * 2 * next
         );
@@ -654,6 +768,38 @@ function generateIcon(icon, icon_as_str) {
         data: imageData.data
     });
     config.icons.push(icon_as_str);
+}
+
+/* Restricts drawing to one of MARKER_CLIP_PATHS on a size x size canvas */
+function clipToShape(context, shape, size) {
+    const points = MARKER_CLIP_PATHS[shape](size);
+    context.beginPath();
+    points.forEach(([x, y], index) => index ? context.lineTo(x, y) : context.moveTo(x, y));
+    context.closePath();
+    context.clip();
+}
+
+/* A plain filled marker image, used for a shaped marker's selection highlight -
+   Single-use function: called from addPointLayers() for each configured shape */
+function generateSolidIcon(shape, color) {
+    const name = HIGHLIGHT_ICON_PREFIX + shape;
+    if (map.hasImage(name)) return;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 64;
+    canvas.height = 64;
+
+    const context = canvas.getContext('2d');
+    clipToShape(context, shape, canvas.width);
+    context.fillStyle = color;
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+    map.addImage(name, {
+        width: canvas.width,
+        height: canvas.height,
+        data: imageData.data
+    });
 }
 
 /*
@@ -947,7 +1093,8 @@ function addPointLayers() {
         'filter': [
             'all',
             ['==', ['geometry-type'], 'Point'],
-            ['has', 'icon']  // only render circles that have icon
+            ['has', 'icon'],  // only render circles that have icon
+            ['!', ['has', 'icon-shape']]  // non-circular markers get their own layer below
         ],
         ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
         'layout': {
@@ -960,6 +1107,32 @@ function addPointLayers() {
         }
     });
     config.layers.push('assets-symbol');
+
+    // Add layer of non-circular markers (see MARKER_CLIP_PATHS). Same images-as-symbols
+    // mechanism as assets-symbol, but kept separate so the shaped markers draw above the
+    // circles rather than disappearing under the denser ones.
+    if (config.markerShapes) {
+        map.addLayer({
+            'id': 'assets-shapes',
+            'type': 'symbol',
+            'source': 'assets-source',
+            'filter': [
+                'all',
+                ['==', ['geometry-type'], 'Point'],
+                ['has', 'icon-shape']
+            ],
+            ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
+            'layout': {
+                'icon-image': ['get', 'icon'],
+                'icon-allow-overlap': true,
+                'icon-size': getCircleRadius('symbol')
+            },
+            'paint': {
+                'icon-opacity': paint['circle-opacity']
+            }
+        });
+        config.layers.push('assets-shapes');
+    }
 
     // Add highlight layers
     paint['circle-color'] = config.highlightColor;
@@ -981,6 +1154,28 @@ function addPointLayers() {
         'paint': paint,
         'filter': ['in', (config.linkField), '']  // highlights any points within the same linkField (eg project_id)
     });
+    // The two highlight layers above are circle layers, so a selected square would be
+    // marked with a circle inscribed in it; shaped markers get a solid marker of their own
+    // shape in the highlight color instead. setHighlightFilter() finds this by the
+    // '-highlighted' suffix on the 'assets-shapes' entry in config.layers.
+    if (config.markerShapes) {
+        config.markerShapes.forEach((rule) => generateSolidIcon(rule.shape, config.highlightColor));
+        map.addLayer({
+            'id': 'assets-shapes-highlighted',
+            'type': 'symbol',
+            'source': 'assets-source',
+            ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
+            'layout': {
+                'icon-image': ['concat', HIGHLIGHT_ICON_PREFIX, ['get', 'icon-shape']],
+                'icon-allow-overlap': true,
+                'icon-size': getCircleRadius('symbol')
+            },
+            'paint': {
+                'icon-opacity': paint['circle-opacity']
+            },
+            'filter': ['in', (config.linkField), '']  // highlights any points within the same linkField (eg project_id)
+        });
+    }
 
     // Add label layer
     map.addLayer({
@@ -1036,6 +1231,19 @@ function enableUX() {
 /* Adds events and sets some event handling - Single-use function */
 function addEvents() {
     config.selectedRoutes = new Set();  // pipelines (linkField values) picked by modifier-click
+
+    // right-click anywhere on the map for the coordinates under the cursor, ready to copy
+    map.on('contextmenu', (e) => {
+        e.originalEvent.preventDefault();  // this replaces the browser's own menu
+        const coordinates = formatCoordinates(e.lngLat.lng, e.lngLat.lat);
+        coordinatesPopup
+            .setLngLat(e.lngLat)
+            .setHTML(
+                '<span class="copyable-coords">' + coordinates + '</span>' +
+                '<button type="button" class="copy-button" onclick="copyText(this, \'' + coordinates + '\')">copy coordinates</button>'
+            )
+            .addTo(map);
+    });
 
     map.on('click', (e) => {
         userInteracting = true;
@@ -1336,7 +1544,9 @@ function buildLegendFilters() {
             check += `<div class="col-8"><input type="checkbox" checked class="form-check-input d-none" id="${check_id}">`;
             // `showColorDots` opts a section in when it filters on a field derived from the
             // color field (combined maps), so its values still resolve in color_association
-            check += (config.color_association.field === filter.field || filter.showColorDots ? '<span class="legend-dot" style="background-color:' + config.color_association.values[ filter.values[i] ] + '"></span>' : "");
+            // dotShape draws this section's swatches as that shape, to match a tracker
+            // whose markers aren't circles on the map (see config.markerShapes)
+            check += (config.color_association.field === filter.field || filter.showColorDots ? '<span class="legend-dot' + (filter.dotShape ? ' legend-' + filter.dotShape : '') + '" style="background-color:' + config.color_association.values[ filter.values[i] ] + '"></span>' : "");
             check += `<span id='${check_id}-label'>` + ('values_labels' in filter ? filter.values_labels[i] : filter.values[i].replaceAll("_", " ")) + '</span></div>';
             check += '<div class="col-3 text-end" style="text-align: right;" id="' + check_id + '-count">' + config.filterCount[filter.field][makeDomSafe(filter.values[i])] + '</div></div>';
             $('#filter-form').append(check);
@@ -1768,6 +1978,7 @@ function setHighlightFilter(links, segmentIds) {
         'assets-lines': ['LineString', 'MultiLineString'],
         'assets-points': ['Point', 'MultiPoint'],
         'assets-symbol': ['Point', 'MultiPoint'],
+        'assets-shapes': ['Point', 'MultiPoint'],
     };
     const highlightLayers = new Set(config.layers);
     // the polygon selection outline is drawn even when the base outlines are off, so it
@@ -2069,7 +2280,7 @@ function renderDetails(features, showingAll) {
             const showDot = config.color_association.field === config.statusField;
             const dotHtml = (status) =>
                 showDot && config.color_association.values?.[status]
-                    ? `<span class="legend-dot" style="background-color:${config.color_association.values[status]}"></span>`
+                    ? `<span class="${statusDotClass(primaryFeature)}" style="background-color:${config.color_association.values[status]}"></span>`
                     : '';
 
             const formatCapacity = (value) =>
@@ -2126,17 +2337,20 @@ function renderDetails(features, showingAll) {
             // add status to detail view popup
             detail_text += '<span class="fw-bold text-capitalize">Status</span>: '
             if (config.color_association.field === config.statusField) {  // add color dot if it is an expected status
-                detail_text += '<span class="legend-dot" style="background-color:' + config.color_association.values[primaryFeature.properties[config.statusDisplayField]] + '"></span>'
+                detail_text += '<span class="' + statusDotClass(primaryFeature) + '" style="background-color:' + config.color_association.values[primaryFeature.properties[config.statusDisplayField]] + '"></span>'
             }
             detail_text += '<span class="text-capitalize">' + primaryFeature.properties[config.statusDisplayField] + '</span><br/>';
         }
     } else {  // only put project-wide status in detail view
         if (config.color_association.field.toLowerCase() === 'status') {
             detail_text += '<span class="fw-bold text-capitalize">Status</span>: ' +
-                '<span class="legend-dot" style="background-color:' + config.color_association.values[primaryFeature.properties[config.statusDisplayField]] + '"></span>' +
+                '<span class="' + statusDotClass(primaryFeature) + '" style="background-color:' + config.color_association.values[primaryFeature.properties[config.statusDisplayField]] + '"></span>' +
                 '<span class="text-lowercase">' + primaryFeature.properties[config.statusDisplayField] + '</span><br/>';
         }
     }
+
+    // coordinates go under the status, for assets that are a single point in space
+    detail_text += coordinatesRowHtml(features);
 
     //Location by azizah from <a href="https://thenounproject.com/browse/icons/term/location/" target="_blank" title="Location Icons">Noun Project</a> (CC BY 3.0)
     //Arrow Back by Nursila from <a href="https://thenounproject.com/browse/icons/term/arrow-back/" target="_blank" title="Arrow Back Icons">Noun Project</a> (CC BY 3.0)

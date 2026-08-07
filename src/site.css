@@ -70,6 +70,25 @@ body {
 .hover-popup {
     pointer-events: none;
 }
+/* right-click coordinates menu, and the detail card's coordinates row */
+.coordinates-popup .mapboxgl-popup-content {
+    padding: 8px 26px 8px 10px;
+    white-space: nowrap;
+}
+.copyable-coords {
+    font-family: monospace;
+    user-select: all;  /* one click selects the whole pair for copying by hand */
+}
+.copy-button {
+    background: none;
+    border: 0;
+    padding: 0;
+    margin-left: .5rem;
+    font-size: .8rem;
+    color: #c00000;
+    text-decoration: underline;
+    cursor: pointer;
+}
 .hover-popup-id {
     font-size: 11px;
     color: #555;
@@ -558,6 +577,22 @@ table.dataTable td {
     border-radius: 50%;
     display: inline-block;
     margin-right: .5rem;
+}
+
+/* swatches for trackers whose markers aren't circles (config.markerShapes); the clip
+   paths mirror MARKER_CLIP_PATHS in site.js */
+.legend-square {
+    border-radius: 0;
+}
+
+.legend-triangle {
+    border-radius: 0;
+    clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+
+.legend-diamond {
+    border-radius: 0;
+    clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
 }
 
 /* the click modal has no backdrop; the full-viewport #modal container passes clicks through.

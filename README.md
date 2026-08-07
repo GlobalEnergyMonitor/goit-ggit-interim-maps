@@ -100,10 +100,10 @@ combinations (including mass and energy units needing density/heat-content
 assumptions), and Parent needs a real ownership-tree traversal; both are the
 data team's and the ownership repos' normalization to own.
 
-**The ggit-goget-gogpt map** is the ggit-goget map with GOGPT oil & gas power
-plants added as a third source. It reads the GGIT file and *the same two GOGET
-files from `trackers/ggit-goget/`* — they aren't copied, so regenerating them
-updates both maps — plus one committed file of its own:
+**The ggit-goget-gogpt map** is the ggit-goget map with two more sources: GOGPT
+oil & gas power plants and GGIT LNG terminals. It reads the GGIT pipelines file
+and *the same two GOGET files from `trackers/ggit-goget/`* — they aren't copied,
+so regenerating them updates both maps — plus two committed files of its own:
 
 - `trackers/ggit-goget-gogpt/gogpt_map_latest.geojson` — plant points, one
   feature per generating unit, from the data team's export
@@ -112,29 +112,61 @@ updates both maps — plus one committed file of its own:
   there when a newer export is published, rerun, then commit and push. Nothing
   is de-duplicated against GOGET — plants and extraction areas are separate
   assets — so this script has no required run order.
+- `trackers/ggit-goget-gogpt/lng_map_latest.geojson` — LNG terminal points, one
+  feature per terminal unit, read straight from the GEM project database by
+  `scripts/build_lng_map_data.py` (needs `GEM_READONLY_DB_URL`). There is no
+  published LNG map export to rename, and the DB is what the researchers work
+  in. `gem-db-ops/lng/pull.py` exports the same tracker as the website's
+  115-column all-fields CSV; this builder pulls only the columns the map draws,
+  so the two don't have to stay in step. Terminals with no coordinates in the DB
+  (a handful) are skipped and listed in the output. **The LNG terminals are only
+  on this map** — the ggit map stays gas pipelines only.
 
 Units aren't merged: the shell groups features sharing link field + coordinates,
-so a station's units render as one circle (a pie chart when their statuses
-differ) and the detail card lists them individually. The legend counts, like the
-pipeline sections' segment counts, are per unit.
+so a station's or terminal's units render as one marker (a pie chart when their
+statuses differ) and the detail card lists them individually. The legend counts,
+like the pipeline sections' segment counts, are per unit.
 
 The legend has one section per tracker, which works via the shell's
 `derivedFields` config: `Status` is copied into `PipelineStatus` on the lines,
-`ExtractionStatus` on the GOGET outlines and points, and (on the three-tracker
-map) `PlantStatus` on the GOGPT units, and a filter section ignores features
-that don't carry its field, so each section filters only its own tracker while
-the map paint still colors off the single shared `Status`. A `derivedFields`
-rule selects features by `geometries`, by `where: {field, value}`, or both —
-`where` is what separates the GOGET centroids from the GOGPT plants, since
-geometry alone can't (both are points).
+`ExtractionStatus` on the GOGET outlines and points, and (on the four-tracker
+map) `PlantStatus` on the GOGPT units and `TerminalStatus` on the LNG units, and
+a filter section ignores features that don't carry its field, so each section
+filters only its own tracker while the map paint still colors off the single
+shared `Status`. A `derivedFields` rule selects features by `geometries`, by
+`where: {field, value}`, or both — `where` is what separates the GOGET centroids
+from the GOGPT plants and LNG terminals, since geometry alone can't (all three
+are points).
 
-The three-tracker map uses the same mechanism for circle size. Radius comes from
-one field, but plant capacity is nameplate MW and pipeline/extraction capacity is
-boe/d, so raw MW would pin every plant at the minimum radius. The GOGPT builder
-writes `CapacityMapScale` (MW × 100, display-only, no efficiency or utilisation
-assumption implied) and `derivedFields` fills the same field from `CapacityBOEd`
-for the other two sources. Real figures stay in `Capacity`/`CapacityUnits`, which
-is what the detail card, the table and the downloads report.
+Because all those points share one status palette, **shape carries the tracker**
+on that map: power plants are squares, LNG terminals triangles, extraction-area
+centroids circles. That's `markerShapes: [{field, value, shape}]` in the tracker
+config, with `dotShape` on the matching legend section. Mapbox circle layers can
+only draw circles, so a shaped marker is a generated canvas image (the same
+status pie, clipped to the shape) drawn through the symbol layer — see
+`MARKER_CLIP_PATHS` in `src/site.js`, which is also where a new shape would be
+added.
+
+The four-tracker map uses `derivedFields` for marker size too. Radius comes from
+one field, but plant capacity is nameplate MW, LNG capacity is whatever unit each
+terminal recorded, and pipeline/extraction capacity is boe/d, so raw values would
+pin most markers at the minimum radius. The GOGPT builder writes
+`CapacityMapScale` (MW × 100, display-only, no efficiency or utilisation
+assumption implied), the LNG builder writes it in boe/d (LNG via ~23,300 boe/d
+per Mtpa; oil throughput is boe/d already; units that don't convert are left
+unscaled rather than guessed at), and `derivedFields` fills the same field from
+`CapacityBOEd` for the other two sources. Real figures stay in
+`Capacity`/`CapacityUnits`, which is what the detail card, the table and the
+downloads report.
+
+## Copying coordinates
+
+Every map offers a location two ways: **right-click anywhere** for a
+"copy coordinates" menu with the point under the cursor, and, for assets that are
+a single point in space (power plants, LNG terminals, extraction-area centroids),
+a **Coordinates** row under Status in the click-through detail card. Both give
+`lat, lon` at 5 decimal places and copy to the clipboard. Pipelines and field
+outlines have no single coordinate, so they get no row.
 
 Data files larger than 100 MB cannot be committed to this repo (GitHub limit) —
 host those on DigitalOcean Spaces (needs CORS open, as `publicgemdata` already
