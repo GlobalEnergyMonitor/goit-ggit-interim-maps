@@ -449,6 +449,10 @@ function setMinMax() {
             minCapacityKey = 'minLineCapacity';
             maxCapacityKey = 'maxLineCapacity';
         } else {
+            // points drawn at a fixed size (config.markerShapes) sit out of the capacity
+            // range: their capacities are in other units, and letting them set the range
+            // would squash the circles that really are scaled by it
+            if (feature.geometry.type === 'Point' && markerShape(feature)) return;
             minCapacityKey = 'minPointCapacity';
             maxCapacityKey = 'maxPointCapacity';
         }
@@ -464,6 +468,11 @@ function setMinMax() {
             config[minCapacityKey] =  parseFloat(feature.properties[config.capacityScaledField]);
         }
     });
+    // a map whose every point is a fixed-size shape leaves the seed values crossed over,
+    // which mapbox rejects as non-ascending interpolate stops
+    if (config.maxPointCapacity < config.minPointCapacity) {
+        config.minPointCapacity = config.maxPointCapacity = 0;
+    }
 }
 
 /* TODO Function Summary - Frequent-use function; used every time data is filtered */
@@ -1061,6 +1070,17 @@ function addPointLayers() {
         ]
     }
 
+    /* Shaped markers ignore capacity entirely (see shapeMarkerRadius in site-config.js) and
+       only grow with zoom, like every other marker does. */
+    function getShapeIconSize() {
+        const scale = 2 / 64;  // because the symbol diameters are 64px
+        return [
+            'interpolate', interpolateExpression, ['zoom'],
+            1, config.shapeMarkerRadius * scale,
+            10, config.highZoomShapeMarkerRadius * scale
+        ];
+    }
+
     try {
         paint['circle-radius'] = getCircleRadius('circle');
     } catch (e) {
@@ -1125,7 +1145,7 @@ function addPointLayers() {
             'layout': {
                 'icon-image': ['get', 'icon'],
                 'icon-allow-overlap': true,
-                'icon-size': getCircleRadius('symbol')
+                'icon-size': getShapeIconSize()
             },
             'paint': {
                 'icon-opacity': paint['circle-opacity']
@@ -1168,7 +1188,7 @@ function addPointLayers() {
             'layout': {
                 'icon-image': ['concat', HIGHLIGHT_ICON_PREFIX, ['get', 'icon-shape']],
                 'icon-allow-overlap': true,
-                'icon-size': getCircleRadius('symbol')
+                'icon-size': getShapeIconSize()
             },
             'paint': {
                 'icon-opacity': paint['circle-opacity']

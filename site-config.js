@@ -78,6 +78,13 @@ var site_config = {
     minLineWidth: 2,
     maxLineWidth: 2,
 
+    /* Shaped markers (config.markerShapes) are drawn at one fixed radius rather than scaled
+       by capacity: they come from trackers whose capacities aren't comparable to the
+       circles' (nameplate MW vs boe/d), so a size comparison there would be meaningless.
+       Same low-zoom/high-zoom pair as the radii above. */
+    shapeMarkerRadius: 4,
+    highZoomShapeMarkerRadius: 12,
+
     /* radius to increase min/max to under high zoom */
     /* In  mapbox there are 22 zoom levels, higher zoom usually meaning samller area "closer in"*/
     highZoomMinRadius: 4,

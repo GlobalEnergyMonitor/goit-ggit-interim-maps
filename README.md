@@ -147,15 +147,17 @@ status pie, clipped to the shape) drawn through the symbol layer — see
 `MARKER_CLIP_PATHS` in `src/site.js`, which is also where a new shape would be
 added.
 
-The four-tracker map uses `derivedFields` for marker size too. Radius comes from
-one field, but plant capacity is nameplate MW, LNG capacity is whatever unit each
-terminal recorded, and pipeline/extraction capacity is boe/d, so raw values would
-pin most markers at the minimum radius. The GOGPT builder writes
-`CapacityMapScale` (MW × 100, display-only, no efficiency or utilisation
-assumption implied), the LNG builder writes it in boe/d (LNG via ~23,300 boe/d
-per Mtpa; oil throughput is boe/d already; units that don't convert are left
-unscaled rather than guessed at), and `derivedFields` fills the same field from
-`CapacityBOEd` for the other two sources. Real figures stay in
+**Shaped markers are all one size**: capacity scaling only makes sense between
+things measured the same way, and plant capacity is nameplate MW while LNG
+capacity is whatever unit each terminal recorded, so the squares and triangles
+are drawn at a fixed radius (`shapeMarkerRadius` / `highZoomShapeMarkerRadius` in
+`site-config.js`, growing with zoom like everything else) and are left out of the
+capacity range in `setMinMax()`. Pipelines and the GOGET extraction centroids —
+both boe/d — keep scaling against each other. Radius still comes from one field,
+`CapacityMapScale`, which `derivedFields` fills from `CapacityBOEd` for those two
+sources; the GOGPT builder's own value (MW × 100, display-only) and the LNG
+builder's (boe/d, LNG via ~23,300 boe/d per Mtpa, unconvertible units left
+unscaled) are now carried but unused for size. Real figures stay in
 `Capacity`/`CapacityUnits`, which is what the detail card, the table and the
 downloads report.
 

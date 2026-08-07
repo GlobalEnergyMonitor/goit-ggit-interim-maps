@@ -165,13 +165,14 @@ var config = {
        and site.js skips a section for features that lack its field, so each section
        filters just its own tracker while the map paint keeps reading the shared Status.
 
-       CapacityBOEd → CapacityMapScale: marker size comes from one field, and plant
-       capacity is nameplate MW while pipeline and extraction capacity is boe/d. The GOGPT
-       file supplies its own CapacityMapScale (MW × 100, a display-only number — see
-       build_gogpt_map_data.py) and the LNG file supplies boe/d converted from whatever
-       unit each terminal recorded (build_lng_map_data.py); the other two sources just
-       reuse their boe/d value. The real figures stay in Capacity/CapacityUnits, which is
-       what the detail card, the table and the downloads show. */
+       CapacityBOEd → CapacityMapScale: marker size comes from one field, so only the two
+       sources measured the same way (pipelines and extraction areas, both boe/d) scale by
+       capacity — they reuse their boe/d value here. The plants and LNG terminals are drawn
+       at a fixed size instead (see markerShapes below and shapeMarkerRadius in
+       site-config.js), since nameplate MW and LNG throughput aren't comparable to boe/d;
+       their builders still write a CapacityMapScale, it just no longer sizes anything. The
+       real figures stay in Capacity/CapacityUnits, which is what the detail card, the
+       table and the downloads show. */
     derivedFields: [
         {field: 'PipelineStatus', from: 'Status', geometries: ['LineString', 'MultiLineString']},
         {field: 'ExtractionStatus', from: 'Status', where: {field: 'Tracker', value: 'GOGET'}},
@@ -184,7 +185,8 @@ var config = {
     /* Three kinds of point on one map, all sharing the status colors, so shape carries the
        tracker: power plants are squares, LNG terminals triangles, and the GOGET extraction
        centroids stay circles. Multi-status groups still get their pie split, just clipped
-       to the shape (see MARKER_CLIP_PATHS in site.js). */
+       to the shape (see MARKER_CLIP_PATHS in site.js). Shaped markers are all one size —
+       capacity scaling applies to the circles and lines only. */
     markerShapes: [
         {field: 'Tracker', value: 'GOGPT', shape: 'square'},
         {field: 'Tracker', value: 'GGIT-LNG', shape: 'triangle'},
