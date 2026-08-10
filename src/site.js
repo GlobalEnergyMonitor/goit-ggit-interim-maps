@@ -153,7 +153,9 @@ function setupRouteDownload() {
         : (location.pathname.split('/').filter(Boolean).pop() || 'combined') + '_map_latest.geojson';
 
     const button = document.getElementById('download-routes');
-    button.textContent = 'Download ' + config.downloadNoun;
+    // downloadAllNoun exists so this button can say what the other two contrast with
+    // ('all data' vs 'filtered data'/'selected data') without garbling their labels
+    button.textContent = 'Download ' + (config.downloadAllNoun ?? config.downloadNoun);
     const label = button.textContent;  // restored after the "Preparing download…" state
     button.hidden = false;
 

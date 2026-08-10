@@ -23,8 +23,10 @@ var config = {
     assetFullLabel: 'assets',
     assetLabel: 'assets',
 
-    /* this map isn't only pipeline routes, so the download buttons say 'data' */
+    /* this map isn't only pipeline routes, so the download buttons say 'data'; the full
+       download says 'all data' to set it against the filtered and selected ones */
     downloadNoun: 'data',
+    downloadAllNoun: 'all data',
 
     /* configure the table view, selecting which columns to show, how to label them,
        and designated which column has the link */
