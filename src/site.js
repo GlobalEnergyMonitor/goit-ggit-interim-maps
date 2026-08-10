@@ -1236,6 +1236,24 @@ function enableUX() {
     buildTable();
     enableModal();
     enableNavFilters();
+    // legend sections that load switched off (config.collapsibleSections) need one filter
+    // pass to take effect; buildLegendFilters() sets the flag but can't run it that early.
+    // A filter pass also reads the search and country state, which enableSearch() and
+    // enableCountrySelect() only populate once their own (async) setup lands, so seed the
+    // empty defaults first — they're the same values those handlers would write.
+    config.searchTerms ??= [];
+    config.searchText ??= '';
+    config.selectedCountries ??= [];
+    if (config.filtersStartOff) {
+        // the geojson source swallows a setData() issued while it's still doing its initial
+        // load — the legend and table would show the filtered set but the map wouldn't — and
+        // enableUX's 3-second fallback regularly fires before then, so wait for the source
+        if (config.tiles || map.isSourceLoaded('assets-source')) {
+            filterData();
+        } else {
+            map.once('idle', filterData);
+        }
+    }
     $('#spinner-container').addClass('d-none')
     $('#spinner-container').removeClass('d-flex')
     if (config.projection === 'globe') {
@@ -1517,11 +1535,24 @@ function makeDomSafe(value) {
 }
 
 function buildLegendFilters() {
+    /* config.collapsibleSections turns each legend section into an asset accordion: a caret
+       that expands/collapses its status rows, plus an on/off switch that stays visible when
+       collapsed and replaces that section's select-all/clear-all links. Per filter,
+       `startExpanded: false` loads it collapsed and `startOn: false` loads its statuses
+       unchecked (so the asset starts hidden on the map); both default to true, which is the
+       pre-accordion behavior. */
+    const collapsible = !!config.collapsibleSections;
+    let anyStartOff = false;
+
     // config.filterCount is tallied by linkAssets(), which always runs before this
     config.filters.forEach((filter, filterIndex) => {
         const title = filter.label || filter.field.replaceAll("_", " ");
         const hasTooltip = !!filter.field_hover_text;
         const isPrimaryWithTooltip = filter.primary && hasTooltip;
+        const sectionId = 'filter-section-' + makeDomSafe(filter.field);
+        const startExpanded = !collapsible || filter.startExpanded !== false;
+        const startOn = !collapsible || filter.startOn !== false;
+        if (!startOn) anyStartOff = true;
 
         const tooltipHtml = hasTooltip
             ? `<div class="infobox" id="infobox">
@@ -1546,7 +1577,25 @@ function buildLegendFilters() {
                 </a>
             </div>`;
 
-        if (config.showToolTip || (!config.showToolTip && config.color_association.field !== filter.field)) {
+        if (collapsible) {
+            // the whole header is the expand/collapse hit area; the switch inside it stops
+            // the click from bubbling so hiding an asset doesn't also collapse its section
+            $('#filter-form').append(`
+                ${hrHtml}
+                <div class="filter-section${startExpanded ? '' : ' collapsed'}" id="${sectionId}" data-field="${filter.field}">
+                    <div class="filter-section-header">
+                        <span class="section-caret" aria-hidden="true"></span>
+                        <h7 class="card-title">
+                            ${title}
+                            ${tooltipHtml}
+                        </h7>
+                        <button type="button" class="section-switch" role="switch"
+                                aria-checked="${startOn}" title="Show or hide all ${title}"></button>
+                    </div>
+                    <div class="filter-section-body" id="${sectionId}-body"></div>
+                </div>
+            `);
+        } else if (config.showToolTip || (!config.showToolTip && config.color_association.field !== filter.field)) {
             $("#filter-form").append(`
                 ${hrHtml}
                 <h7 class="card-title">
@@ -1557,11 +1606,12 @@ function buildLegendFilters() {
             `);
         }
 
+        const rowTarget = collapsible ? `#${sectionId}-body` : '#filter-form';
         for (let i = 0; i < filter.values.length; i++) {
             let check_id =  filter.field + '_' + makeDomSafe(filter.values[i]);
-            let check = `<div class="row filter-row" data-checkid="${(check_id).replace('/','\\/')}">`;
-            check += '<div class="col-1 checkmark" id="' + check_id + '-checkmark"></div>';
-            check += `<div class="col-8"><input type="checkbox" checked class="form-check-input d-none" id="${check_id}">`;
+            let check = `<div class="row filter-row" data-field="${filter.field}" data-checkid="${(check_id).replace('/','\\/')}">`;
+            check += `<div class="col-1 ${startOn ? 'checkmark' : 'uncheckmark'}" id="${check_id}-checkmark"></div>`;
+            check += `<div class="col-8"><input type="checkbox"${startOn ? ' checked' : ''} class="form-check-input d-none" id="${check_id}">`;
             // `showColorDots` opts a section in when it filters on a field derived from the
             // color field (combined maps), so its values still resolve in color_association
             // dotShape draws this section's swatches as that shape, to match a tracker
@@ -1569,7 +1619,7 @@ function buildLegendFilters() {
             check += (config.color_association.field === filter.field || filter.showColorDots ? '<span class="legend-dot' + (filter.dotShape ? ' legend-' + filter.dotShape : '') + '" style="background-color:' + config.color_association.values[ filter.values[i] ] + '"></span>' : "");
             check += `<span id='${check_id}-label'>` + ('values_labels' in filter ? filter.values_labels[i] : filter.values[i].replaceAll("_", " ")) + '</span></div>';
             check += '<div class="col-3 text-end" style="text-align: right;" id="' + check_id + '-count">' + config.filterCount[filter.field][makeDomSafe(filter.values[i])] + '</div></div>';
-            $('#filter-form').append(check);
+            $(rowTarget).append(check);
         }
 
         // add eventlistener for infobox and tooltip to show on hover
@@ -1608,14 +1658,68 @@ function buildLegendFilters() {
         this.addEventListener('click', function() {
             $('#' + this.dataset.checkid).click();
             toggleFilter(this.dataset.checkid);
+            refreshSectionSwitches();  // a row click can flip its section on or off
 
             filterData();
         });
     });
 
+    if (collapsible) {
+        $('.filter-section-header').on('click', function(event) {
+            if ($(event.target).closest('.section-switch').length) return;  // the switch handles its own click
+            toggleSection($(this).closest('.filter-section'));
+        });
+        $('.section-switch').on('click', function(event) {
+            event.preventDefault();  // it lives inside #filter-form
+            event.stopPropagation();
+            const field = $(this).closest('.filter-section').data('field');
+            // anything showing → hide the whole asset; nothing showing → show all of it
+            if (sectionCheckedCount(field) > 0) {
+                clearAllFilterSection(field);
+            } else {
+                selectAllFilterSection(field);
+            }
+            refreshSectionSwitches();
+        });
+        refreshSectionSwitches();
+    }
+
     lockLegendWidth();
     // the theme's web font usually lands after the first measurement; re-measure once loaded
     document.fonts.ready.then(lockLegendWidth);
+
+    // sections that load switched off aren't reflected on the map until a filter pass runs.
+    // enableUX() runs it once the rest of the UI is initialized — filtering reads state
+    // (config.searchTerms) that enableNavFilters() sets up after this function returns.
+    config.filtersStartOff = anyStartOff;
+}
+
+/* Expand or collapse one legend section (config.collapsibleSections maps only) */
+function toggleSection(section) {
+    section.toggleClass('collapsed');
+    section.find('.section-caret').attr('aria-hidden', 'true');
+    lockLegendWidth();  // an expanded section can be wider than anything rendered so far
+}
+
+function sectionCheckedCount(field) {
+    let checked = 0;
+    $('.filter-row[data-field="' + field + '"]').each(function() {
+        if ($('#' + this.dataset.checkid)[0].checked) checked++;
+    });
+    return checked;
+}
+
+/* Each section's switch tracks its rows: on when they all show, off when none do, and a
+   dimmed half-way state when only some do (a row click can leave a section partly on) */
+function refreshSectionSwitches() {
+    $('.filter-section').each(function() {
+        const rows = $(this).find('.filter-row');
+        const checked = sectionCheckedCount(this.dataset.field);
+        const sw = $(this).find('.section-switch');
+        sw.toggleClass('on', checked > 0);
+        sw.toggleClass('partial', checked > 0 && checked < rows.length);
+        sw.attr('aria-checked', checked === 0 ? 'false' : (checked === rows.length ? 'true' : 'mixed'));
+    });
 }
 
 /* Freeze the legend at the widest width it has rendered at (full-data counts): filtered
@@ -1647,7 +1751,7 @@ function selectAllFilter() {
 // needs to know field name to distinguish which filter rows to clear and what not to
 function selectAllFilterSection(fieldRow) {
     $('.filter-row').each(function() {
-        let rowFieldName = this.dataset.checkid.split('_')[0];
+        let rowFieldName = this.dataset.field ?? this.dataset.checkid.split('_')[0];
         if (rowFieldName === fieldRow && !$('#' + this.dataset.checkid)[0].checked) {
             $('#' + this.dataset.checkid)[0].checked = true;
             toggleFilter(this.dataset.checkid);
@@ -1672,7 +1776,7 @@ function clearAllFilter(fieldRow) {
 // for section level select all and clear all
 function clearAllFilterSection(fieldRow) {
     $('.filter-row').each(function() {
-        let rowFieldName = this.dataset.checkid.split('_')[0];
+        let rowFieldName = this.dataset.field ?? this.dataset.checkid.split('_')[0];
         if (rowFieldName === fieldRow && $('#' + this.dataset.checkid)[0].checked) {
             $('#' + this.dataset.checkid)[0].checked = false;
             toggleFilter(this.dataset.checkid);
@@ -1878,6 +1982,7 @@ function updateSummary() {
     }
 
     updateFilteredDownloadButton();  // runs after every filter change, so the button tracks filter state
+    refreshSectionSwitches();  // catches the paths that change checkboxes without going through a switch
     lockLegendWidth();  // ratchet, in case the legend rendered narrow before fonts loaded
 }
 

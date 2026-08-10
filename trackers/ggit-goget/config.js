@@ -137,11 +137,17 @@ var config = {
         {field: 'ExtractionStatus', from: 'Status', geometries: ['Point', 'MultiPoint', 'Polygon', 'MultiPolygon']},
     ],
 
+    /* one collapsible section per asset, each with its own show/hide switch; matches the
+       ggit-goget-gogpt map, where only the pipelines are expanded and drawn at load */
+    collapsibleSections: true,
+
     filters: [
         {
             field: 'PipelineStatus',
             label: 'Gas pipelines',
             showColorDots: true,
+            startExpanded: true,
+            startOn: true,
             values: ['operating', 'construction', 'proposed', 'shelved', 'mothballed', 'cancelled', 'retired', 'idle', 'mixed status'],
             values_labels: ['Operating', 'Construction', 'Proposed', 'Shelved', 'Mothballed', 'Cancelled', 'Retired', 'Idle', 'Mixed status'],
         },
@@ -149,6 +155,8 @@ var config = {
             field: 'ExtractionStatus',
             label: 'Oil &amp; gas extraction areas',
             showColorDots: true,
+            startExpanded: false,
+            startOn: false,
             values: ['operating', 'in-development', 'discovered', 'exploration', 'decommissioning', 'mothballed', 'abandoned', 'cancelled', 'underground gas storage', 'not found'],
             values_labels: ['Operating', 'In development', 'Discovered', 'Exploration', 'Decommissioning', 'Mothballed', 'Abandoned', 'Cancelled', 'Underground gas storage', 'Not found'],
         },

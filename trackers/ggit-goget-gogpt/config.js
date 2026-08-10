@@ -192,11 +192,18 @@ var config = {
         {field: 'Tracker', value: 'GGIT-LNG', shape: 'triangle'},
     ],
 
+    /* one collapsible section per asset, each with its own show/hide switch. Four trackers'
+       worth of statuses is a long legend, so only the pipelines are expanded and drawn at
+       load; the other three start collapsed and switched off (startExpanded/startOn). */
+    collapsibleSections: true,
+
     filters: [
         {
             field: 'PipelineStatus',
             label: 'Gas pipelines',
             showColorDots: true,
+            startExpanded: true,
+            startOn: true,
             values: ['operating', 'construction', 'proposed', 'shelved', 'mothballed', 'cancelled', 'retired', 'idle', 'mixed status'],
             values_labels: ['Operating', 'Construction', 'Proposed', 'Shelved', 'Mothballed', 'Cancelled', 'Retired', 'Idle', 'Mixed status'],
         },
@@ -204,6 +211,8 @@ var config = {
             field: 'ExtractionStatus',
             label: 'Oil &amp; gas extraction areas',
             showColorDots: true,
+            startExpanded: false,
+            startOn: false,
             values: ['operating', 'in-development', 'discovered', 'exploration', 'decommissioning', 'mothballed', 'abandoned', 'cancelled', 'underground gas storage', 'not found'],
             values_labels: ['Operating', 'In development', 'Discovered', 'Exploration', 'Decommissioning', 'Mothballed', 'Abandoned', 'Cancelled', 'Underground gas storage', 'Not found'],
         },
@@ -212,6 +221,8 @@ var config = {
             label: 'Oil &amp; gas power plants',
             showColorDots: true,
             dotShape: 'square',  // these draw as squares on the map
+            startExpanded: false,
+            startOn: false,
             values: ['operating', 'construction', 'pre-construction', 'announced', 'shelved', 'mothballed', 'retired', 'cancelled'],
             values_labels: ['Operating', 'Construction', 'Pre-construction', 'Announced', 'Shelved', 'Mothballed', 'Retired', 'Cancelled'],
         },
@@ -220,6 +231,8 @@ var config = {
             label: 'LNG terminals',
             showColorDots: true,
             dotShape: 'triangle',  // these draw as triangles on the map
+            startExpanded: false,
+            startOn: false,
             values: ['operating', 'construction', 'proposed', 'shelved', 'mothballed', 'idled', 'retired', 'cancelled'],
             values_labels: ['Operating', 'Construction', 'Proposed', 'Shelved', 'Mothballed', 'Idled', 'Retired', 'Cancelled'],
         },

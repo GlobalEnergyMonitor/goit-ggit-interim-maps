@@ -138,6 +138,19 @@ shared `Status`. A `derivedFields` rule selects features by `geometries`, by
 from the GOGPT plants and LNG terminals, since geometry alone can't (all three
 are points).
 
+On both combined maps each of those sections is a **collapsible asset accordion**:
+a caret expands its status rows, and a switch on the header — visible whether the
+section is open or closed — turns that whole asset on or off (it replaces the
+per-section "select all section / clear all section" links; the legend-wide
+select all / clear all stays). The switch shows a half-way state when only some
+of a section's statuses are ticked. `collapsibleSections: true` in the tracker
+config turns this on, and each filter takes `startExpanded` / `startOn`
+(both default true). Both maps load with only **Gas pipelines** expanded and
+drawn; the other assets start collapsed and switched off, which `enableUX()`
+applies with one filter pass once the geojson source has finished loading —
+a `setData()` issued before that is silently dropped, so the map would keep
+drawing everything while the legend claimed otherwise.
+
 Because all those points share one status palette, **shape carries the tracker**
 on that map: power plants are squares, LNG terminals triangles, extraction-area
 centroids circles. That's `markerShapes: [{field, value, shape}]` in the tracker
