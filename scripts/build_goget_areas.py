@@ -20,6 +20,10 @@ Needs GEM_READONLY_DB_URL in the environment (read-only Postgres role):
 
     python3 scripts/build_goget_areas.py
 
+The connection itself comes from the sibling gem-db-ops repo via scripts/gem_db.py
+(read-only session guard + statement timeout included) — don't add a local
+psycopg2.connect back.
+
 Commit and push the regenerated file; the ggit-goget map loads it from this
 repo's raw.githubusercontent.com URL.
 
@@ -40,12 +44,13 @@ asset on the map instead of two.
 """
 
 import json
-import os
 import sys
 import urllib.request
 from pathlib import Path
 
-import psycopg2
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+import gem_db  # read-only GEM connection, borrowed from the sibling gem-db-ops repo
 from shapely import force_2d, make_valid, set_precision
 from shapely.geometry import MultiPolygon, mapping
 from shapely.wkt import loads as wkt_loads
@@ -249,13 +254,7 @@ def point_only_attributes():
 
 
 def main():
-    db_url = os.environ.get('GEM_READONLY_DB_URL')
-    if not db_url:
-        sys.exit('GEM_READONLY_DB_URL is not set (read-only GEM project DB URL)')
-
-    with psycopg2.connect(db_url) as conn, conn.cursor() as cur:
-        cur.execute(QUERY)
-        rows = cur.fetchall()
+    rows = gem_db.fetch_all(QUERY)
     print(f'fetched {len(rows)} outlines from project_geospatial')
 
     point_attrs = point_only_attributes()

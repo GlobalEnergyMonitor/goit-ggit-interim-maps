@@ -11,6 +11,10 @@ Needs GEM_READONLY_DB_URL in the environment (read-only Postgres role):
 
     python3 scripts/build_lng_map_data.py
 
+The connection itself comes from the sibling gem-db-ops repo via scripts/gem_db.py
+(read-only session guard + statement timeout included) — don't add a local
+psycopg2.connect back.
+
 Commit and push the regenerated file; the ggit-goget-gogpt map loads it from
 this repo's raw.githubusercontent.com URL.
 
@@ -25,12 +29,13 @@ only — terminals appear on the combined ggit-goget-gogpt map.
 """
 
 import json
-import os
 import sys
 from decimal import Decimal
 from pathlib import Path
 
-import psycopg2
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+import gem_db  # read-only GEM connection, borrowed from the sibling gem-db-ops repo
 
 OUT_PATH = Path(__file__).resolve().parent.parent / 'trackers' / 'ggit-goget-gogpt' / 'lng_map_latest.geojson'
 
@@ -185,13 +190,7 @@ def trim(value):
 
 
 def main():
-    db_url = os.environ.get('GEM_READONLY_DB_URL')
-    if not db_url:
-        sys.exit('GEM_READONLY_DB_URL is not set (read-only GEM project DB URL)')
-
-    with psycopg2.connect(db_url) as conn, conn.cursor() as cur:
-        cur.execute(QUERY)
-        rows = cur.fetchall()
+    rows = gem_db.fetch_all(QUERY)
     print(f'fetched {len(rows)} LNG terminal units')
 
     features = []

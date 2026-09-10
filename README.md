@@ -92,6 +92,14 @@ python3 scripts/build_goget_areas.py
 python3 scripts/build_goget_map_data.py
 ```
 
+The two database-reading builders (`build_goget_areas.py`, `build_lng_map_data.py`)
+get their connection from the sibling **`gem-db-ops`** repo through
+`scripts/gem_db.py` — that repo is the single source of truth for GEM data access,
+so the read-only session guard and statement timeout come along for free. Clone it
+beside this one, or point `GEM_DB_OPS_REPO` at it. Don't add a local
+`psycopg2.connect` back (the pre-2026-08-11 shape); extend `scripts/gem_db.py`
+instead. Verified byte-identical output across that switch.
+
 Then commit and push both regenerated files. Update `SOURCE_URL` in
 `build_goget_map_data.py` first if the data team published a newer export.
 Production/capacity and Parent are deliberately *not* derived from the database
