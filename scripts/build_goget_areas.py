@@ -62,7 +62,7 @@ from shapely.geometry import MultiPolygon, mapping
 from shapely.wkt import loads as wkt_loads
 
 import goget_db
-from goget_bulk_overlay import NO_STATUS, BulkOverlay, current_status, first_year, merge_timeline  # noqa: F401
+from goget_bulk_overlay import BulkOverlay
 
 OUT_PATH = Path(__file__).resolve().parent.parent / 'trackers' / 'ggit-goget' / 'goget_areas_latest.geojson'
 
@@ -74,8 +74,6 @@ MAKE_WIKI_ONLY = False
 # which is most of the file size and none of the accuracy.
 COORD_PRECISION = 6
 
-# NO_STATUS, current_status() and first_year() live in goget_bulk_overlay so the
-# point builder derives status from a merged timeline the same way.
 
 def polygonal(geom):
     """Reduce a geometry to its polygonal parts, or None if it has none.

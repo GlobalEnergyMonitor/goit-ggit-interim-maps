@@ -7,34 +7,44 @@ they live here rather than in one builder importing the other. Everything comes
 from the read-only GEM connection in scripts/gem_db.py (borrowed from the
 sibling gem-db-ops repo); nothing here writes.
 
-What the data team's GOGET map export (goget_map_*.geojson on the public CDN,
-the map's source until October 2026) did, and what this reproduces:
-
-  * projects: every non-deleted GOGET plant (`plant.projectType = 9`). The
-    export only carried projects with `goget_project.makeWIKI` set — every one
-    of its ids had the flag, and every flagged project with coordinates was in
-    it — so the point builder applies the same rule; the outline builder keeps
-    every traced outline regardless (see its docstring).
-  * owners and operators: plant-level `plant_owner` / `operator` rows with the
-    company's legal entity type and the share as recorded (the export
-    truncated shares to whole numbers; the map keeps the decimals).
+  * projects: gem-db-ops' `export_goget_all_fields`, the port of the
+    website's GOGET all-fields report (one row per non-deleted
+    `plant.projectType = 9` plant), written to a temporary CSV — the same
+    pattern build_gogpt_map_data.py uses. Name, wiki link, location, outline,
+    operators, status and the discovery / FID / production-start years are
+    therefore spelled the way the published spreadsheet spells them
+    (status and years read off the timeline the website's way, so a field
+    whose only operating entry is an as-of year has no production start
+    year). Before 2026-10-14 this module ran its own project query instead.
+  * what the export doesn't carry, or carries in a form the map can't use,
+    comes from EXTRA_QUERY: the second country; the owners with their shares
+    as recorded (the export truncates them to whole numbers, which turns a
+    0.74% stake into "[0%]"; the map keeps the decimals); the decimal
+    coordinates (a fallback for the few rows whose export coordinates are free
+    text); the raw status timeline (the Asana bulk overlay merges its entries
+    into it); and when the outline was last edited (the overlay's newer-source
+    check).
   * parents: the owner companies' precomputed ultimate parents
     (`company.gemParentsJSON`), the owner's share times the chain share,
     summed per parent, one decimal, biggest first; an owner with no recorded
-    share lists its parents without a bracket. Checked against the March 2026
+    share lists its parents without a bracket. GOGET's all-fields report has
+    no parent column, so this stays here. Checked against the March 2026 CDN
     export: 5,927 of 7,673 strings identical, the rest mostly company renames
     since then.
   * production: `reserves_production` rows of kind 'production', converted
     with goget_bulk_overlay.convert_production (oil and condensate to million
     bbl/y, gas to million m³/y), latest year per fuel, summed within that year.
-    Checked against the export: within rounding on ~3,150 of ~3,350 projects
+    The export only gives the latest year, not the quantities. Checked against
+    the March 2026 CDN export: within rounding on ~3,150 of ~3,350 projects
     per fuel, the rest being figures updated since March. Fuels and units the
     conversion doesn't cover (LPG, NGL, boe, petajoules…) are skipped and
     counted, never guessed.
 """
 
+import csv
 import json
 import sys
+import tempfile
 from collections import Counter, defaultdict
 from decimal import ROUND_HALF_EVEN, Decimal
 from pathlib import Path
@@ -42,7 +52,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import gem_db  # read-only GEM connection, borrowed from the sibling gem-db-ops repo
-from goget_bulk_overlay import convert_production, current_status, first_year, production_props
+from goget_bulk_overlay import NO_STATUS, convert_production, production_props
+
+csv.field_size_limit(sys.maxsize)  # the outline column runs to ~2 MB
 
 GOGET_PROJECT_TYPE = 9
 
@@ -56,19 +68,10 @@ POINT_ONLY_FIELDS = (
     'Capacity', 'CapacityUnits', 'CapacityBOEd',
 )
 
-PROJECT_COLUMNS = (
-    'project_id', 'unit_number', 'name', 'wiki', 'subnational', 'accuracy',
-    'country', 'country2', 'fuel_type', 'production_type', 'basin', 'make_wiki',
-    'latitude', 'longitude', 'owners', 'operators', 'timeline', 'wkt', 'wkt_modified',
-)
-
-PROJECT_QUERY = """
-with geo as (
-    select pg.project_id, pg.wkt, pg.modified
-    from project_geospatial pg
-    where pg.wkt is not null and btrim(pg.wkt) <> ''
-),
-owners as (
+# One row per GOGET plant, keyed like the export's "Unit ID". The outline row
+# is the lowest-id one, the same row the export prints.
+EXTRA_QUERY = """
+with owners as (
     select po.plant_id,
            string_agg(
                btrim(c.name || ' ' || coalesce(l.type, '')) ||
@@ -84,11 +87,10 @@ owners as (
     left join legal_entity_type l on l.id = c."legalEntityType_id"
     group by po.plant_id
 ),
-ops as (
-    select o.plant_id, string_agg(distinct btrim(c.name), '; ') as operators
-    from operator o
-    join company c on c.id = o.company_id and c.deleted is not true
-    group by o.plant_id
+geo as (
+    select distinct on (pg.project_id) pg.project_id, pg.modified
+    from project_geospatial pg
+    order by pg.project_id, pg.id
 ),
 tl as (
     select u.plant_id,
@@ -100,40 +102,25 @@ tl as (
     join status_timeline st on st.unit_id = u.id
     group by u.plant_id
 )
-select 'L' || p."unitIDSearch"[1]  as project_id,
-       p."unitIDSearch"[1]          as unit_number,
-       p.name,
-       p."wikiUrl",
-       p.subnational,
-       p."locationAccuracy",
-       c1."gemName"                as country,
-       c2."gemName"                as country2,
-       gp."fuelType",
-       gp."productionType",
-       gp.basin,
-       gp."makeWIKI",
+select 'L' || p.id          as project_id,
+       c2."gemName"         as country2,
+       owners.owners,
        p.latitude,
        p.longitude,
-       owners.owners,
-       ops.operators,
        tl.timeline,
-       geo.wkt,
-       geo.modified               as wkt_modified
+       geo.modified         as wkt_modified
 from plant p
-join goget_project gp on gp.project_id = p.id
-left join geo on geo.project_id = p.id
-left join country c1 on c1.id = p.country_id
 left join country c2 on c2.id = p.country2_id
 left join owners on owners.plant_id = p.id
-left join ops on ops.plant_id = p.id
 left join tl on tl.plant_id = p.id
+left join geo on geo.project_id = p.id
 where p.deleted is not true
   and p."projectType" = :project_type
-order by project_id
 """
 
+
 OWNER_QUERY = """
-select 'L' || p."unitIDSearch"[1] as project_id,
+select 'L' || p.id as project_id,
        po.share,
        c."gemParentsJSON"
 from plant p
@@ -145,7 +132,7 @@ order by po.id
 """
 
 PRODUCTION_QUERY = """
-select 'L' || p."unitIDSearch"[1] as project_id,
+select 'L' || p.id as project_id,
        rp."fuelDesc",
        rp.quantity,
        rp."quantityUnit",
@@ -158,10 +145,63 @@ where rp."productionReserves" = 'production'
 """
 
 
+def export_rows():
+    """Every row of gem-db-ops' GOGET all-fields export, as dicts keyed by the CSV header."""
+    sys.path.insert(0, str(gem_db.db_ops_repo()))
+    from gem_all_fields import export_goget_all_fields
+
+    engine = gem_db.build_readonly_engine()
+    with tempfile.TemporaryDirectory() as tmp:
+        csv_path = Path(tmp) / 'goget.csv'
+        export_goget_all_fields(engine, str(csv_path))
+        with csv_path.open(encoding='utf-8-sig', newline='') as handle:
+            return list(csv.DictReader(handle))
+
+
+def _coordinate(text, fallback):
+    """The export's coordinate string as a float, else the database decimal.
+
+    The export prints the free-text `latitudeText` / `longitudeText` for
+    projects recorded in another coordinate format, which may not parse.
+    """
+    try:
+        return float(text)
+    except (TypeError, ValueError):
+        return float(fallback) if fallback is not None else None
+
+
 def fetch_projects():
-    """Every non-deleted GOGET project as a dict (PROJECT_COLUMNS), by project id."""
-    rows = gem_db.fetch_all(PROJECT_QUERY, {'project_type': GOGET_PROJECT_TYPE})
-    return {row[0]: dict(zip(PROJECT_COLUMNS, row)) for row in rows}
+    """Every non-deleted GOGET project as a dict, by project id ('L' + plant id)."""
+    extra = {row[0]: row for row in gem_db.fetch_all(EXTRA_QUERY, {'project_type': GOGET_PROJECT_TYPE})}
+    projects = {}
+    for row in export_rows():
+        project_id = row['Unit ID']
+        _, country2, owners, lat, lon, timeline, wkt_modified = extra.get(project_id, (None,) * 7)
+        projects[project_id] = {
+            'project_id': project_id,
+            'name': row['Unit Name'],
+            'wiki': row['Wiki URL'],
+            'subnational': row['Subnational unit'],
+            'accuracy': row['Location accuracy'],
+            'country': row['Country/Area'],
+            'country2': country2,
+            'fuel_type': row['Fuel type'],
+            'production_type': row['Production Type'],
+            'basin': row['Basin'],
+            'make_wiki': row['Keep (makeWIKI)'] == 'True',
+            'latitude': _coordinate(row['Latitude'], lat),
+            'longitude': _coordinate(row['Longitude'], lon),
+            'owners': owners,
+            'operators': row['Operator'],
+            'status': row['Status'],
+            'start_year': row['Production start year'],
+            'discovery_year': row['Discovery year'],
+            'fid_year': row['FID Year'],
+            'timeline': timeline or [],
+            'wkt': row['Project outline (WKT)'],
+            'wkt_modified': wkt_modified,
+        }
+    return projects
 
 
 def countries(country, country2):
@@ -173,18 +213,17 @@ def countries(country, country2):
 def feature_props(row):
     """The handoff-schema properties shared by outlines and centroids, from a fetch_projects() row.
 
-    Status and the three year fields are read off the status timeline the same
-    way the bulk overlay reads a merged one (goget_bulk_overlay.current_status
-    and first_year). The POINT_ONLY_FIELDS are added by point_only_props().
+    Status and the three year fields are the export's. A project with a bulk
+    status upload gets them re-derived from the merged timeline by
+    BulkOverlay.apply_status, with the export's own rules. The
+    POINT_ONLY_FIELDS are added by point_only_props().
     """
-    timeline = row['timeline']
-    status = current_status(timeline)
     country_label = countries(row['country'], row['country2'])
     subnational = row['subnational']
     return {
         'PipelineName': row['name'] or '',
         'SegmentName': '',  # keeps the shared hover popup from printing undefined
-        'Status': status,
+        'Status': row['status'] or NO_STATUS,
         'Wiki': row['wiki'] or '',
         'ProjectID': row['project_id'] or '',
         'CountriesOrAreas': country_label,
@@ -192,9 +231,9 @@ def feature_props(row):
         'StartLocation': ', '.join([p for p in (subnational, country_label) if p]),
         'Owner': row['owners'] or '',
         'Operator': row['operators'] or '',
-        'StartYear1': first_year(timeline, status='operating'),
-        'DiscoveryYear': first_year(timeline, status='discovered'),
-        'FIDYear': first_year(timeline, substatus='actual FID'),
+        'StartYear1': row['start_year'],
+        'DiscoveryYear': row['discovery_year'],
+        'FIDYear': row['fid_year'],
         'LocationAccuracy': row['accuracy'] or '',
         'FuelType': row['fuel_type'] or '',
         'ProductionType': row['production_type'] or '',

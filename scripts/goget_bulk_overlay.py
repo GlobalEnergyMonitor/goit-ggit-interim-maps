@@ -22,7 +22,7 @@ What is applied, keyed on the GEM unit id (L1000…):
   * point locations (lat/lon + accuracy + subnational) — move centroids;
   * operators (GEM entity ids, resolved to names through the `company` table);
   * status timeline entries — merged into the database timeline, then the
-    current status is re-derived the same way as for database rows;
+    status and years are re-derived by the export's rules (timeline_props);
   * production — the same conversion the database builders use for
     `reserves_production` (convert_production below): oil and condensate in
     bbl, m³ or tonnes, gas in m³ or cubic feet (standard/normal variants,
@@ -124,35 +124,32 @@ def _lower(text):
 # Timeline helpers (shared with the database builders)
 # ---------------------------------------------------------------------------
 
-def current_status(timeline):
-    """Latest actual status from the timeline.
+def timeline_props(timeline):
+    """Status and the three year properties from a timeline, the export's way.
 
-    `order` is the researcher-maintained sequence, so the last entry is the
-    current state — except that planned future events (a scheduled
-    decommissioning, a planned start-up) also live in the timeline and would
-    otherwise win. Dropping substatus='planned' reproduces the March release
-    sheet's Status column for 1709 of the 1755 fields the two sources share
-    (97.4%); the rest are fields whose status genuinely moved on since March.
+    Runs gem-db-ops' _derive_goget_status, the port of the website's GOGET
+    status logic that also fills the all-fields export the builders read, so a
+    project whose timeline gained bulk-upload entries is read by the same rules
+    as every other project: the latest non-planned entry is the status;
+    discovery, FID and production start are the first dated entries of the
+    first discovered, non-planned in-development and operating + ramp up
+    groups. A timeline with only planned entries has no status.
     """
-    if not timeline:
-        return NO_STATUS
-    actual = [t for t in timeline if t.get('substatus') != 'planned'] or timeline
-    ordered = sorted(actual, key=lambda t: (t.get('ord') is None, t.get('ord')))
-    return (ordered[-1].get('status') or '').strip() or NO_STATUS
+    import gem_db
+    sys.path.insert(0, str(gem_db.db_ops_repo()))
+    from gem_all_fields import _derive_goget_status, _fmt_year
 
-
-def first_year(timeline, status=None, substatus=None):
-    """Year of the earliest timeline entry matching status/substatus."""
-    matches = [
-        t for t in timeline or []
-        if (status is None or (t.get('status') or '').strip() == status)
-        and (substatus is None or (t.get('substatus') or '').strip() == substatus)
-        and t.get('year')
-    ]
-    if not matches:
-        return ''
-    matches.sort(key=lambda t: (t.get('ord') is None, t.get('ord')))
-    return str(matches[0]['year'])
+    derived = _derive_goget_status([
+        {'order': t.get('ord') or 0, 'status': (t.get('status') or '').strip(),
+         'substatus': (t.get('substatus') or '').strip(), 'year': t.get('year')}
+        for t in timeline or []
+    ])
+    return {
+        'Status': derived['status'] or NO_STATUS,
+        'StartYear1': _fmt_year(derived['start_year']),
+        'DiscoveryYear': _fmt_year(derived['discovery_year']),
+        'FIDYear': _fmt_year(derived['fid_year']),
+    }
 
 
 def merge_timeline(db_timeline, bulk_entries):
@@ -511,7 +508,7 @@ class BulkOverlay:
         import gem_db
         rows = gem_db.fetch_all(
             """
-            select 'L' || p."unitIDSearch"[1],
+            select 'L' || p.id,
                    json_agg(json_build_object(
                        'status', st.status, 'substatus', st.substatus,
                        'ord', st."order", 'year', st.year
@@ -519,7 +516,7 @@ class BulkOverlay:
             from plant p
             join powerplant_unit u on u.plant_id = p.id
             join status_timeline st on st.unit_id = u.id
-            where p."unitIDSearch"[1] = any(:ids)
+            where p.id = any(:ids)
             group by 1
             """,
             {'ids': numeric},
@@ -542,11 +539,7 @@ class BulkOverlay:
         entry = self.status.get(uid)
         if entry is None:
             return False
-        timeline = merge_timeline(db_timeline, entry[1])
-        props['Status'] = current_status(timeline)
-        props['StartYear1'] = first_year(timeline, status='operating')
-        props['DiscoveryYear'] = first_year(timeline, status='discovered')
-        props['FIDYear'] = first_year(timeline, substatus='actual FID')
+        props.update(timeline_props(merge_timeline(db_timeline, entry[1])))
         return True
 
     def apply_operator(self, props, uid):
