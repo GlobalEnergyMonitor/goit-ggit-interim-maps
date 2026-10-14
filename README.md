@@ -14,6 +14,7 @@ Deployed to GitHub Pages on every push to `main`:
 
 - https://globalenergymonitor.github.io/goit-ggit-interim-maps/trackers/goit/
 - https://globalenergymonitor.github.io/goit-ggit-interim-maps/trackers/ggit/
+- https://globalenergymonitor.github.io/goit-ggit-interim-maps/trackers/goget/
 - https://globalenergymonitor.github.io/goit-ggit-interim-maps/trackers/ggit-goget/
 - https://globalenergymonitor.github.io/goit-ggit-interim-maps/trackers/ggit-goget-gogpt/
 
@@ -60,7 +61,7 @@ their own map separately.
 **The ggit-goget map** overlays GOGET oil & gas extraction areas on the GGIT
 pipelines. Its `geojson:` key is an *array* of URLs (the shared shell merges
 multiple sources): the same auto-updating GGIT file, plus two committed GOGET
-files under `trackers/ggit-goget/`.
+files under `trackers/ggit-goget/`. **The goget map** (`trackers/goget/`) shows those two GOGET files on their own, read from the same URLs, so it needs no data of its own.
 
 - `goget_areas_latest.geojson` — field-outline polygons, read straight from the
   GEM project database (`project_geospatial.wkt`) by
@@ -95,7 +96,8 @@ Then commit and push the regenerated files (or let the workflow below do it).
 The GOGET researchers hand their updates to the data team as **bulk-upload requests** in the Asana "Data team inbox" project (mostly in its "Bulk Upload Requests" section, though older ones sit in "Tracker Releases"; one task per region: Alberta, Saskatchewan, British Columbia, Australia, Texas, the UK, Argentina, Brazil, …), with the CSVs attached to the task's subtasks or to the task itself. Until the data team processes a request its data is in neither the database nor the export, yet it is the freshest GOGET data there is: new field outlines (WKT), moved centroids, production, operators, statuses and deletions. So both GOGET builders overlay those files on top of what they read. The requests belong to the data team: nothing here completes, edits or comments on them, and the downloader only ever sends GET requests.
 
 - `scripts/asana_goget_bulk_uploads.py` downloads every `.csv` attached to an **incomplete** GOGET bulk-upload task anywhere in that project (Tracker custom field or name says GOGET; Task Type, Data Product or Project, or name says bulk upload) or to one of its incomplete subtasks, into the gitignored `_asana_cache/` (`files/<attachment gid>.csv` plus `manifest.json`). Completed subtasks are skipped because that data is already in the database, and a request that has since been completed drops out of the cache on the next run. It needs an Asana personal access token in `ASANA_ACCESS_TOKEN` (https://app.asana.com/0/my-apps, any workspace member who can see the inbox; locally, `~/.config/asana/token` holds one).
-- `scripts/goget_bulk_overlay.py` reads that cache. It classifies each CSV by its header (outline WKT, lat/lon, new assets, production, operator, status/timeline, deletion; reserves, other IDs and record-of-updates files are ignored), and when the same unit is in several files the newest upload wins. Running it on its own prints what it found.
+- `scripts/goget_bulk_overlay.py` reads that cache. It classifies each CSV by its header (outline WKT, lat/lon, new assets, production, operator, status/timeline, deletion; reserves, other IDs and record-of-updates files are ignored), and when the same unit is in several files the newest upload wins. A file that still has the upload template's title and instruction lines above its header is read from the first line it recognizes. Running it on its own prints what it found.
+- `data/goget_bulk_static/` holds bulk files that Asana links as Google Sheets instead of attaching as CSVs, which the downloader can't fetch (CI has no Google login). Each was exported by hand with `gws-gem` into `files/` and listed in its own `manifest.json` (same format as the cache's, plus a `source` link); the overlay reads it together with `_asana_cache/`. It now holds the Texas new-assets production sheet. Its rows have no GEM ID, only a temporary government unit ID, so production rows without an ID are keyed on that column and the new-asset points pick them up by it. Re-export a file if its sheet changes, and delete it once its Asana task is complete.
 - `build_goget_areas.py` draws a bulk outline for any GOGET project that has one, unless the database outline was modified after the upload; a field with a bulk outline that does not parse keeps its database outline. `build_goget_map_data.py` moves centroids, drops deleted units, and appends the Texas "new assets" (fields with no GEM ID yet) as points with an empty `ProjectID` and `Wiki`. Both apply operators (`E…` IDs resolved through the `company` table), statuses (appended to the database timeline, then read with the export's own rules through `timeline_props`) and production.
 - Production: only `Production/Reserves == production` rows are used, converted with the same `convert_production` the database builders use (oil and condensate in bbl, m³ or tonnes; gas in m³ or cubic feet; see above), summed for the latest year per fuel, and `Capacity` recomputed the same way. LPG, NGL, reserves, cumulative production, energy units and negative (correction) rows are skipped and listed in the run summary.
 
@@ -192,6 +194,7 @@ acceptable.
 python server.py
 # → http://localhost:8080/maps/trackers/goit/
 # → http://localhost:8080/maps/trackers/ggit/
+# → http://localhost:8080/maps/trackers/goget/
 # → http://localhost:8080/maps/trackers/ggit-goget/
 # → http://localhost:8080/maps/trackers/ggit-goget-gogpt/
 ```
@@ -209,3 +212,4 @@ locally, so a regenerated geojson only shows up after it's pushed.
 - `.github/workflows/pages.yml` — deploys `_dist/` to Pages on push to `main`
 - `.github/workflows/build-map-data.yml` — daily rebuild of the GOGET, GOGPT and LNG files from the database (plus the open Asana bulk uploads for GOGET)
 - `_asana_cache/` (gitignored) — the downloaded bulk-upload CSVs and their manifest
+- `data/goget_bulk_static/` — bulk-upload Google Sheets exported by hand for the overlay (see the GOGET section)

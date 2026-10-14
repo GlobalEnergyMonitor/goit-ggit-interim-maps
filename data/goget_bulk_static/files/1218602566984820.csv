@@ -1,0 +1,367 @@
+Database ID,Production/Reserves,Year,Fuel Description,Quantity,Quantity Unit,Datasource,Notes,"Government unit ID (Temp, until GOGET ID is generated)",Asset Base Name
+,production,2025,gas,154249456,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85280300_102324,Spraberry (Trend Area) - Oxyrock Operating
+,production,2025,gas,133691176,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),71052900_100852,Phantom (Wolfcamp) - Permian Resources Operating
+,production,2025,gas,69209744,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85280300_760725,Spraberry (Trend Area) - Surge Operating
+,production,2025,gas,82768864,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85279200_101577,Spraberry (Trend Area) - Civitas Permian Operating
+,production,2025,gas,34356403,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85280300_385826,Spraberry (Trend Area) - Highpeak Energy Holdings
+,production,2025,gas,88022450,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),12018200_100351,Briscoe Ranch (Eagleford) - Javelin Energy Partners Mgmt
+,production,2025,gas,52075532,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85280300_148113,Spraberry (Trend Area) - Chevron U. S. A. Inc.
+,production,2025,gas,22614784,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85280300_263696,"Spraberry (Trend Area) - Fasken Oil And Ranch, Ltd."
+,production,2025,gas,58978000,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85280300_100951,"Spraberry (Trend Area) - Vital Energy, Inc."
+,production,2025,gas,85355296,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85280300_71331,"Spraberry (Trend Area) - Birch Operations, Inc."
+,production,2025,gas,34252839,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85280300_630591,Spraberry (Trend Area) - Oxy Usa Inc.
+,production,2025,gas,61274320,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85279200_102879,Spraberry (Trend Area) - De Central Operating
+,production,2025,gas,12383586,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),27135700_100351,Eagleville (Eagle Ford-1) - Javelin Energy Partners Mgmt
+,production,2025,gas,26147337,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),71052900_100951,"Phantom (Wolfcamp) - Vital Energy, Inc."
+,production,2025,gas,48652501,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),34733500_521544,Giddings (Austin Chalk-3) - Magnolia Oil & Gas Operating
+,production,2025,gas,93152292,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85279201_665748,"Spraberry (Trend Area) - Pioneer Natural Res. Usa, Inc."
+,production,2025,gas,30278289,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),27135700_102886,Eagleville (Eagle Ford-1) - Verdun Oil Ef Ii
+,production,2025,gas,16136397,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),27135750_101444,"Eagleville (Eagle Ford-2) - Baytex Energy Usa, Inc."
+,production,2025,gas,17333969,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),27135700_424176,Eagleville (Eagle Ford-1) - Ineos Usa Oil & Gas
+,production,2025,gas,29232400,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85279200_101413,Spraberry (Trend Area) - Firebird Energy Ii
+,production,2025,gas,20214702,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85280300_655805,Spraberry (Trend Area) - Permian Deep Rock Oil Co.
+,production,2025,gas,19100684,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),98359800_100852,Wolfbone (Trend Area) - Permian Resources Operating
+,production,2025,gas,43085665,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85280300_101577,Spraberry (Trend Area) - Civitas Permian Operating
+,production,2025,gas,14776766,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),80544500_101377,Sandbar (Bone Spring) - Vtx Energy Operating
+,production,2025,gas,8718495,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85280300_101969,Spraberry (Trend Area) - Hibernia Resources Iv
+,production,2025,gas,13901080,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85280300_58827,Spraberry (Trend Area) - Bayswater Operating Company
+,production,2025,gas,45954724,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),31913800_103285,FordWest (Wolfcamp) - Coterra Energy Operating Co.
+,production,2025,gas,3703433,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),34733610_923444,Giddings (Eagleford) - Wildfire Energy Operating
+,production,2025,gas,23948604,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),12018200_424176,Briscoe Ranch (Eagleford) - Ineos Usa Oil & Gas
+,production,2025,gas,2538009,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85280300_101633,Spraberry (Trend Area) - Ike Operating
+,production,2025,gas,20772940,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),71052900_331448,Phantom (Wolfcamp) - Greenlake Energy Operating
+,production,2025,gas,3430945,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),870500_923444,Aguila Vado (Eagleford) - Wildfire Energy Operating
+,production,2025,gas,74264660,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85279200_100951,"Spraberry (Trend Area) - Vital Energy, Inc."
+,production,2025,gas,13333498,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),98359800_100951,"Wolfbone (Trend Area) - Vital Energy, Inc."
+,production,2025,gas,3310235,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),27135700_101444,"Eagleville (Eagle Ford-1) - Baytex Energy Usa, Inc."
+,production,2025,gas,9527781,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),98359800_101377,Wolfbone (Trend Area) - Vtx Energy Operating
+,production,2025,gas,57241028,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85279200_100852,Spraberry (Trend Area) - Permian Resources Operating
+,production,2025,gas,47861909,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85280301_665748,"Spraberry (Trend Area) - Pioneer Natural Res. Usa, Inc."
+,production,2025,gas,27824492,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),71052900_872117,Phantom (Wolfcamp) - Trp Operating
+,production,2025,gas,14502988,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85279200_100168,Spraberry (Trend Area) - De Iv Operating
+,production,2025,gas,12706321,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85280300_617544,Spraberry (Trend Area) - Occidental Permian Ltd.
+,production,2025,gas,6337238,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85280300_100168,Spraberry (Trend Area) - De Iv Operating
+,production,2025,gas,14214540,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),71052900_100158,Phantom (Wolfcamp) - Admiral Permian Operating
+,production,2025,gas,11616130,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),41911500_100951,"Hoefs T-K (Wolfcamp) - Vital Energy, Inc."
+,production,2025,gas,2950132,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85280300_101413,Spraberry (Trend Area) - Firebird Energy Ii
+,production,2025,gas,5504715,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),71052900_101577,Phantom (Wolfcamp) - Civitas Permian Operating
+,production,2025,gas,12243634,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),71823666_108799,"Platang (San Andres) - Burk Royalty Co., Ltd."
+,production,2025,gas,39449704,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),39724001_102229,Hawkins - Mmgl East Texas Ii
+,production,2025,gas,400157888,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),16032300_102211,Carthage (Haynesville Shale) - Tgnr East Texas Ii
+,production,2025,gas,5593789,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85280300_195763,Spraberry (Trend Area) - Cutbow Operating
+,production,2025,gas,3201208,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85280300_660886,Spraberry (Trend Area) - Petroplex Energy Inc.
+,production,2025,gas,7332594,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85279200_101136,Spraberry (Trend Area) - Hannathon Petroleum Ii
+,production,2025,gas,17450792,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85280300_101136,Spraberry (Trend Area) - Hannathon Petroleum Ii
+,production,2025,gas,1736049,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),83991001_617544,Slaughter - Occidental Permian Ltd.
+,production,2025,gas,6984992,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),80544500_101577,Sandbar (Bone Spring) - Civitas Permian Operating
+,production,2025,gas,4425692,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85280300_280969,Spraberry (Trend Area) - Fourpoint Energy
+,production,2025,gas,20640894,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85280301_102324,Spraberry (Trend Area) - Oxyrock Operating
+,production,2025,gas,2245255,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85280300_253162,"Spraberry (Trend Area) - Eog Resources, Inc."
+,production,2025,gas,2046932,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),34733500_923444,Giddings (Austin Chalk-3) - Wildfire Energy Operating
+,production,2025,gas,5308880,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),41911500_760218,Hoefs T-K (Wolfcamp) - Scout Energy Management
+,production,2025,gas,20562708,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),71052900_101714,Phantom (Wolfcamp) - Cpx Energy Operating
+,production,2025,gas,1863624,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),56599500_923444,MadisonvilleW. (Woodbine -A-) - Wildfire Energy Operating
+,production,2025,gas,4999062,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85280300_102718,Spraberry (Trend Area) - Langford & Brigham Operating
+,production,2025,gas,79807,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),39603001_215343,HastingsWest - Denbury Onshore
+,production,2025,gas,355357,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),59337001_760218,Mcelroy - Scout Energy Management
+,production,2025,gas,4543085,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),79887001_630555,Salt Creek - Oxy Usa Wtp Lp
+,production,2025,gas,29905691,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85279201_100852,Spraberry (Trend Area) - Permian Resources Operating
+,production,2025,gas,6079578,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85280300_100852,Spraberry (Trend Area) - Permian Resources Operating
+,production,2025,gas,945983,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),27302001_53974,"East Texas - Basa Resources, Inc."
+,production,2025,gas,4266119,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),71052900_101377,Phantom (Wolfcamp) - Vtx Energy Operating
+,production,2025,gas,464952,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),34733610_743223,Giddings (Eagleford) - Sage Natural Resources
+,production,2025,gas,12019179,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),71052900_103285,Phantom (Wolfcamp) - Coterra Energy Operating Co.
+,production,2025,gas,1704288,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85280300_741937,Spraberry (Trend Area) - Sabalo Ii Operating
+,production,2025,gas,4744643,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),27135700_100453,Eagleville (Eagle Ford-1) - Ep Energy E&P Company
+,production,2025,gas,23312364,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),71052900_101634,Phantom (Wolfcamp) - Eqv Operating
+,production,2025,gas,562029,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),84750500_189405,Southern Bay (Eagle Ford) - Crescent Pass Energy
+,production,2025,gas,3634112,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),82233001_630555,SeminoleWest - Oxy Usa Wtp Lp
+,production,2025,gas,4561499,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),61130001_617544,Midland Farms Deep - Occidental Permian Ltd.
+,production,2025,gas,1640697,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85279200_100303,Spraberry (Trend Area) - Rockport Energy Solutions
+,production,2025,gas,5190135,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85280300_760218,Spraberry (Trend Area) - Scout Energy Management
+,production,2025,gas,2220,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),60137001_386310,Means - Hilcorp Energy Company
+,production,2025,gas,756687,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),84750500_101444,"Southern Bay (Eagle Ford) - Baytex Energy Usa, Inc."
+,production,2025,gas,16175424,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),12018200_101300,Briscoe Ranch (Eagleford) - Tbm Catarina
+,production,2025,gas,2170890,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),92100050_100951,"Two Georges (Bone Spring) - Vital Energy, Inc."
+,production,2025,gas,1497330,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),80544500_100703,Sandbar (Bone Spring) - Circle-S Energy
+,production,2025,gas,452740,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),27135700_665543,Eagleville (Eagle Ford-1) - Pillar Efs
+,production,2025,gas,3358111,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),71052900_432283,"Phantom (Wolfcamp) - Jetta Operating Company, Inc."
+,production,2025,gas,4818495,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),33998500_103088,"Garden CityS. (Wolfcamp) - Browning Oil Company, Inc."
+,production,2025,gas,1459702,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85280300_786697,Spraberry (Trend Area) - Slant Operating
+,production,2025,gas,0,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),67947001_215343,Oyster Bayou - Denbury Onshore
+,production,2025,gas,2876163,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),80544500_100313,Sandbar (Bone Spring) - Petro-Hunt Permian
+,production,2025,gas,1790871,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),95397001_386310,Wasson - Hilcorp Energy Company
+,production,2025,gas,4877488,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),98359800_875462,Wolfbone (Trend Area) - U.S. Energy Development Corp
+,production,2025,gas,1969001,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),3194001_617544,Anton-Irish - Occidental Permian Ltd.
+,production,2025,gas,2583542,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),49129150_54430,Keystone (Consolidated) - Basin Oil & Gas Operating
+,production,2025,gas,2280298,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),71052900_100703,Phantom (Wolfcamp) - Circle-S Energy
+,production,2025,gas,79207,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85948001_53974,"Stephens County Regular - Basa Resources, Inc."
+,production,2025,gas,2630676,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),98359800_101577,Wolfbone (Trend Area) - Civitas Permian Operating
+,production,2025,gas,1747922,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),92618125_73056,University Waddell (Devonian) - Blackbeard Operating
+,production,2025,gas,0,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),96545691_386310,West Ranch (41-A & 98-A Cons.) - Hilcorp Energy Company
+,production,2025,gas,2743255,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),41911500_878506,Hoefs T-K (Wolfcamp) - Upcurve Energy
+,production,2025,gas,2815948,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),69996200_217012,Peart (Barnett) - Diamondback E&P
+,production,2025,gas,5121159,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),54928500_100351,Lorenzo (Austin Chalk) - Javelin Energy Partners Mgmt
+,production,2025,gas,4944474,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),28899040_630591,Emma (Barnett Shale) - Oxy Usa Inc.
+,production,2025,gas,153028,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),90534863_386310,Tom Oconnor (5800) - Hilcorp Energy Company
+,production,2025,gas,7867976,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),33998500_100951,"Garden CityS. (Wolfcamp) - Vital Energy, Inc."
+,production,2025,gas,3849811,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),54928500_728874,"Lorenzo (Austin Chalk) - Rosewood Resources, Inc."
+,production,2025,gas,304395,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),21289001_617544,CowdenNorth - Occidental Permian Ltd.
+,production,2025,gas,1944370,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),92100050_872117,Two Georges (Bone Spring) - Trp Operating
+,production,2025,gas,2666136,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),12018200_334912,Briscoe Ranch (Eagleford) - Grit Oil & Gas Management
+,production,2025,gas,1341114,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),24562142_463316,Diamond -M- (Canyon Lime Area) - Kinder Morgan Production Co
+,production,2025,gas,1780392,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),69233125_100951,"Parks (Consolidated) - Vital Energy, Inc."
+,production,2025,gas,2657700,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85280301_102526,Spraberry (Trend Area) - Sogc
+,production,2025,gas,564895,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),33230001_386310,Fullerton - Hilcorp Energy Company
+,production,2025,gas,73169608,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),39744500_100291,Hawkville (Eagleford Shale) - Kimmeridge Texas Gas
+,production,2025,gas,809937,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),35652062_617544,Goldsmith (Clear Fork) - Occidental Permian Ltd.
+,production,2025,gas,0,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),55679001_847710,Luling-Branyon - Texas Petroleum Investment Co.
+,production,2025,gas,1284724,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),71052900_20522,"Phantom (Wolfcamp) - Amtex Energy, Inc."
+,production,2025,gas,5149439,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),12193500_108799,"Brookeland (Austin Chalk 8800) - Burk Royalty Co., Ltd."
+,production,2025,gas,1331901,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),41911500_331448,Hoefs T-K (Wolfcamp) - Greenlake Energy Operating
+,production,2025,gas,1220368,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),69996200_41867,Peart (Barnett) - Bta Oil Producers
+,production,2025,gas,1724226,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),47684090_586557,June Ann (Pennsylvanian) - Moriah Operating
+,production,2025,gas,86166320,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),65280200_100345,NewarkEast (Barnett Shale) - Bkv North Texas
+,production,2025,gas,1409970,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),80544500_100951,"Sandbar (Bone Spring) - Vital Energy, Inc."
+,production,2025,gas,429425,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),28899040_100158,Emma (Barnett Shale) - Admiral Permian Operating
+,production,2025,gas,117670,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),53411001_386310,Levelland - Hilcorp Energy Company
+,production,2025,gas,893599,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),92100050_100158,Two Georges (Bone Spring) - Admiral Permian Operating
+,production,2025,gas,0,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),42971200_53974,"Howard Glasscock (Consolidated) - Basa Resources, Inc."
+,production,2025,gas,6912296,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),39744500_101444,"Hawkville (Eagleford Shale) - Baytex Energy Usa, Inc."
+,production,2025,gas,4375569,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85279201_101577,Spraberry (Trend Area) - Civitas Permian Operating
+,production,2025,gas,293202,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),83991001_386310,Slaughter - Hilcorp Energy Company
+,production,2025,gas,3176756,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85279200_870372,Spraberry (Trend Area) - Triple Crown Resources
+,production,2025,gas,669986,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),69996200_562560,Peart (Barnett) - Mewbourne Oil Company
+,production,2025,gas,1475802,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),98359800_878506,Wolfbone (Trend Area) - Upcurve Energy
+,production,2025,gas,6664113,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),80544500_100852,Sandbar (Bone Spring) - Permian Resources Operating
+,production,2025,gas,1700326,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),44510500_276959,Indio Tanks (Pearsall) - Formentera Operations
+,production,2025,gas,239347,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),83750500_561136,Sinor Nest (Lower Wilcox) - Merit Energy Company
+,production,2025,gas,4685367,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),80544500_103285,Sandbar (Bone Spring) - Coterra Energy Operating Co.
+,production,2025,gas,522131,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85280300_102526,Spraberry (Trend Area) - Sogc
+,production,2025,gas,16864388,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),31913800_100852,FordWest (Wolfcamp) - Permian Resources Operating
+,production,2025,gas,1063571,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),52624220_712382,"Lea (Consolidated) - Ring Energy, Inc."
+,production,2025,gas,403388,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),84750500_728874,"Southern Bay (Eagle Ford) - Rosewood Resources, Inc."
+,production,2025,gas,642523,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),71823666_20522,"Platang (San Andres) - Amtex Energy, Inc."
+,production,2025,gas,724114,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),69996200_173777,"Peart (Barnett) - Continental Resources, Inc."
+,production,2025,gas,217567,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),12018200_521544,Briscoe Ranch (Eagleford) - Magnolia Oil & Gas Operating
+,production,2025,gas,0,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),56378001_760218,Mabee - Scout Energy Management
+,production,2025,gas,115056,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),570001_386310,Adair - Hilcorp Energy Company
+,production,2025,gas,553781,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),88071696_276959,Txl (Tubb) - Formentera Operations
+,production,2025,gas,3435428,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85279201_100951,"Spraberry (Trend Area) - Vital Energy, Inc."
+,production,2025,gas,93718,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),53411001_742122,Levelland - Sabinal Energy Operating
+,production,2025,gas,51630580,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),39744250_100291,Hawkville (Austin Chalk) - Kimmeridge Texas Gas
+,production,2025,gas,7255175,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),34773550_923444,Giddings (Austin Chalk Gas) - Wildfire Energy Operating
+,production,2025,gas,22556,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),53759333_54430,Linker (Clear Fork) - Basin Oil & Gas Operating
+,production,2025,gas,8278715,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),86950600_101444,"Sugarkane (Eagle Ford) - Baytex Energy Usa, Inc."
+,production,2025,gas,1189143,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),25188400_760218,Dollarhide (Devonian) - Scout Energy Management
+,production,2025,gas,248590,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),82572666_712382,"Shafter LakeN. (San Andres) - Ring Energy, Inc."
+,production,2025,gas,0,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),23191666_847710,Darst Creek (Edwards) - Texas Petroleum Investment Co.
+,production,2025,gas,2133991,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),41911500_100852,Hoefs T-K (Wolfcamp) - Permian Resources Operating
+,production,2025,gas,1097196,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),256500_100291,A.W.P. (Olmos) - Kimmeridge Texas Gas
+,production,2025,gas,193391,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),34733610_521544,Giddings (Eagleford) - Magnolia Oil & Gas Operating
+,production,2025,gas,0,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),44148500_53974,"IatanEast Howard - Basa Resources, Inc."
+,production,2025,gas,3289257,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),21907111_617544,Crossett (Devonian) - Occidental Permian Ltd.
+,production,2025,gas,200512,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),76707001_742122,RileyNorth - Sabinal Energy Operating
+,production,2025,gas,466932,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),12018200_101444,"Briscoe Ranch (Eagleford) - Baytex Energy Usa, Inc."
+,production,2025,gas,155540,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),11308001_386310,Brahaney - Hilcorp Energy Company
+,production,2025,gas,190223,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),2725760_386310,Andrews (Wolfcamp-Penn.) - Hilcorp Energy Company
+,production,2025,gas,113955,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),77318666_386310,RobertsonN. (Clear Fork 7100) - Hilcorp Energy Company
+,production,2025,gas,7291035,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),53613750_100852,Lin (Wolfcamp) - Permian Resources Operating
+,production,2025,gas,688665,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),69996200_100951,"Peart (Barnett) - Vital Energy, Inc."
+,production,2025,gas,1333071,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),28899040_665748,"Emma (Barnett Shale) - Pioneer Natural Res. Usa, Inc."
+,production,2025,gas,149247,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),96062001_630555,Welch - Oxy Usa Wtp Lp
+,production,2025,gas,278628,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),9362500_73056,Block 31Nw. (Penn Upper) - Blackbeard Operating
+,production,2025,gas,1374439,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),28899040_101413,Emma (Barnett Shale) - Firebird Energy Ii
+,production,2025,gas,38164182,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),65280200_100351,NewarkEast (Barnett Shale) - Javelin Energy Partners Mgmt
+,production,2025,gas,1393538,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),70279100_788997,Pegasus (Consolidated) - Sm Energy Company
+,production,2025,gas,1309611,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),41911500_875462,Hoefs T-K (Wolfcamp) - U.S. Energy Development Corp
+,production,2025,gas,133868,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),83991001_630555,Slaughter - Oxy Usa Wtp Lp
+,production,2025,gas,66606,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),93042001_53974,"Van - Basa Resources, Inc."
+,production,2025,gas,952190,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),92100050_875462,Two Georges (Bone Spring) - U.S. Energy Development Corp
+,production,2025,gas,376190,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),85280300_173777,"Spraberry (Trend Area) - Continental Resources, Inc."
+,production,2025,gas,294526,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),27135750_100291,Eagleville (Eagle Ford-2) - Kimmeridge Texas Gas
+,production,2025,gas,685991,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),80544500_100158,Sandbar (Bone Spring) - Admiral Permian Operating
+,production,2025,gas,90860,thousand cubic feet/y,TRRC-PDQ-2026,Gas production (Mcf/y) + Casinghead gas production (Mcf/y),32309001_617544,Foster - Occidental Permian Ltd.
+,production,2025,oil and condensate,38074128,bbl/y,TRRC-PDQ-2026,,85280300_102324,Spraberry (Trend Area) - Oxyrock Operating
+,production,2025,oil and condensate,25873000,bbl/y,TRRC-PDQ-2026,,71052900_100852,Phantom (Wolfcamp) - Permian Resources Operating
+,production,2025,oil and condensate,19183516,bbl/y,TRRC-PDQ-2026,,85280300_760725,Spraberry (Trend Area) - Surge Operating
+,production,2025,oil and condensate,18437758,bbl/y,TRRC-PDQ-2026,,85279200_101577,Spraberry (Trend Area) - Civitas Permian Operating
+,production,2025,oil and condensate,16381332,bbl/y,TRRC-PDQ-2026,,85280300_385826,Spraberry (Trend Area) - Highpeak Energy Holdings
+,production,2025,oil and condensate,14867796,bbl/y,TRRC-PDQ-2026,,12018200_100351,Briscoe Ranch (Eagleford) - Javelin Energy Partners Mgmt
+,production,2025,oil and condensate,14479809,bbl/y,TRRC-PDQ-2026,,85280300_148113,Spraberry (Trend Area) - Chevron U. S. A. Inc.
+,production,2025,oil and condensate,13350609,bbl/y,TRRC-PDQ-2026,,85280300_263696,"Spraberry (Trend Area) - Fasken Oil And Ranch, Ltd."
+,production,2025,oil and condensate,12541815,bbl/y,TRRC-PDQ-2026,,85280300_100951,"Spraberry (Trend Area) - Vital Energy, Inc."
+,production,2025,oil and condensate,11650728,bbl/y,TRRC-PDQ-2026,,85280300_71331,"Spraberry (Trend Area) - Birch Operations, Inc."
+,production,2025,oil and condensate,10681171,bbl/y,TRRC-PDQ-2026,,85280300_630591,Spraberry (Trend Area) - Oxy Usa Inc.
+,production,2025,oil and condensate,10397875,bbl/y,TRRC-PDQ-2026,,85279200_102879,Spraberry (Trend Area) - De Central Operating
+,production,2025,oil and condensate,9876187,bbl/y,TRRC-PDQ-2026,,27135700_100351,Eagleville (Eagle Ford-1) - Javelin Energy Partners Mgmt
+,production,2025,oil and condensate,9651964,bbl/y,TRRC-PDQ-2026,,71052900_100951,"Phantom (Wolfcamp) - Vital Energy, Inc."
+,production,2025,oil and condensate,9138080,bbl/y,TRRC-PDQ-2026,,34733500_521544,Giddings (Austin Chalk-3) - Magnolia Oil & Gas Operating
+,production,2025,oil and condensate,8716710,bbl/y,TRRC-PDQ-2026,,85279201_665748,"Spraberry (Trend Area) - Pioneer Natural Res. Usa, Inc."
+,production,2025,oil and condensate,8677765,bbl/y,TRRC-PDQ-2026,,27135700_102886,Eagleville (Eagle Ford-1) - Verdun Oil Ef Ii
+,production,2025,oil and condensate,8411057,bbl/y,TRRC-PDQ-2026,,27135750_101444,"Eagleville (Eagle Ford-2) - Baytex Energy Usa, Inc."
+,production,2025,oil and condensate,8367770,bbl/y,TRRC-PDQ-2026,,27135700_424176,Eagleville (Eagle Ford-1) - Ineos Usa Oil & Gas
+,production,2025,oil and condensate,8226878,bbl/y,TRRC-PDQ-2026,,85279200_101413,Spraberry (Trend Area) - Firebird Energy Ii
+,production,2025,oil and condensate,7688568,bbl/y,TRRC-PDQ-2026,,85280300_655805,Spraberry (Trend Area) - Permian Deep Rock Oil Co.
+,production,2025,oil and condensate,7503686,bbl/y,TRRC-PDQ-2026,,98359800_100852,Wolfbone (Trend Area) - Permian Resources Operating
+,production,2025,oil and condensate,7112772,bbl/y,TRRC-PDQ-2026,,85280300_101577,Spraberry (Trend Area) - Civitas Permian Operating
+,production,2025,oil and condensate,7098285,bbl/y,TRRC-PDQ-2026,,80544500_101377,Sandbar (Bone Spring) - Vtx Energy Operating
+,production,2025,oil and condensate,6611550,bbl/y,TRRC-PDQ-2026,,85280300_101969,Spraberry (Trend Area) - Hibernia Resources Iv
+,production,2025,oil and condensate,6214815,bbl/y,TRRC-PDQ-2026,,85280300_58827,Spraberry (Trend Area) - Bayswater Operating Company
+,production,2025,oil and condensate,5477507,bbl/y,TRRC-PDQ-2026,,31913800_103285,FordWest (Wolfcamp) - Coterra Energy Operating Co.
+,production,2025,oil and condensate,5668454,bbl/y,TRRC-PDQ-2026,,34733610_923444,Giddings (Eagleford) - Wildfire Energy Operating
+,production,2025,oil and condensate,5455450,bbl/y,TRRC-PDQ-2026,,12018200_424176,Briscoe Ranch (Eagleford) - Ineos Usa Oil & Gas
+,production,2025,oil and condensate,5562506,bbl/y,TRRC-PDQ-2026,,85280300_101633,Spraberry (Trend Area) - Ike Operating
+,production,2025,oil and condensate,5138926,bbl/y,TRRC-PDQ-2026,,71052900_331448,Phantom (Wolfcamp) - Greenlake Energy Operating
+,production,2025,oil and condensate,4910780,bbl/y,TRRC-PDQ-2026,,870500_923444,Aguila Vado (Eagleford) - Wildfire Energy Operating
+,production,2025,oil and condensate,4358191,bbl/y,TRRC-PDQ-2026,,85279200_100951,"Spraberry (Trend Area) - Vital Energy, Inc."
+,production,2025,oil and condensate,4625245,bbl/y,TRRC-PDQ-2026,,98359800_100951,"Wolfbone (Trend Area) - Vital Energy, Inc."
+,production,2025,oil and condensate,4674779,bbl/y,TRRC-PDQ-2026,,27135700_101444,"Eagleville (Eagle Ford-1) - Baytex Energy Usa, Inc."
+,production,2025,oil and condensate,4505564,bbl/y,TRRC-PDQ-2026,,98359800_101377,Wolfbone (Trend Area) - Vtx Energy Operating
+,production,2025,oil and condensate,4211040,bbl/y,TRRC-PDQ-2026,,85279200_100852,Spraberry (Trend Area) - Permian Resources Operating
+,production,2025,oil and condensate,3990313,bbl/y,TRRC-PDQ-2026,,85280301_665748,"Spraberry (Trend Area) - Pioneer Natural Res. Usa, Inc."
+,production,2025,oil and condensate,3836977,bbl/y,TRRC-PDQ-2026,,71052900_872117,Phantom (Wolfcamp) - Trp Operating
+,production,2025,oil and condensate,3857012,bbl/y,TRRC-PDQ-2026,,85279200_100168,Spraberry (Trend Area) - De Iv Operating
+,production,2025,oil and condensate,3755574,bbl/y,TRRC-PDQ-2026,,85280300_617544,Spraberry (Trend Area) - Occidental Permian Ltd.
+,production,2025,oil and condensate,3614345,bbl/y,TRRC-PDQ-2026,,85280300_100168,Spraberry (Trend Area) - De Iv Operating
+,production,2025,oil and condensate,3152929,bbl/y,TRRC-PDQ-2026,,71052900_100158,Phantom (Wolfcamp) - Admiral Permian Operating
+,production,2025,oil and condensate,2507768,bbl/y,TRRC-PDQ-2026,,41911500_100951,"Hoefs T-K (Wolfcamp) - Vital Energy, Inc."
+,production,2025,oil and condensate,2515348,bbl/y,TRRC-PDQ-2026,,85280300_101413,Spraberry (Trend Area) - Firebird Energy Ii
+,production,2025,oil and condensate,2492159,bbl/y,TRRC-PDQ-2026,,71052900_101577,Phantom (Wolfcamp) - Civitas Permian Operating
+,production,2025,oil and condensate,2447152,bbl/y,TRRC-PDQ-2026,,71823666_108799,"Platang (San Andres) - Burk Royalty Co., Ltd."
+,production,2025,oil and condensate,2190920,bbl/y,TRRC-PDQ-2026,,39724001_102229,Hawkins - Mmgl East Texas Ii
+,production,2025,oil and condensate,54080,bbl/y,TRRC-PDQ-2026,,16032300_102211,Carthage (Haynesville Shale) - Tgnr East Texas Ii
+,production,2025,oil and condensate,2320845,bbl/y,TRRC-PDQ-2026,,85280300_195763,Spraberry (Trend Area) - Cutbow Operating
+,production,2025,oil and condensate,2204321,bbl/y,TRRC-PDQ-2026,,85280300_660886,Spraberry (Trend Area) - Petroplex Energy Inc.
+,production,2025,oil and condensate,1975051,bbl/y,TRRC-PDQ-2026,,85279200_101136,Spraberry (Trend Area) - Hannathon Petroleum Ii
+,production,2025,oil and condensate,1872013,bbl/y,TRRC-PDQ-2026,,85280300_101136,Spraberry (Trend Area) - Hannathon Petroleum Ii
+,production,2025,oil and condensate,1938242,bbl/y,TRRC-PDQ-2026,,83991001_617544,Slaughter - Occidental Permian Ltd.
+,production,2025,oil and condensate,1853943,bbl/y,TRRC-PDQ-2026,,80544500_101577,Sandbar (Bone Spring) - Civitas Permian Operating
+,production,2025,oil and condensate,1772879,bbl/y,TRRC-PDQ-2026,,85280300_280969,Spraberry (Trend Area) - Fourpoint Energy
+,production,2025,oil and condensate,1672351,bbl/y,TRRC-PDQ-2026,,85280301_102324,Spraberry (Trend Area) - Oxyrock Operating
+,production,2025,oil and condensate,1740825,bbl/y,TRRC-PDQ-2026,,85280300_253162,"Spraberry (Trend Area) - Eog Resources, Inc."
+,production,2025,oil and condensate,1708441,bbl/y,TRRC-PDQ-2026,,34733500_923444,Giddings (Austin Chalk-3) - Wildfire Energy Operating
+,production,2025,oil and condensate,1644699,bbl/y,TRRC-PDQ-2026,,41911500_760218,Hoefs T-K (Wolfcamp) - Scout Energy Management
+,production,2025,oil and condensate,1537122,bbl/y,TRRC-PDQ-2026,,71052900_101714,Phantom (Wolfcamp) - Cpx Energy Operating
+,production,2025,oil and condensate,1644879,bbl/y,TRRC-PDQ-2026,,56599500_923444,MadisonvilleW. (Woodbine -A-) - Wildfire Energy Operating
+,production,2025,oil and condensate,1622070,bbl/y,TRRC-PDQ-2026,,85280300_102718,Spraberry (Trend Area) - Langford & Brigham Operating
+,production,2025,oil and condensate,1583635,bbl/y,TRRC-PDQ-2026,,39603001_215343,HastingsWest - Denbury Onshore
+,production,2025,oil and condensate,1573702,bbl/y,TRRC-PDQ-2026,,59337001_760218,Mcelroy - Scout Energy Management
+,production,2025,oil and condensate,1547734,bbl/y,TRRC-PDQ-2026,,79887001_630555,Salt Creek - Oxy Usa Wtp Lp
+,production,2025,oil and condensate,1392599,bbl/y,TRRC-PDQ-2026,,85279201_100852,Spraberry (Trend Area) - Permian Resources Operating
+,production,2025,oil and condensate,1518650,bbl/y,TRRC-PDQ-2026,,85280300_100852,Spraberry (Trend Area) - Permian Resources Operating
+,production,2025,oil and condensate,1505877,bbl/y,TRRC-PDQ-2026,,27302001_53974,"East Texas - Basa Resources, Inc."
+,production,2025,oil and condensate,1469810,bbl/y,TRRC-PDQ-2026,,71052900_101377,Phantom (Wolfcamp) - Vtx Energy Operating
+,production,2025,oil and condensate,1488288,bbl/y,TRRC-PDQ-2026,,34733610_743223,Giddings (Eagleford) - Sage Natural Resources
+,production,2025,oil and condensate,1357417,bbl/y,TRRC-PDQ-2026,,71052900_103285,Phantom (Wolfcamp) - Coterra Energy Operating Co.
+,production,2025,oil and condensate,1404430,bbl/y,TRRC-PDQ-2026,,85280300_741937,Spraberry (Trend Area) - Sabalo Ii Operating
+,production,2025,oil and condensate,1333756,bbl/y,TRRC-PDQ-2026,,27135700_100453,Eagleville (Eagle Ford-1) - Ep Energy E&P Company
+,production,2025,oil and condensate,1217826,bbl/y,TRRC-PDQ-2026,,71052900_101634,Phantom (Wolfcamp) - Eqv Operating
+,production,2025,oil and condensate,1349937,bbl/y,TRRC-PDQ-2026,,84750500_189405,Southern Bay (Eagle Ford) - Crescent Pass Energy
+,production,2025,oil and condensate,1330764,bbl/y,TRRC-PDQ-2026,,82233001_630555,SeminoleWest - Oxy Usa Wtp Lp
+,production,2025,oil and condensate,1311393,bbl/y,TRRC-PDQ-2026,,61130001_617544,Midland Farms Deep - Occidental Permian Ltd.
+,production,2025,oil and condensate,1309393,bbl/y,TRRC-PDQ-2026,,85279200_100303,Spraberry (Trend Area) - Rockport Energy Solutions
+,production,2025,oil and condensate,1183427,bbl/y,TRRC-PDQ-2026,,85280300_760218,Spraberry (Trend Area) - Scout Energy Management
+,production,2025,oil and condensate,1172062,bbl/y,TRRC-PDQ-2026,,60137001_386310,Means - Hilcorp Energy Company
+,production,2025,oil and condensate,1160754,bbl/y,TRRC-PDQ-2026,,84750500_101444,"Southern Bay (Eagle Ford) - Baytex Energy Usa, Inc."
+,production,2025,oil and condensate,1044750,bbl/y,TRRC-PDQ-2026,,12018200_101300,Briscoe Ranch (Eagleford) - Tbm Catarina
+,production,2025,oil and condensate,1106946,bbl/y,TRRC-PDQ-2026,,92100050_100951,"Two Georges (Bone Spring) - Vital Energy, Inc."
+,production,2025,oil and condensate,1107528,bbl/y,TRRC-PDQ-2026,,80544500_100703,Sandbar (Bone Spring) - Circle-S Energy
+,production,2025,oil and condensate,1067536,bbl/y,TRRC-PDQ-2026,,27135700_665543,Eagleville (Eagle Ford-1) - Pillar Efs
+,production,2025,oil and condensate,1043893,bbl/y,TRRC-PDQ-2026,,71052900_432283,"Phantom (Wolfcamp) - Jetta Operating Company, Inc."
+,production,2025,oil and condensate,1008393,bbl/y,TRRC-PDQ-2026,,33998500_103088,"Garden CityS. (Wolfcamp) - Browning Oil Company, Inc."
+,production,2025,oil and condensate,1001097,bbl/y,TRRC-PDQ-2026,,85280300_786697,Spraberry (Trend Area) - Slant Operating
+,production,2025,oil and condensate,1009441,bbl/y,TRRC-PDQ-2026,,67947001_215343,Oyster Bayou - Denbury Onshore
+,production,2025,oil and condensate,960049,bbl/y,TRRC-PDQ-2026,,80544500_100313,Sandbar (Bone Spring) - Petro-Hunt Permian
+,production,2025,oil and condensate,949808,bbl/y,TRRC-PDQ-2026,,95397001_386310,Wasson - Hilcorp Energy Company
+,production,2025,oil and condensate,905022,bbl/y,TRRC-PDQ-2026,,98359800_875462,Wolfbone (Trend Area) - U.S. Energy Development Corp
+,production,2025,oil and condensate,905437,bbl/y,TRRC-PDQ-2026,,3194001_617544,Anton-Irish - Occidental Permian Ltd.
+,production,2025,oil and condensate,872655,bbl/y,TRRC-PDQ-2026,,49129150_54430,Keystone (Consolidated) - Basin Oil & Gas Operating
+,production,2025,oil and condensate,862312,bbl/y,TRRC-PDQ-2026,,71052900_100703,Phantom (Wolfcamp) - Circle-S Energy
+,production,2025,oil and condensate,870636,bbl/y,TRRC-PDQ-2026,,85948001_53974,"Stephens County Regular - Basa Resources, Inc."
+,production,2025,oil and condensate,844537,bbl/y,TRRC-PDQ-2026,,98359800_101577,Wolfbone (Trend Area) - Civitas Permian Operating
+,production,2025,oil and condensate,834581,bbl/y,TRRC-PDQ-2026,,92618125_73056,University Waddell (Devonian) - Blackbeard Operating
+,production,2025,oil and condensate,842907,bbl/y,TRRC-PDQ-2026,,96545691_386310,West Ranch (41-A & 98-A Cons.) - Hilcorp Energy Company
+,production,2025,oil and condensate,806061,bbl/y,TRRC-PDQ-2026,,41911500_878506,Hoefs T-K (Wolfcamp) - Upcurve Energy
+,production,2025,oil and condensate,798644,bbl/y,TRRC-PDQ-2026,,69996200_217012,Peart (Barnett) - Diamondback E&P
+,production,2025,oil and condensate,775748,bbl/y,TRRC-PDQ-2026,,54928500_100351,Lorenzo (Austin Chalk) - Javelin Energy Partners Mgmt
+,production,2025,oil and condensate,763360,bbl/y,TRRC-PDQ-2026,,28899040_630591,Emma (Barnett Shale) - Oxy Usa Inc.
+,production,2025,oil and condensate,778552,bbl/y,TRRC-PDQ-2026,,90534863_386310,Tom Oconnor (5800) - Hilcorp Energy Company
+,production,2025,oil and condensate,722110,bbl/y,TRRC-PDQ-2026,,33998500_100951,"Garden CityS. (Wolfcamp) - Vital Energy, Inc."
+,production,2025,oil and condensate,716087,bbl/y,TRRC-PDQ-2026,,54928500_728874,"Lorenzo (Austin Chalk) - Rosewood Resources, Inc."
+,production,2025,oil and condensate,718058,bbl/y,TRRC-PDQ-2026,,21289001_617544,CowdenNorth - Occidental Permian Ltd.
+,production,2025,oil and condensate,706949,bbl/y,TRRC-PDQ-2026,,92100050_872117,Two Georges (Bone Spring) - Trp Operating
+,production,2025,oil and condensate,692142,bbl/y,TRRC-PDQ-2026,,12018200_334912,Briscoe Ranch (Eagleford) - Grit Oil & Gas Management
+,production,2025,oil and condensate,693488,bbl/y,TRRC-PDQ-2026,,24562142_463316,Diamond -M- (Canyon Lime Area) - Kinder Morgan Production Co
+,production,2025,oil and condensate,671051,bbl/y,TRRC-PDQ-2026,,69233125_100951,"Parks (Consolidated) - Vital Energy, Inc."
+,production,2025,oil and condensate,662689,bbl/y,TRRC-PDQ-2026,,85280301_102526,Spraberry (Trend Area) - Sogc
+,production,2025,oil and condensate,665548,bbl/y,TRRC-PDQ-2026,,33230001_386310,Fullerton - Hilcorp Energy Company
+,production,2025,oil and condensate,228741,bbl/y,TRRC-PDQ-2026,,39744500_100291,Hawkville (Eagleford Shale) - Kimmeridge Texas Gas
+,production,2025,oil and condensate,652300,bbl/y,TRRC-PDQ-2026,,35652062_617544,Goldsmith (Clear Fork) - Occidental Permian Ltd.
+,production,2025,oil and condensate,633271,bbl/y,TRRC-PDQ-2026,,55679001_847710,Luling-Branyon - Texas Petroleum Investment Co.
+,production,2025,oil and condensate,611565,bbl/y,TRRC-PDQ-2026,,71052900_20522,"Phantom (Wolfcamp) - Amtex Energy, Inc."
+,production,2025,oil and condensate,568590,bbl/y,TRRC-PDQ-2026,,12193500_108799,"Brookeland (Austin Chalk 8800) - Burk Royalty Co., Ltd."
+,production,2025,oil and condensate,572055,bbl/y,TRRC-PDQ-2026,,41911500_331448,Hoefs T-K (Wolfcamp) - Greenlake Energy Operating
+,production,2025,oil and condensate,562618,bbl/y,TRRC-PDQ-2026,,69996200_41867,Peart (Barnett) - Bta Oil Producers
+,production,2025,oil and condensate,550771,bbl/y,TRRC-PDQ-2026,,47684090_586557,June Ann (Pennsylvanian) - Moriah Operating
+,production,2025,oil and condensate,10747,bbl/y,TRRC-PDQ-2026,,65280200_100345,NewarkEast (Barnett Shale) - Bkv North Texas
+,production,2025,oil and condensate,490244,bbl/y,TRRC-PDQ-2026,,80544500_100951,"Sandbar (Bone Spring) - Vital Energy, Inc."
+,production,2025,oil and condensate,495449,bbl/y,TRRC-PDQ-2026,,28899040_100158,Emma (Barnett Shale) - Admiral Permian Operating
+,production,2025,oil and condensate,495707,bbl/y,TRRC-PDQ-2026,,53411001_386310,Levelland - Hilcorp Energy Company
+,production,2025,oil and condensate,490938,bbl/y,TRRC-PDQ-2026,,92100050_100158,Two Georges (Bone Spring) - Admiral Permian Operating
+,production,2025,oil and condensate,481039,bbl/y,TRRC-PDQ-2026,,42971200_53974,"Howard Glasscock (Consolidated) - Basa Resources, Inc."
+,production,2025,oil and condensate,428134,bbl/y,TRRC-PDQ-2026,,39744500_101444,"Hawkville (Eagleford Shale) - Baytex Energy Usa, Inc."
+,production,2025,oil and condensate,436826,bbl/y,TRRC-PDQ-2026,,85279201_101577,Spraberry (Trend Area) - Civitas Permian Operating
+,production,2025,oil and condensate,457046,bbl/y,TRRC-PDQ-2026,,83991001_386310,Slaughter - Hilcorp Energy Company
+,production,2025,oil and condensate,435442,bbl/y,TRRC-PDQ-2026,,85279200_870372,Spraberry (Trend Area) - Triple Crown Resources
+,production,2025,oil and condensate,443022,bbl/y,TRRC-PDQ-2026,,69996200_562560,Peart (Barnett) - Mewbourne Oil Company
+,production,2025,oil and condensate,419945,bbl/y,TRRC-PDQ-2026,,98359800_878506,Wolfbone (Trend Area) - Upcurve Energy
+,production,2025,oil and condensate,380932,bbl/y,TRRC-PDQ-2026,,80544500_100852,Sandbar (Bone Spring) - Permian Resources Operating
+,production,2025,oil and condensate,406819,bbl/y,TRRC-PDQ-2026,,44510500_276959,Indio Tanks (Pearsall) - Formentera Operations
+,production,2025,oil and condensate,410242,bbl/y,TRRC-PDQ-2026,,83750500_561136,Sinor Nest (Lower Wilcox) - Merit Energy Company
+,production,2025,oil and condensate,381935,bbl/y,TRRC-PDQ-2026,,80544500_103285,Sandbar (Bone Spring) - Coterra Energy Operating Co.
+,production,2025,oil and condensate,402254,bbl/y,TRRC-PDQ-2026,,85280300_102526,Spraberry (Trend Area) - Sogc
+,production,2025,oil and condensate,297175,bbl/y,TRRC-PDQ-2026,,31913800_100852,FordWest (Wolfcamp) - Permian Resources Operating
+,production,2025,oil and condensate,389137,bbl/y,TRRC-PDQ-2026,,52624220_712382,"Lea (Consolidated) - Ring Energy, Inc."
+,production,2025,oil and condensate,376752,bbl/y,TRRC-PDQ-2026,,84750500_728874,"Southern Bay (Eagle Ford) - Rosewood Resources, Inc."
+,production,2025,oil and condensate,368717,bbl/y,TRRC-PDQ-2026,,71823666_20522,"Platang (San Andres) - Amtex Energy, Inc."
+,production,2025,oil and condensate,363044,bbl/y,TRRC-PDQ-2026,,69996200_173777,"Peart (Barnett) - Continental Resources, Inc."
+,production,2025,oil and condensate,350182,bbl/y,TRRC-PDQ-2026,,12018200_521544,Briscoe Ranch (Eagleford) - Magnolia Oil & Gas Operating
+,production,2025,oil and condensate,348693,bbl/y,TRRC-PDQ-2026,,56378001_760218,Mabee - Scout Energy Management
+,production,2025,oil and condensate,322032,bbl/y,TRRC-PDQ-2026,,570001_386310,Adair - Hilcorp Energy Company
+,production,2025,oil and condensate,318179,bbl/y,TRRC-PDQ-2026,,88071696_276959,Txl (Tubb) - Formentera Operations
+,production,2025,oil and condensate,299041,bbl/y,TRRC-PDQ-2026,,85279201_100951,"Spraberry (Trend Area) - Vital Energy, Inc."
+,production,2025,oil and condensate,307723,bbl/y,TRRC-PDQ-2026,,53411001_742122,Levelland - Sabinal Energy Operating
+,production,2025,oil and condensate,0,bbl/y,TRRC-PDQ-2026,,39744250_100291,Hawkville (Austin Chalk) - Kimmeridge Texas Gas
+,production,2025,oil and condensate,256841,bbl/y,TRRC-PDQ-2026,,34773550_923444,Giddings (Austin Chalk Gas) - Wildfire Energy Operating
+,production,2025,oil and condensate,291440,bbl/y,TRRC-PDQ-2026,,53759333_54430,Linker (Clear Fork) - Basin Oil & Gas Operating
+,production,2025,oil and condensate,240236,bbl/y,TRRC-PDQ-2026,,86950600_101444,"Sugarkane (Eagle Ford) - Baytex Energy Usa, Inc."
+,production,2025,oil and condensate,280824,bbl/y,TRRC-PDQ-2026,,25188400_760218,Dollarhide (Devonian) - Scout Energy Management
+,production,2025,oil and condensate,281007,bbl/y,TRRC-PDQ-2026,,82572666_712382,"Shafter LakeN. (San Andres) - Ring Energy, Inc."
+,production,2025,oil and condensate,280825,bbl/y,TRRC-PDQ-2026,,23191666_847710,Darst Creek (Edwards) - Texas Petroleum Investment Co.
+,production,2025,oil and condensate,264847,bbl/y,TRRC-PDQ-2026,,41911500_100852,Hoefs T-K (Wolfcamp) - Permian Resources Operating
+,production,2025,oil and condensate,268271,bbl/y,TRRC-PDQ-2026,,256500_100291,A.W.P. (Olmos) - Kimmeridge Texas Gas
+,production,2025,oil and condensate,271977,bbl/y,TRRC-PDQ-2026,,34733610_521544,Giddings (Eagleford) - Magnolia Oil & Gas Operating
+,production,2025,oil and condensate,266509,bbl/y,TRRC-PDQ-2026,,44148500_53974,"IatanEast Howard - Basa Resources, Inc."
+,production,2025,oil and condensate,241709,bbl/y,TRRC-PDQ-2026,,21907111_617544,Crossett (Devonian) - Occidental Permian Ltd.
+,production,2025,oil and condensate,258493,bbl/y,TRRC-PDQ-2026,,76707001_742122,RileyNorth - Sabinal Energy Operating
+,production,2025,oil and condensate,248461,bbl/y,TRRC-PDQ-2026,,12018200_101444,"Briscoe Ranch (Eagleford) - Baytex Energy Usa, Inc."
+,production,2025,oil and condensate,249263,bbl/y,TRRC-PDQ-2026,,11308001_386310,Brahaney - Hilcorp Energy Company
+,production,2025,oil and condensate,246951,bbl/y,TRRC-PDQ-2026,,2725760_386310,Andrews (Wolfcamp-Penn.) - Hilcorp Energy Company
+,production,2025,oil and condensate,244860,bbl/y,TRRC-PDQ-2026,,77318666_386310,RobertsonN. (Clear Fork 7100) - Hilcorp Energy Company
+,production,2025,oil and condensate,200781,bbl/y,TRRC-PDQ-2026,,53613750_100852,Lin (Wolfcamp) - Permian Resources Operating
+,production,2025,oil and condensate,238463,bbl/y,TRRC-PDQ-2026,,69996200_100951,"Peart (Barnett) - Vital Energy, Inc."
+,production,2025,oil and condensate,234671,bbl/y,TRRC-PDQ-2026,,28899040_665748,"Emma (Barnett Shale) - Pioneer Natural Res. Usa, Inc."
+,production,2025,oil and condensate,240188,bbl/y,TRRC-PDQ-2026,,96062001_630555,Welch - Oxy Usa Wtp Lp
+,production,2025,oil and condensate,238635,bbl/y,TRRC-PDQ-2026,,9362500_73056,Block 31Nw. (Penn Upper) - Blackbeard Operating
+,production,2025,oil and condensate,229997,bbl/y,TRRC-PDQ-2026,,28899040_101413,Emma (Barnett Shale) - Firebird Energy Ii
+,production,2025,oil and condensate,12885,bbl/y,TRRC-PDQ-2026,,65280200_100351,NewarkEast (Barnett Shale) - Javelin Energy Partners Mgmt
+,production,2025,oil and condensate,203222,bbl/y,TRRC-PDQ-2026,,70279100_788997,Pegasus (Consolidated) - Sm Energy Company
+,production,2025,oil and condensate,203228,bbl/y,TRRC-PDQ-2026,,41911500_875462,Hoefs T-K (Wolfcamp) - U.S. Energy Development Corp
+,production,2025,oil and condensate,208757,bbl/y,TRRC-PDQ-2026,,83991001_630555,Slaughter - Oxy Usa Wtp Lp
+,production,2025,oil and condensate,207908,bbl/y,TRRC-PDQ-2026,,93042001_53974,"Van - Basa Resources, Inc."
+,production,2025,oil and condensate,201488,bbl/y,TRRC-PDQ-2026,,92100050_875462,Two Georges (Bone Spring) - U.S. Energy Development Corp
+,production,2025,oil and condensate,201633,bbl/y,TRRC-PDQ-2026,,85280300_173777,"Spraberry (Trend Area) - Continental Resources, Inc."
+,production,2025,oil and condensate,200627,bbl/y,TRRC-PDQ-2026,,27135750_100291,Eagleville (Eagle Ford-2) - Kimmeridge Texas Gas
+,production,2025,oil and condensate,197396,bbl/y,TRRC-PDQ-2026,,80544500_100158,Sandbar (Bone Spring) - Admiral Permian Operating
+,production,2025,oil and condensate,197525,bbl/y,TRRC-PDQ-2026,,32309001_617544,Foster - Occidental Permian Ltd.

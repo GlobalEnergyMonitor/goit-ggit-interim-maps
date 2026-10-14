@@ -31,6 +31,8 @@ npm-debug.log
 *client_secret.json
 _dist/
 _asana_cache/
+# bulk-upload Google Sheets exported by hand, read by the GOGET overlay in CI
+!data/goget_bulk_static/**
 
 
 # Byte-compiled / optimized / DLL files

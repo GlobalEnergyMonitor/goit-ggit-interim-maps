@@ -58,6 +58,9 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_CACHE_DIR = REPO_ROOT / '_asana_cache'
 CACHE_ENV_VAR = 'GOGET_BULK_CACHE'
 MANIFEST_NAME = 'manifest.json'
+# Bulk files Asana links as Google Sheets rather than attaching as CSVs: CI has no
+# Google login, so these are exported by hand into the repo (same manifest format)
+STATIC_DIR = REPO_ROOT / 'data' / 'goget_bulk_static'
 
 csv.field_size_limit(sys.maxsize)  # WKT cells run to hundreds of KB
 
@@ -204,11 +207,38 @@ def classify(header):
     return None
 
 
+def read_table(path, max_preamble=10):
+    """(header, rows) from a bulk CSV.
+
+    Some files still carry the upload template's title and instruction lines
+    above the real header, so take the first of the top few lines that
+    classify() recognizes, falling back to the first line.
+    """
+    with open(path, newline='', encoding='utf-8-sig') as handle:
+        lines = list(csv.reader(handle))
+    start = next((i for i, line in enumerate(lines[:max_preamble]) if classify(line)), 0)
+    header = [_norm(c) for c in lines[start]] if lines else []
+    rows = []
+    for line in lines[start + 1:]:
+        if any(cell.strip() for cell in line):
+            rows.append({k: v for k, v in zip(header, line) if k})
+    return header, rows
+
+
 def unit_id(row):
     for col in ID_COLUMNS:
         value = _norm(row.get(col))
         if value:
             return value
+    return ''
+
+
+def government_id_key(row):
+    """Production key for a new asset that has no GEM id yet: its temporary
+    government unit id, a column whose header starts 'Government unit ID'."""
+    for col, value in row.items():
+        if col.startswith('Government unit ID') and _norm(value):
+            return 'gov:' + _norm(value)
     return ''
 
 
@@ -335,20 +365,18 @@ class BulkOverlay:
     def load(cls, cache_dir=None):
         cache_dir = Path(cache_dir or os.environ.get(CACHE_ENV_VAR) or DEFAULT_CACHE_DIR)
         overlay = cls(cache_dir)
-        manifest = cache_dir / MANIFEST_NAME
-        if not manifest.is_file():
-            return overlay
-        entries = json.loads(manifest.read_text())
-        entries.sort(key=lambda e: e['created_at'])  # oldest first: later files override
-        for entry in entries:
-            path = cache_dir / entry['path']
+        entries = []
+        for base in (cache_dir, STATIC_DIR):
+            manifest = base / MANIFEST_NAME
+            if manifest.is_file():
+                entries += [(base, e) for e in json.loads(manifest.read_text())]
+        entries.sort(key=lambda be: be[1]['created_at'])  # oldest first: later files override
+        for base, entry in entries:
+            path = base / entry['path']
             if not path.is_file():
                 print(f'bulk upload: missing cached file {path.name} ({entry["name"]}) — skipped')
                 continue
-            with open(path, newline='', encoding='utf-8-sig') as handle:
-                reader = csv.DictReader(handle)
-                header = reader.fieldnames or []
-                rows = [{_norm(k): v for k, v in row.items() if k is not None} for row in reader]
+            header, rows = read_table(path)
             kind = classify(header)
             record = {**entry, 'kind': kind, 'rows': len(rows)}
             if kind is None:
@@ -413,7 +441,7 @@ class BulkOverlay:
         # (unit, category) -> year -> summed value, within this one file
         totals = defaultdict(lambda: defaultdict(float))
         for row in rows:
-            uid = unit_id(row)
+            uid = unit_id(row) or government_id_key(row)
             kind = _lower(row.get('Production/Reserves'))
             if not uid:
                 continue
@@ -603,6 +631,9 @@ class BulkOverlay:
                 'FuelType': _norm(row.get('GOGET Fuel Type')),
                 'Tracker': 'GOGET',
             })
+            key = government_id_key(row)
+            if key:
+                self.apply_production(props, key)
             features.append({
                 'type': 'Feature',
                 'geometry': {'type': 'Point', 'coordinates': [

@@ -1,0 +1,13 @@
+[
+  {
+    "gid": "1218602566984820",
+    "name": "goget_new_production_2026-09-17 (Google Sheet, tab New_Units_Production_Bulk_prod)",
+    "created_at": "2026-09-17T22:49:21.445Z",
+    "task_gid": "1218602566984819",
+    "task_name": "New assets - production",
+    "parent_gid": "1218602566705876",
+    "parent_name": "Bulk Upload - Texas - GOGET",
+    "path": "files/1218602566984820.csv",
+    "source": "https://docs.google.com/spreadsheets/d/1LM9rYvwDKDB4ZM-4lk0pVNeVkMS9Jxx9_6dsHgyRgHA/edit?gid=358361336"
+  }
+]
