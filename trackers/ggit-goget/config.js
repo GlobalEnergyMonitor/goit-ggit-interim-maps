@@ -120,6 +120,7 @@ var config = {
             'mixed status': 'grey',
             'abandoned': 'grey',
             'underground gas storage': 'grey',
+            'underground carbon storage': 'grey',
             'not found': 'grey',
         },
     },
@@ -159,8 +160,8 @@ var config = {
             showColorDots: true,
             startExpanded: false,
             startOn: false,
-            values: ['operating', 'in-development', 'discovered', 'exploration', 'decommissioning', 'mothballed', 'abandoned', 'cancelled', 'underground gas storage', 'not found'],
-            values_labels: ['Operating', 'In development', 'Discovered', 'Exploration', 'Decommissioning', 'Mothballed', 'Abandoned', 'Cancelled', 'Underground gas storage', 'Not found'],
+            values: ['operating', 'in-development', 'discovered', 'exploration', 'decommissioning', 'mothballed', 'abandoned', 'cancelled', 'underground gas storage', 'underground carbon storage', 'not found'],
+            values_labels: ['Operating', 'In development', 'Discovered', 'Exploration', 'Decommissioning', 'Mothballed', 'Abandoned', 'Cancelled', 'Underground gas storage', 'Underground carbon storage', 'Not found'],
         },
     ],
 

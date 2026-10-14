@@ -17,13 +17,26 @@ https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/interim_maps/
 Run this AFTER build_goget_areas.py, whose outlines decide which centroids get
 dropped (see outlined_project_ids).
 
+The open GOGET bulk-upload requests in the Asana Data team inbox are overlaid
+on the export's centroids (moved locations, operators, status, production,
+deletions, plus brand-new assets that have no GEM id yet) — see
+scripts/goget_bulk_overlay.py; fill `_asana_cache/` with
+scripts/asana_goget_bulk_uploads.py first. Status and operator overlays read
+the GEM database (GEM_READONLY_DB_URL) to merge timelines and resolve entity
+ids; without bulk uploads the database isn't touched.
+
 Commit and push the regenerated goget_map_latest.geojson; the ggit-goget map
 loads it from this repo's raw.githubusercontent.com URL.
 """
 
 import json
+import sys
 import urllib.request
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from goget_bulk_overlay import BulkOverlay
 
 SOURCE_URL = 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/interim_maps/goget_map_2026-03.geojson'
 OUT_PATH = Path(__file__).resolve().parent.parent / 'trackers' / 'ggit-goget' / 'goget_map_latest.geojson'
@@ -99,31 +112,52 @@ def outlined_project_ids():
 
 
 def main():
+    bulk = BulkOverlay.load()
+    print('\n'.join(bulk.describe()))
     outlined = outlined_project_ids()
     print(f'downloading {SOURCE_URL}')
     with urllib.request.urlopen(SOURCE_URL) as response:
         data = json.load(response)
 
+    # database timelines for the centroids whose status a bulk upload changes
+    # (the export carries only the scalar status, and the bulk entries have to
+    # be merged into the full timeline to be read the same way as everywhere else)
+    status_ids = {f['properties'].get('project-id') for f in data['features']} & set(bulk.status)
+    timelines = bulk.db_timelines(status_ids - outlined) if status_ids - outlined else {}
+
     features = []
     dropped = 0
+    overlaid = {'deleted': 0, 'location': 0, 'operator': 0, 'status': 0, 'production': 0}
     for feature in data['features']:
         if not feature.get('geometry'):
             continue
         props = transform(feature['properties'])
-        if props['ProjectID'] in outlined:
+        project_id = props['ProjectID']
+        if project_id in outlined:
             dropped += 1
             continue
-        features.append({
-            'type': 'Feature',
-            'geometry': feature['geometry'],
-            'properties': props,
-        })
+        if project_id in bulk.deleted:
+            overlaid['deleted'] += 1
+            continue
+        out_feature = {'type': 'Feature', 'geometry': feature['geometry'], 'properties': props}
+        overlaid['location'] += bulk.apply_latlon(out_feature, project_id)
+        overlaid['operator'] += bulk.apply_operator(props, project_id)
+        overlaid['status'] += bulk.apply_status(props, project_id, timelines.get(project_id))
+        overlaid['production'] += bulk.apply_production(props, project_id)
+        features.append(out_feature)
+
+    template = {k: '' for k in transform({})}
+    new_features = bulk.new_asset_features(template)
+    features.extend(new_features)
 
     out = {'type': 'FeatureCollection', 'features': features}
     OUT_PATH.write_text(json.dumps(out, separators=(',', ':'), ensure_ascii=False))
     size_mb = OUT_PATH.stat().st_size / 1e6
     print(f'wrote {OUT_PATH.name}: {len(features)} features, {size_mb:.1f} MB')
     print(f'dropped {dropped} centroids that have a field outline instead')
+    if not bulk.empty:
+        print('bulk uploads applied: ' + ', '.join(f'{k} {v}' for k, v in overlaid.items())
+              + f', new assets added {len(new_features)}')
 
 
 if __name__ == '__main__':

@@ -41,6 +41,13 @@ the ownership repos' job. Fields the export doesn't cover simply go without.
 Run this BEFORE build_goget_map_data.py: that script reads this file to drop the
 centroids of fields that now have an outline, so each extraction area is one
 asset on the map instead of two.
+
+The open GOGET bulk-upload requests in the Asana Data team inbox are overlaid on
+top of the database (newer outlines, operators, status, production, deletions —
+see scripts/goget_bulk_overlay.py): run scripts/asana_goget_bulk_uploads.py
+first to fill `_asana_cache/`. A field that only had a centroid but gets an
+outline from a bulk upload becomes an outline here, so the point builder drops
+its centroid like any other.
 """
 
 import json
@@ -56,6 +63,7 @@ from shapely.geometry import MultiPolygon, mapping
 from shapely.wkt import loads as wkt_loads
 
 from build_goget_map_data import SOURCE_URL, transform
+from goget_bulk_overlay import NO_STATUS, BulkOverlay, current_status, first_year, merge_timeline  # noqa: F401
 
 OUT_PATH = Path(__file__).resolve().parent.parent / 'trackers' / 'ggit-goget' / 'goget_areas_latest.geojson'
 
@@ -72,15 +80,12 @@ POINT_ONLY_FIELDS = (
 # which is most of the file size and none of the accuracy.
 COORD_PRECISION = 6
 
-# What the data team's own GOGET export uses for a field with no recorded status
-# (213 of the centroids in goget_map_latest.geojson). An empty string would fall
-# through the map's color_association to black and match no legend checkbox, so
-# it has to be a value the shared status vocabulary already knows.
-NO_STATUS = 'not found'
+# NO_STATUS, current_status() and first_year() live in goget_bulk_overlay so the
+# point builder derives status from a merged timeline the same way.
 
 QUERY = """
 with geo as (
-    select pg.project_id, pg.wkt
+    select pg.project_id, pg.wkt, pg.modified
     from project_geospatial pg
     where pg.wkt is not null and btrim(pg.wkt) <> ''
 ),
@@ -117,6 +122,7 @@ tl as (
     group by u.plant_id
 )
 select 'L' || p."unitIDSearch"[1]  as project_id,
+       p."unitIDSearch"[1]          as unit_number,
        p.name,
        p."wikiUrl",
        p.subnational,
@@ -129,48 +135,21 @@ select 'L' || p."unitIDSearch"[1]  as project_id,
        owners.owners,
        ops.operators,
        tl.timeline,
-       geo.wkt
-from geo
-join plant p on p.id = geo.project_id and p.deleted is not true
+       geo.wkt,
+       geo.modified               as wkt_modified
+from plant p
+left join geo on geo.project_id = p.id
 left join goget_project gp on gp.project_id = p.id
 left join country c1 on c1.id = p.country_id
 left join country c2 on c2.id = p.country2_id
 left join owners on owners.plant_id = p.id
 left join ops on ops.plant_id = p.id
 left join tl on tl.plant_id = p.id
+where p.deleted is not true
+  and gp.project_id is not null
+  and (geo.wkt is not null or p."unitIDSearch"[1] = any(:bulk_outline_ids))
 order by project_id
 """
-
-
-def current_status(timeline):
-    """Latest actual status from the timeline.
-
-    `order` is the researcher-maintained sequence, so the last entry is the
-    current state — except that planned future events (a scheduled
-    decommissioning, a planned start-up) also live in the timeline and would
-    otherwise win. Dropping substatus='planned' reproduces the March release
-    sheet's Status column for 1709 of the 1755 fields the two sources share
-    (97.4%); the rest are fields whose status genuinely moved on since March.
-    """
-    if not timeline:
-        return NO_STATUS
-    actual = [t for t in timeline if t.get('substatus') != 'planned'] or timeline
-    ordered = sorted(actual, key=lambda t: (t.get('ord') is None, t.get('ord')))
-    return (ordered[-1].get('status') or '').strip() or NO_STATUS
-
-
-def first_year(timeline, status=None, substatus=None):
-    """Year of the earliest timeline entry matching status/substatus."""
-    matches = [
-        t for t in timeline or []
-        if (status is None or (t.get('status') or '').strip() == status)
-        and (substatus is None or (t.get('substatus') or '').strip() == substatus)
-        and t.get('year')
-    ]
-    if not matches:
-        return ''
-    matches.sort(key=lambda t: (t.get('ord') is None, t.get('ord')))
-    return str(matches[0]['year'])
 
 
 def polygonal(geom):
@@ -254,8 +233,11 @@ def point_only_attributes():
 
 
 def main():
-    rows = gem_db.fetch_all(QUERY)
-    print(f'fetched {len(rows)} outlines from project_geospatial')
+    bulk = BulkOverlay.load()
+    print('\n'.join(bulk.describe()))
+    bulk_outline_ids = [int(u[1:]) for u in bulk.wkt if u[:1] == 'L' and u[1:].isdigit()]
+    rows = gem_db.fetch_all(QUERY, {'bulk_outline_ids': bulk_outline_ids})
+    print(f'fetched {len(rows)} fields with an outline in project_geospatial or in a bulk upload')
 
     point_attrs = point_only_attributes()
     blank_attrs = {k: '' for k in POINT_ONLY_FIELDS}
@@ -266,13 +248,32 @@ def main():
     skipped_bad = []
     skipped_nonpolygon = []
     repaired_count = []
-    for (project_id, name, wiki, subnational, accuracy, country, country2,
-         fuel_type, production_type, basin, owners, operators, timeline, wkt) in rows:
+    overlaid = {'outline': 0, 'deleted': 0, 'operator': 0, 'status': 0, 'production': 0, 'outline kept (db newer)': 0}
+    for (project_id, unit_number, name, wiki, subnational, accuracy, country, country2,
+         fuel_type, production_type, basin, owners, operators, timeline, wkt, wkt_modified) in rows:
+        if project_id in bulk.deleted:
+            overlaid['deleted'] += 1
+            continue
+        db_wkt = wkt
+        bulk_wkt = bulk.outline(project_id, wkt_modified)
+        if bulk_wkt is not None:
+            wkt = bulk_wkt
+            overlaid['outline'] += 1
+        elif project_id in bulk.wkt:
+            overlaid['outline kept (db newer)'] += 1
+        if not wkt:
+            continue
         try:
             geom = wkt_loads(wkt)
         except Exception as exc:  # unparseable WKT should be loud, not silent
-            skipped_bad.append((project_id, name, str(exc)[:80]))
-            continue
+            if bulk_wkt is not None and db_wkt:
+                # a broken bulk outline shouldn't cost the field its database one
+                skipped_bad.append((project_id, name, f'bulk upload WKT unparseable, kept the database outline — {exc}'[:120]))
+                overlaid['outline'] -= 1
+                geom = wkt_loads(db_wkt)
+            else:
+                skipped_bad.append((project_id, name, str(exc)[:80]))
+                continue
         if geom.is_empty:
             skipped_empty.append((project_id, name))
             continue
@@ -302,31 +303,31 @@ def main():
         extras = point_attrs.get(project_id)
         matched += extras is not None
 
-        features.append({
-            'type': 'Feature',
-            'geometry': geojson_geom,
-            'properties': {
-                'PipelineName': name or '',
-                'SegmentName': '',  # keeps the shared hover popup from printing undefined
-                'Status': status,
-                'Wiki': wiki or '',
-                'ProjectID': project_id or '',
-                'CountriesOrAreas': country_label,
-                'StartState/Province': subnational or '',
-                'StartLocation': ', '.join([p for p in (subnational, country_label) if p]),
-                'Owner': owners or '',
-                'Operator': operators or '',
-                'StartYear1': first_year(timeline, status='operating'),
-                'DiscoveryYear': first_year(timeline, status='discovered'),
-                'FIDYear': first_year(timeline, substatus='actual FID'),
-                'LocationAccuracy': accuracy or '',
-                'FuelType': fuel_type or '',
-                'ProductionType': production_type or '',
-                'Basin': basin or '',
-                'Tracker': 'GOGET',
-                **(extras or blank_attrs),
-            },
-        })
+        props = {
+            'PipelineName': name or '',
+            'SegmentName': '',  # keeps the shared hover popup from printing undefined
+            'Status': status,
+            'Wiki': wiki or '',
+            'ProjectID': project_id or '',
+            'CountriesOrAreas': country_label,
+            'StartState/Province': subnational or '',
+            'StartLocation': ', '.join([p for p in (subnational, country_label) if p]),
+            'Owner': owners or '',
+            'Operator': operators or '',
+            'StartYear1': first_year(timeline, status='operating'),
+            'DiscoveryYear': first_year(timeline, status='discovered'),
+            'FIDYear': first_year(timeline, substatus='actual FID'),
+            'LocationAccuracy': accuracy or '',
+            'FuelType': fuel_type or '',
+            'ProductionType': production_type or '',
+            'Basin': basin or '',
+            'Tracker': 'GOGET',
+            **(extras or blank_attrs),
+        }
+        overlaid['operator'] += bulk.apply_operator(props, project_id)
+        overlaid['status'] += bulk.apply_status(props, project_id, timeline)
+        overlaid['production'] += bulk.apply_production(props, project_id)
+        features.append({'type': 'Feature', 'geometry': geojson_geom, 'properties': props})
 
     out = {'type': 'FeatureCollection', 'features': features}
     OUT_PATH.write_text(json.dumps(out, separators=(',', ':'), ensure_ascii=False))
@@ -334,6 +335,8 @@ def main():
     size_mb = OUT_PATH.stat().st_size / 1e6
     print(f'wrote {OUT_PATH.name}: {len(features)} features, {size_mb:.1f} MB')
     print(f'{matched} of them picked up production/capacity/parent from the export')
+    if not bulk.empty:
+        print('bulk uploads applied: ' + ', '.join(f'{k} {v}' for k, v in overlaid.items()))
     print('now rerun scripts/build_goget_map_data.py to drop the duplicated centroids')
     if repaired_count:
         print(f'repaired {len(repaired_count)} self-intersecting geometries via make_valid')

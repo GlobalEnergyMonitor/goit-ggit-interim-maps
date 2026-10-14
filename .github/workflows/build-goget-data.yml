@@ -1,0 +1,70 @@
+name: build goget map data
+
+# Rebuilds the two committed GOGET files under trackers/ggit-goget/ from the GEM
+# database and the data team's export, with the open GOGET bulk-upload requests
+# in the Asana Data team inbox overlaid on top (see README, "The ggit-goget
+# map"), and commits them if anything changed. Both combined maps load those
+# files from raw.githubusercontent.com at runtime, so no Pages deploy is needed
+# (a push made with GITHUB_TOKEN wouldn't trigger one anyway).
+#
+# Secrets: GEM_READONLY_DB_URL (read-only GEM project DB role) and
+# ASANA_ACCESS_TOKEN (an Asana personal access token that can see the Data
+# team inbox; used for GET requests only — the Asana tasks are never touched).
+
+on:
+  schedule:
+    - cron: "41 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: goget-data
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Checkout gem-db-ops (owns the GEM database connection)
+        uses: actions/checkout@v4
+        with:
+          repository: bairdlangenbrunner/gem-db-ops
+          path: gem-db-ops
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install sqlalchemy psycopg2-binary shapely requests
+
+      - name: Download the open GOGET bulk uploads from Asana
+        env:
+          ASANA_ACCESS_TOKEN: ${{ secrets.ASANA_ACCESS_TOKEN }}
+        run: python3 scripts/asana_goget_bulk_uploads.py
+
+      - name: Build the GOGET outlines and centroids
+        env:
+          GEM_READONLY_DB_URL: ${{ secrets.GEM_READONLY_DB_URL }}
+          GEM_DB_OPS_REPO: ${{ github.workspace }}/gem-db-ops
+        run: |
+          python3 scripts/build_goget_areas.py
+          python3 scripts/build_goget_map_data.py
+
+      - name: Commit and push if the data changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add trackers/ggit-goget/goget_areas_latest.geojson trackers/ggit-goget/goget_map_latest.geojson
+          if git diff --cached --quiet; then
+            echo "no data changes"
+          else
+            git commit -m "refresh goget map data"
+            git push
+          fi

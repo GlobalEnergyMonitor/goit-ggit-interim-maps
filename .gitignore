@@ -30,6 +30,7 @@ npm-debug.log
 *.pbf
 *client_secret.json
 _dist/
+_asana_cache/
 
 
 # Byte-compiled / optimized / DLL files
