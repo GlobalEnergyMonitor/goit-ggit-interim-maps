@@ -42,7 +42,9 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install sqlalchemy psycopg2-binary shapely requests
+        # SQLAlchemy 2.1 made psycopg (v3) the default postgresql driver, while
+        # gem-db-ops lists psycopg2 — install both so either resolves
+        run: pip install sqlalchemy psycopg2-binary "psycopg[binary]" shapely requests
 
       - name: Download the open GOGET bulk uploads from Asana
         env:
