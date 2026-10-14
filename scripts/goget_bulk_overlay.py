@@ -23,12 +23,13 @@ What is applied, keyed on the GEM unit id (L1000…):
   * operators (GEM entity ids, resolved to names through the `company` table);
   * status timeline entries — merged into the database timeline, then the
     current status is re-derived the same way as for database rows;
-  * production — only rows in plain volume units (bbl or m³ for oil, m³ or
-    cubic feet for gas, per year or per day, with thousand/million prefixes),
-    normalized to the export's million bbl/y and million m³/y and summed into
-    the million boe/y capacity with the export's own gas factor. Reserves,
-    cumulative production, LPG, condensate and anything in mass or energy units
-    are reported and skipped — those need the data team's conversion tables;
+  * production — the same conversion the database builders use for
+    `reserves_production` (convert_production below): oil and condensate in
+    bbl, m³ or tonnes, gas in m³ or cubic feet (standard/normal variants,
+    thousand/million/billion prefixes, bcm, per year or per day), normalized
+    to million bbl/y and million m³/y and summed into the million boe/y
+    capacity. Reserves, cumulative production, LPG, NGL and energy units are
+    reported and skipped;
   * deletions — the feature is dropped;
   * brand-new assets without a GEM id yet (name + coordinates) — added as
     centroids with an empty wiki link.
@@ -69,26 +70,43 @@ NO_STATUS = 'not found'
 # Columns that carry the GEM unit id, in the order they're tried.
 ID_COLUMNS = ('Unit ID', 'Project ID', 'Database ID', 'GEM Project ID')
 
-# The export's gas-to-boe factor: median of gas / (capacity - oil) over the 876
-# export rows that report both fuels is 169.9813 m³ per boe, i.e. 6,000 cf/boe.
+# The data team's export used these factors (checked against its March 2026
+# GOGET map export, which the database builders replaced in October 2026):
+# gas / (capacity - oil) is 169.9813 m³ per boe (6,000 cf/boe) on every row
+# that reports both fuels, and oil or condensate recorded by mass comes out at
+# 7.33 bbl per tonne.
 M3_PER_BOE = 169.9813
 BBL_PER_M3 = 6.28981
+BBL_PER_TONNE = 7.33
 M3_PER_CUBIC_FOOT = 0.0283168
 MILLION_BOE_Y_TO_BOE_D = 1e6 / 365.0
 
-# Fuel descriptions folded into the map's two production figures. Anything else
-# (condensate, LPG, NGL, bitumen…) is reported as skipped rather than guessed.
-OIL_FUELS = {'oil', 'crude oil', 'crude', 'oil and condensate', 'crude oil and condensate'}
+# Fuel descriptions folded into the map's two production figures. Condensate
+# counts as oil, as it did in the data team's export. Anything else (LPG, NGL,
+# bitumen, coal seam gas, hydrocarbons in boe…) is reported as skipped rather
+# than guessed.
+OIL_FUELS = {'oil', 'crude oil', 'crude', 'oil and condensate', 'crude oil and condensate',
+             'condensate', 'gas condensate', 'oil and gas condensate', 'oil (incl. condensate)'}
 GAS_FUELS = {'gas', 'natural gas', 'dry gas', 'associated gas', 'non-associated gas',
-             'sales gas', 'raw gas', 'marketable gas'}
+             'nonassociated gas', 'non associated gas', 'sales gas', 'raw gas',
+             'marketable gas', 'wet gas', 'gas (incl. associated gas)',
+             'coal seam gas', 'coal bed methane'}
 
+# Volume units, plus mass units for oil. Standard/normal cubic meters (Sm³,
+# Nm³, m³(Vn), "metric standard m³") are the map's m³; scf is cf; bcm is a
+# billion m³; a megalitre is 1,000 m³. Energy units (petajoules, boe) and
+# anything unrecognized are skipped.
 UNIT_RE = re.compile(
-    r'^(?:(?P<prefix>thousand|million|billion)\s*)?'
-    r'(?P<unit>m³|m3|cubic\s*met(?:re|er)s?|bbls?|barrels?|cubic\s*feet|cubic\s*foot|cf|mcf|mmcf|bcf)'
-    r'\s*(?:/\s*(?P<period>y|yr|year|d|day))?$',
+    r'^(?:(?P<prefix>thousand|kilo|million|billion)\s*)?'
+    r'(?:metric\s*standard\s*)?'
+    r'(?P<unit>[sn]?m³|[sn]?m3|m³\(vn\)|m3\(vn\)|cubic\s*met(?:re|er)s?|stb|bbls?|barrels?'
+    r'|cubic\s*feet|cubic\s*foot|s?cf|mcf|mmcf|bcf|bcm'
+    r'|megalit(?:re|er)s?|kilolit(?:re|er)s?|lit(?:re|er)s?'
+    r'|(?:metric\s*)?tonnes?|(?:metric\s*)?tons?|t|kilotonnes?|kt)'
+    r'\s*(?:/\s*(?P<period>y|yr|year|a|d|day))?$',
     re.IGNORECASE,
 )
-PREFIX_SCALE = {None: 1.0, 'thousand': 1e3, 'million': 1e6, 'billion': 1e9}
+PREFIX_SCALE = {None: 1.0, 'thousand': 1e3, 'kilo': 1e3, 'million': 1e6, 'billion': 1e9}
 
 # Bulk files spell a few statuses differently from the database.
 STATUS_ALIASES = {'in development': 'in-development'}
@@ -224,12 +242,25 @@ def convert_production(fuel, quantity, unit):
         base, scale = 'cubicfeet', scale * 1e6
     elif base == 'bcf':
         base, scale = 'cubicfeet', scale * 1e9
-    elif base.startswith('bbl') or base.startswith('barrel'):
-        base = 'bbl'
-    elif base in ('m3', 'm³') or base.startswith('cubicmet'):
+    elif base == 'bcm':
+        base, scale = 'm3', scale * 1e9
+    elif base.startswith('megalit'):
+        base, scale = 'm3', scale * 1e3
+    elif base.startswith('kilolit'):
         base = 'm3'
-    elif base in ('cf', 'cubicfeet', 'cubicfoot'):
+    elif base.startswith('lit'):
+        base, scale = 'm3', scale * 1e-3
+    elif base in ('kilotonne', 'kilotonnes', 'kt'):
+        base, scale = 'tonne', scale * 1e3
+    elif base.startswith('bbl') or base.startswith('barrel') or base == 'stb':
+        base = 'bbl'
+    elif base.startswith('cubicmet') or base.rstrip('(vn)') in ('m3', 'm³', 'sm3', 'sm³', 'nm3', 'nm³'):
+        base = 'm3'
+    elif base in ('cf', 'scf', 'cubicfeet', 'cubicfoot'):
         base = 'cubicfeet'
+    elif base in ('tonne', 'tonnes', 'ton', 'tons', 'metrictonne', 'metrictonnes',
+                  'metricton', 'metrictons', 't'):
+        base = 'tonne'
     per_year = quantity * scale
     if match.group('period').lower().startswith('d'):
         per_year *= 365.0
@@ -238,6 +269,8 @@ def convert_production(fuel, quantity, unit):
             value = per_year
         elif base == 'm3':
             value = per_year * BBL_PER_M3
+        elif base == 'tonne':
+            value = per_year * BBL_PER_TONNE
         else:
             return None
     else:
@@ -248,6 +281,38 @@ def convert_production(fuel, quantity, unit):
         else:
             return None
     return category, value / 1e6
+
+
+def capacity_from_production(oil, gas):
+    """Capacity / CapacityUnits / CapacityBOEd from the two production figures.
+
+    Oil in million bbl/y plus gas in million m³/y over the export's m³-per-boe
+    factor, in million boe/y; CapacityBOEd is the same figure as boe/d, which
+    is what the pipeline features carry, so the circle scaling stays
+    comparable. Empty when neither fuel has a figure.
+    """
+    if oil in ('', None) and gas in ('', None):
+        return {'Capacity': '', 'CapacityUnits': '', 'CapacityBOEd': ''}
+    capacity = (float(oil) if oil not in ('', None) else 0.0) \
+        + (float(gas) if gas not in ('', None) else 0.0) / M3_PER_BOE
+    return {
+        'Capacity': f'{capacity:.4f}'.rstrip('0').rstrip('.'),
+        'CapacityUnits': 'million boe/y',
+        'CapacityBOEd': round(capacity * MILLION_BOE_Y_TO_BOE_D, 1),
+    }
+
+
+def production_props(figures):
+    """The seven production properties from {'oil': (value, year), 'gas': (value, year)}."""
+    props = {'ProdOil': '', 'ProdOilYear': '', 'ProdGas': '', 'ProdGasYear': ''}
+    if 'oil' in figures:
+        props['ProdOil'] = round(figures['oil'][0], 3)
+        props['ProdOilYear'] = str(figures['oil'][1])
+    if 'gas' in figures:
+        props['ProdGas'] = round(figures['gas'][0], 3)
+        props['ProdGasYear'] = str(figures['gas'][1])
+    props.update(capacity_from_production(props['ProdOil'], props['ProdGas']))
+    return props
 
 
 class BulkOverlay:
@@ -502,13 +567,7 @@ class BulkOverlay:
         if 'gas' in figures:
             props['ProdGas'] = round(figures['gas'][0], 3)
             props['ProdGasYear'] = str(figures['gas'][1])
-        oil = props.get('ProdOil')
-        gas = props.get('ProdGas')
-        capacity = (float(oil) if oil not in ('', None) else 0.0) \
-            + (float(gas) if gas not in ('', None) else 0.0) / M3_PER_BOE
-        props['Capacity'] = f'{capacity:.4f}'.rstrip('0').rstrip('.')
-        props['CapacityUnits'] = 'million boe/y'
-        props['CapacityBOEd'] = round(capacity * MILLION_BOE_Y_TO_BOE_D, 1)
+        props.update(capacity_from_production(props.get('ProdOil'), props.get('ProdGas')))
         return True
 
     def apply_latlon(self, feature, uid):

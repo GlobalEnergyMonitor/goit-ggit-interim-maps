@@ -4,13 +4,16 @@ var config = {
        handoff-schema property names, so one config drives them together:
        - the GGIT file is the same auto-built one the ggit map uses (rebuilt by
          goit-ggit-data-ops whenever pipeline routes or the sheet change);
-       - goget_map_latest.geojson is a snapshot of the data team's GOGET map export
-         with properties renamed to the handoff schema — rebuild it with
-         scripts/build_goget_map_data.py;
+       - goget_map_latest.geojson is the centroids of the fields that have no
+         outline, read straight from the GEM project database by
+         scripts/build_goget_map_data.py (projects flagged for a wiki page, as
+         in the data team's export it replaced);
        - goget_areas_latest.geojson is the field outlines, read straight from the
          GEM project database (project_geospatial.wkt) by
          scripts/build_goget_areas.py — fresher than the release sheet, and the
-         only source where outlines over 32k characters survive intact. */
+         only source where outlines over 32k characters survive intact.
+       Both are rebuilt daily by .github/workflows/build-map-data.yml, with the
+       open GOGET bulk uploads from Asana overlaid. */
     geojson: [
         'https://raw.githubusercontent.com/GlobalEnergyMonitor/goit-ggit-data-ops/map-data/ggit_map_latest.geojson',
         'https://raw.githubusercontent.com/GlobalEnergyMonitor/goit-ggit-interim-maps/main/trackers/ggit-goget/goget_areas_latest.geojson',

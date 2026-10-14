@@ -9,13 +9,12 @@ var config = {
        - the two GOGET files are the ones the ggit-goget map already loads, read from
          that tracker's folder rather than copied here — see trackers/ggit-goget/config.js
          for how they're built and why each field appears exactly once;
-       - gogpt_map_latest.geojson is a snapshot of the data team's GOGPT map export with
-         properties renamed to the handoff schema — rebuild it with
-         scripts/build_gogpt_map_data.py;
-       - lng_map_latest.geojson comes straight from the GEM project database (there is no
-         published LNG map export to rename) — rebuild it with
+       - gogpt_map_latest.geojson is the GOGPT units, read straight from the GEM project
+         database through gem-db-ops' all-fields export by scripts/build_gogpt_map_data.py;
+       - lng_map_latest.geojson comes straight from the GEM project database by
          scripts/build_lng_map_data.py. The LNG terminals are deliberately only on this
-         map: the ggit map stays gas pipelines only. */
+         map: the ggit map stays gas pipelines only.
+       All four are rebuilt daily by .github/workflows/build-map-data.yml. */
     geojson: [
         'https://raw.githubusercontent.com/GlobalEnergyMonitor/goit-ggit-data-ops/map-data/ggit_map_latest.geojson',
         'https://raw.githubusercontent.com/GlobalEnergyMonitor/goit-ggit-interim-maps/main/trackers/ggit-goget/goget_areas_latest.geojson',

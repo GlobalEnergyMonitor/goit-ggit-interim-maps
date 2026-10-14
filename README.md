@@ -72,21 +72,9 @@ files under `trackers/ggit-goget/`.
   from `status_timeline` (a timeline, not a scalar — `status_id` is null for
   every GOGET project), taking the highest-`order` entry that isn't a
   `planned` substatus.
-- `goget_map_latest.geojson` — centroid points for the fields that have no
-  outline, from the data team's export
-  (`publicgemdata…/interim_maps/goget_map_*.geojson`) with properties renamed
-  to the handoff schema, by `scripts/build_goget_map_data.py`, with the open
-  bulk uploads' locations, deletions and new assets applied.
+- `goget_map_latest.geojson` — centroid points for the fields that have no outline, read from the same database by `scripts/build_goget_map_data.py`, with the open bulk uploads' locations, deletions and new assets applied. Like the data team's export it replaced in October 2026, it includes only the projects flagged `goget_project.makeWIKI` (the export's own inclusion rule: every id in it carried the flag); the outline builder shows every traced outline regardless, which its `MAKE_WIKI_ONLY` constant can flip.
 
-**Each field appears exactly once**, as an outline or a centroid, never both —
-the outline builder copies the export's production, capacity and parent values
-onto the matching outline, and the point builder then drops those fields'
-centroids. Keeping both would double-count them in the legend and the "total
-assets" line, because the shell groups features by link field *plus*
-coordinates and a polygon's coordinates never match its centroid's. So the
-two scripts must run **in that order**, and the outline builder reads the
-published export rather than the local points file (which no longer has those
-rows):
+**Each field appears exactly once**, as an outline or a centroid, never both — the point builder drops the centroids of the fields the outline builder wrote. Keeping both would double-count them in the legend and the "total assets" line, because the shell groups features by link field *plus* coordinates and a polygon's coordinates never match its centroid's. So the two scripts must run **in that order**:
 
 ```
 export GEM_READONLY_DB_URL=…      # read-only GEM project DB role
@@ -94,23 +82,14 @@ python3 scripts/build_goget_areas.py
 python3 scripts/build_goget_map_data.py
 ```
 
-The two database-reading builders (`build_goget_areas.py`, `build_lng_map_data.py`)
-get their connection from the sibling **`gem-db-ops`** repo through
-`scripts/gem_db.py` — that repo is the single source of truth for GEM data access,
-so the read-only session guard and statement timeout come along for free. Clone it
-beside this one, or point `GEM_DB_OPS_REPO` at it. Don't add a local
-`psycopg2.connect` back (the pre-2026-08-11 shape); extend `scripts/gem_db.py`
-instead. Verified byte-identical output across that switch.
+Both read through `scripts/goget_db.py`, which holds the one project query (coordinates, outlines, owners, operators, status timelines) and the two derived columns the export used to supply:
 
-Then commit and push both regenerated files. Update `SOURCE_URL` in
-`build_goget_map_data.py` first if the data team published a newer export.
-Production/capacity and Parent are deliberately *not* derived from the database
-— production lives in `reserves_production` in ~110 fuel-description × unit
-combinations (including mass and energy units needing density/heat-content
-assumptions), and Parent needs a real ownership-tree traversal; both are the
-data team's and the ownership repos' normalization to own. (The bulk-upload
-overlay below is the one exception: its production rows come in a handful of
-volume units that convert cleanly.)
+- Production and capacity come from `reserves_production` rows of kind `production`, converted by `goget_bulk_overlay.convert_production` (the same code the bulk-upload overlay uses): oil and condensate in bbl, m³ or tonnes (7.33 bbl/tonne) to million bbl/y, gas in m³ or cubic feet (standard/normal variants, bcm, mcf/mmcf/bcf) to million m³/y, latest year per fuel, summed within that year. `Capacity` is oil + gas / 169.9813 m³ per boe in million boe/y, `CapacityBOEd` the same as boe/d. Checked against the March 2026 export: within rounding on about 3,150 of 3,350 projects per fuel, the rest updated in the database since. NGL, LPG, boe and energy units are skipped and listed in the build log, never guessed; add a unit to `UNIT_RE` or a fuel to `OIL_FUELS`/`GAS_FUELS` there to cover more.
+- Parent comes from the owner companies' precomputed ultimate parents (`company.gemParentsJSON`): owner share × chain share summed per parent, one decimal, biggest first, and an owner with no recorded share lists its parents without a bracket. 5,927 of the export's 7,673 strings reproduced exactly; the rest are mostly company renames since March.
+
+All four database-reading builders (`build_goget_areas.py`, `build_goget_map_data.py`, `build_gogpt_map_data.py`, `build_lng_map_data.py`) get their connection from the sibling **`gem-db-ops`** repo through `scripts/gem_db.py` — that repo is the single source of truth for GEM data access, so the read-only session guard and statement timeout come along for free. Clone it beside this one, or point `GEM_DB_OPS_REPO` at it. Don't add a local `psycopg2.connect` back (the pre-2026-08-11 shape); extend `scripts/gem_db.py` instead.
+
+Then commit and push the regenerated files (or let the workflow below do it).
 
 ### The GOGET bulk uploads waiting in Asana
 
@@ -119,22 +98,16 @@ The GOGET researchers hand their updates to the data team as **bulk-upload reque
 - `scripts/asana_goget_bulk_uploads.py` downloads every `.csv` attached to an **incomplete** GOGET bulk-upload task anywhere in that project (Tracker custom field or name says GOGET; Task Type, Data Product or Project, or name says bulk upload) or to one of its incomplete subtasks, into the gitignored `_asana_cache/` (`files/<attachment gid>.csv` plus `manifest.json`). Completed subtasks are skipped because that data is already in the database, and a request that has since been completed drops out of the cache on the next run. It needs an Asana personal access token in `ASANA_ACCESS_TOKEN` (https://app.asana.com/0/my-apps, any workspace member who can see the inbox; locally, `~/.config/asana/token` holds one).
 - `scripts/goget_bulk_overlay.py` reads that cache. It classifies each CSV by its header (outline WKT, lat/lon, new assets, production, operator, status/timeline, deletion; reserves, other IDs and record-of-updates files are ignored), and when the same unit is in several files the newest upload wins. Running it on its own prints what it found.
 - `build_goget_areas.py` draws a bulk outline for any GOGET project that has one, unless the database outline was modified after the upload; a field with a bulk outline that does not parse keeps its database outline. `build_goget_map_data.py` moves centroids, drops deleted units, and appends the Texas "new assets" (fields with no GEM ID yet) as points with an empty `ProjectID` and `Wiki`. Both apply operators (`E…` IDs resolved through the `company` table), statuses (appended to the database timeline, so `current_status` still picks the latest non-planned entry) and production.
-- Production: only `Production/Reserves == production` rows for oil (oil, crude, oil and condensate) and gas (gas, natural gas, dry, associated, non-associated, sales, raw, marketable gas) in volume units (bbl or m³ for oil; m³, cubic feet, mcf, mmcf, bcf for gas; thousand/million/billion prefixes; per year or per day) are used, summed for the latest year per fuel. `Capacity` is oil + gas / 169.9813 m³ per boe (the export's own factor, 6,000 cf/boe) in million boe/y, with `CapacityBOEd` derived from it. Condensate, LPG, reserves, cumulative production, energy and mass units, and negative (correction) rows are skipped and listed in the run summary.
+- Production: only `Production/Reserves == production` rows are used, converted with the same `convert_production` the database builders use (oil and condensate in bbl, m³ or tonnes; gas in m³ or cubic feet; see above), summed for the latest year per fuel, and `Capacity` recomputed the same way. LPG, NGL, reserves, cumulative production, energy units and negative (correction) rows are skipped and listed in the run summary.
 
-The daily `build goget map data` workflow (`.github/workflows/build-goget-data.yml`, 06:41 UTC, also `gh workflow run build-goget-data.yml`) runs the downloader and both builders and commits the two geojsons when they changed. It needs two repo secrets: `ASANA_ACCESS_TOKEN` and `GEM_READONLY_DB_URL` (the database must accept connections from GitHub runners). Locally, run the downloader first and the builders pick the cache up automatically; without a cache they build from the database and export alone.
+The daily `build map data` workflow (`.github/workflows/build-map-data.yml`, 06:41 UTC, also `gh workflow run build-map-data.yml`) runs the downloader and then all four builders — GOGET outlines, GOGET centroids, GOGPT units, LNG terminals — fresh from the database on every run, and commits whichever of the four geojsons changed. It needs two repo secrets: `ASANA_ACCESS_TOKEN` and `GEM_READONLY_DB_URL` (the database must accept connections from GitHub runners). Locally, run the downloader first and the GOGET builders pick the cache up automatically; without a cache they build from the database alone.
 
 **The ggit-goget-gogpt map** is the ggit-goget map with two more sources: GOGPT
 oil & gas power plants and GGIT LNG terminals. It reads the GGIT pipelines file
 and *the same two GOGET files from `trackers/ggit-goget/`* — they aren't copied,
 so regenerating them updates both maps — plus two committed files of its own:
 
-- `trackers/ggit-goget-gogpt/gogpt_map_latest.geojson` — plant points, one
-  feature per generating unit, from the data team's export
-  (`publicgemdata…/interim_maps/gogpt_map_*.geojson`) with properties renamed to
-  the handoff schema, by `scripts/build_gogpt_map_data.py`. Update `SOURCE_URL`
-  there when a newer export is published, rerun, then commit and push. Nothing
-  is de-duplicated against GOGET — plants and extraction areas are separate
-  assets — so this script has no required run order.
+- `trackers/ggit-goget-gogpt/gogpt_map_latest.geojson` — plant points, one feature per generating unit, read from the GEM project database by `scripts/build_gogpt_map_data.py` (needs `GEM_READONLY_DB_URL` and the gem-db-ops checkout). It runs gem-db-ops' `export_gogpt_all_fields` — the code behind the published GOGPT all-fields spreadsheet, so owners, parents, status and technology are spelled the way the published data spells them — into a temporary CSV and keeps the units whose `powerplant_unit.trackerSearch` is `GOGPT`, have coordinates and have a status (inferred statuses such as `shelved - inferred 2 y` are shortened to `shelved`). Until October 2026 this renamed the data team's CDN export instead. Nothing is de-duplicated against GOGET — plants and extraction areas are separate assets — so this script has no required run order.
 - `trackers/ggit-goget-gogpt/lng_map_latest.geojson` — LNG terminal points, one
   feature per terminal unit, read straight from the GEM project database by
   `scripts/build_lng_map_data.py` (needs `GEM_READONLY_DB_URL`). There is no
@@ -235,5 +208,5 @@ locally, so a regenerated geojson only shows up after it's pushed.
 - `scripts/build-pages.mjs` — assembles `_dist/` for Pages; auto-includes any
   `trackers/*/config.js` folder, so adding a new map is just a new folder
 - `.github/workflows/pages.yml` — deploys `_dist/` to Pages on push to `main`
-- `.github/workflows/build-goget-data.yml` — daily rebuild of the two GOGET files from the database, the export and the open Asana bulk uploads
+- `.github/workflows/build-map-data.yml` — daily rebuild of the GOGET, GOGPT and LNG files from the database (plus the open Asana bulk uploads for GOGET)
 - `_asana_cache/` (gitignored) — the downloaded bulk-upload CSVs and their manifest
