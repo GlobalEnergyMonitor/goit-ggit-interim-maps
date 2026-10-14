@@ -3,18 +3,18 @@
 
 The GOGET researchers hand their updates (field outlines, locations, production,
 operators, status, deletions) to the data team as bulk-upload requests in the
-Asana "Data team inbox" project, section "Bulk Upload Requests": one task per
-region, with the CSV files attached to its subtasks (sometimes to the task
-itself). Until the data team processes a request its data isn't in the GEM
+Asana "Data team inbox" project (mostly in its "Bulk Upload Requests" section,
+but older ones sit in "Tracker Releases"): one task per region, with the CSV
+files attached to its subtasks (sometimes to the task itself). Until the data team processes a request its data isn't in the GEM
 database, so the map builders overlay these files on top of the database
 (see scripts/goget_bulk_overlay.py). This script fills the cache they read.
 
 Strictly read-only: it only ever sends GET requests. The requests belong to the
 data team — nothing here completes, edits, comments on or reassigns them.
 
-Selection: incomplete tasks in that section whose "Tracker" custom field says
-GOGET and that are bulk uploads (by name or "Task Type"), plus every
-incomplete subtask of those. Subtasks the data team has already completed are
+Selection: incomplete tasks anywhere in that project whose "Tracker" custom
+field says GOGET and that are bulk uploads (by name, "Task Type" or "Data
+Product or Project"), plus every incomplete subtask of those. Subtasks the data team has already completed are
 skipped — that data is in the database already. Only .csv attachments with a
 download URL are fetched (Asana also records files that live elsewhere, with
 no download URL).
@@ -53,9 +53,8 @@ API = 'https://app.asana.com/api/1.0'
 TOKEN_ENV_VAR = 'ASANA_ACCESS_TOKEN'
 
 DATA_TEAM_INBOX_PROJECT = '1204455496936499'
-BULK_UPLOAD_SECTION = '1219455529070691'   # "Bulk Upload Requests"
 TRACKER_FIELD = 'Tracker'                  # custom field, e.g. "GOGET (Gas & Oil extraction)"
-TASK_TYPE_FIELD = 'Task Type'              # custom field, e.g. "Bulk upload"
+TASK_TYPE_FIELDS = ('Task Type', 'Data Product or Project')   # either may say "Bulk upload"
 
 TASK_FIELDS = 'name,completed,created_at,parent.gid,custom_fields.name,custom_fields.display_value'
 ATTACHMENT_FIELDS = 'name,created_at,download_url,resource_subtype'
@@ -101,18 +100,18 @@ def custom_field(task, name):
 def is_goget_bulk_upload(task):
     name = (task.get('name') or '').lower()
     tracker = custom_field(task, TRACKER_FIELD).lower()
-    task_type = custom_field(task, TASK_TYPE_FIELD).lower()
+    task_types = [custom_field(task, field).lower() for field in TASK_TYPE_FIELDS]
     is_goget = 'goget' in tracker or 'goget' in name
-    is_bulk = 'bulk upload' in task_type or 'bulk upload' in name
+    is_bulk = 'bulk upload' in name or any('bulk upload' in t for t in task_types)
     return is_goget and is_bulk
 
 
 def open_requests(asana):
-    """Top-level open GOGET bulk-upload tasks in the section, oldest first."""
-    tasks = asana.get(f'/sections/{BULK_UPLOAD_SECTION}/tasks',
+    """Top-level open GOGET bulk-upload tasks in the inbox, oldest first."""
+    tasks = asana.get(f'/projects/{DATA_TEAM_INBOX_PROJECT}/tasks',
                       completed_since='now', opt_fields=TASK_FIELDS)
     chosen = {t['gid']: t for t in tasks if not t.get('completed') and is_goget_bulk_upload(t)}
-    # a subtask that was also added to the section shows up on its own — keep
+    # a subtask that was also added to the project shows up on its own — keep
     # it only through its parent, so each file is listed once
     for gid in list(chosen):
         parent = (chosen[gid].get('parent') or {}).get('gid')
